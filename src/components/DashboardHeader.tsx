@@ -1,4 +1,5 @@
 import { Search, Bell, User } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -19,8 +20,9 @@ export function DashboardHeader() {
     return (
         <header className="h-16 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-10 px-6 flex items-center justify-between">
             {/* Search Bar - Global Command Center */}
-            <div className="flex-1 max-w-xl">
-                <div className="relative group">
+            <div className="flex items-center gap-4 flex-1 max-w-xl">
+                <SidebarTrigger />
+                <div className="relative group flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                         placeholder="Search funds, stocks, or recent analysis..."

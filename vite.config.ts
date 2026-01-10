@@ -4,8 +4,6 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
-import { nitro } from "nitro/vite";
-import dbPlugin from "vite-plugin-db";
 
 const config = defineConfig({
   plugins: [

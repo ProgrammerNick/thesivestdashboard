@@ -5,11 +5,17 @@ import { Resource } from "sst";
 import * as schema from "./schema.ts";
 
 // Debug: Check what Resource looks like
-console.log("Resource:", Resource);
-console.log("VITE_DATABASE_URL_POOLER:", Resource.VITE_DATABASE_URL_POOLER);
+// console.log("Resource:", Resource);
+// console.log("VITE_DATABASE_URL_POOLER:", Resource?.VITE_DATABASE_URL_POOLER?.value);
 
 // Get the database URL with optional chaining
-const dbUrl = Resource.VITE_DATABASE_URL_POOLER?.value || process.env.VITE_DATABASE_URL_POOLER || process.env.DATABASE_URL;
+let dbUrl: string | undefined;
+try {
+  dbUrl = Resource?.VITE_DATABASE_URL_POOLER?.value;
+} catch (e) {
+  // Ignore SST error if not running in SST context
+}
+dbUrl = dbUrl || process.env.VITE_DATABASE_URL_POOLER || process.env.DATABASE_URL;
 
 console.log("dbUrl:", dbUrl);
 

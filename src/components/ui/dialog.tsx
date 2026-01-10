@@ -13,10 +13,21 @@ const DialogContext = React.createContext<{
     setOpen: () => { },
 })
 
-const Dialog = ({ children, ...props }: { children: React.ReactNode }) => {
-    const [open, setOpen] = React.useState(false)
+const Dialog = ({ children, open: controlledOpen, onOpenChange: setControlledOpen, ...props }: { children: React.ReactNode, open?: boolean, onOpenChange?: (open: boolean) => void }) => {
+    const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
+
+    const isControlled = controlledOpen !== undefined
+    const open = isControlled ? controlledOpen : uncontrolledOpen
+    const setOpen = React.useCallback((value: boolean) => {
+        if (isControlled && setControlledOpen) {
+            setControlledOpen(value)
+        } else {
+            setUncontrolledOpen(value)
+        }
+    }, [isControlled, setControlledOpen])
+
     return (
-        <DialogContext.Provider value={{ open, setOpen }}>
+        <DialogContext.Provider value={{ open: !!open, setOpen }}>
             {children}
         </DialogContext.Provider>
     )

@@ -44,11 +44,6 @@ export default function Header() {
         </Link>
       </div>
       <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-        <Link to="/" className="hover:text-primary transition-colors" onClick={handleNavbarClick}>Discover</Link>
-        <Link to="/tournaments" className="hover:text-primary transition-colors" onClick={handleNavbarClick}>Tournaments</Link>
-        <Link to="/funds" className="hover:text-primary transition-colors" onClick={handleNavbarClick}>Fund Research</Link>
-        <Link to="/contributors" className="hover:text-primary transition-colors" onClick={handleNavbarClick}>Contributors</Link>
-        <div className="h-4 w-px bg-border/50 mx-2" />
         <Link to="/dashboard" className="text-primary font-bold hover:text-primary/80 transition-colors" onClick={handleNavbarClick}>Dashboard</Link>
       </nav>
 

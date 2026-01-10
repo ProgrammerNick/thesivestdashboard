@@ -9,40 +9,49 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TournamentsRouteImport } from './routes/tournaments'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SeedRouteImport } from './routes/seed'
 import { Route as SanityRouteImport } from './routes/sanity'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as FundsRouteImport } from './routes/funds'
 import { Route as DebugSimpleRouteImport } from './routes/debug-simple'
 import { Route as DebugDbRouteImport } from './routes/debug-db'
-import { Route as ContributorsRouteImport } from './routes/contributors'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CorporationsIndexRouteImport } from './routes/corporations/index'
 import { Route as ProfilesIdRouteImport } from './routes/profiles.$id'
 import { Route as PostsIdRouteImport } from './routes/posts.$id'
 import { Route as FundsIdRouteImport } from './routes/funds.$id'
 import { Route as ApiTournamentsRouteImport } from './routes/api/tournaments'
 import { Route as ApiThesesRouteImport } from './routes/api/theses'
 import { Route as ApiContributorsRouteImport } from './routes/api/contributors'
+import { Route as DashboardTournamentsRouteImport } from './routes/_dashboard/tournaments'
+import { Route as DashboardTalentRouteImport } from './routes/_dashboard/talent'
+import { Route as DashboardStocksRouteImport } from './routes/_dashboard/stocks'
+import { Route as DashboardResearchRouteImport } from './routes/_dashboard/research'
+import { Route as DashboardProfileRouteImport } from './routes/_dashboard/profile'
+import { Route as DashboardJobsRouteImport } from './routes/_dashboard/jobs'
+import { Route as DashboardHistoryRouteImport } from './routes/_dashboard/history'
 import { Route as DashboardFundsRouteImport } from './routes/_dashboard/funds'
+import { Route as DashboardFundIntelligenceRouteImport } from './routes/_dashboard/fund-intelligence'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard/dashboard'
+import { Route as DashboardCommunityRouteImport } from './routes/_dashboard/community'
 import { Route as ProfilesIdTradesRouteImport } from './routes/profiles.$id.trades'
 import { Route as ProfilesIdPerformanceRouteImport } from './routes/profiles.$id.performance'
 import { Route as ApiUsersUpdateNameRouteImport } from './routes/api/users/update-name'
 import { Route as ApiProfilesIdRouteImport } from './routes/api/profiles/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as DashboardPostPostIdRouteImport } from './routes/_dashboard/post.$postId'
 import { Route as ApiProfilesIdTradeHistoryRouteImport } from './routes/api/profiles/$id/trade-history'
 import { Route as ApiProfilesIdPerformanceRouteImport } from './routes/api/profiles/$id/performance'
 
-const TournamentsRoute = TournamentsRouteImport.update({
-  id: '/tournaments',
-  path: '/tournaments',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeedRoute = SeedRouteImport.update({
+  id: '/seed',
+  path: '/seed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SanityRoute = SanityRouteImport.update({
@@ -55,11 +64,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FundsRoute = FundsRouteImport.update({
-  id: '/funds',
-  path: '/funds',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DebugSimpleRoute = DebugSimpleRouteImport.update({
   id: '/debug-simple',
   path: '/debug-simple',
@@ -70,11 +74,6 @@ const DebugDbRoute = DebugDbRouteImport.update({
   path: '/debug-db',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ContributorsRoute = ContributorsRouteImport.update({
-  id: '/contributors',
-  path: '/contributors',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
   getParentRoute: () => rootRouteImport,
@@ -82,6 +81,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorporationsIndexRoute = CorporationsIndexRouteImport.update({
+  id: '/corporations/',
+  path: '/corporations/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfilesIdRoute = ProfilesIdRouteImport.update({
@@ -95,9 +99,9 @@ const PostsIdRoute = PostsIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const FundsIdRoute = FundsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => FundsRoute,
+  id: '/funds/$id',
+  path: '/funds/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTournamentsRoute = ApiTournamentsRouteImport.update({
   id: '/api/tournaments',
@@ -114,14 +118,60 @@ const ApiContributorsRoute = ApiContributorsRouteImport.update({
   path: '/api/contributors',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardTournamentsRoute = DashboardTournamentsRouteImport.update({
+  id: '/tournaments',
+  path: '/tournaments',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardTalentRoute = DashboardTalentRouteImport.update({
+  id: '/talent',
+  path: '/talent',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardStocksRoute = DashboardStocksRouteImport.update({
+  id: '/stocks',
+  path: '/stocks',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardResearchRoute = DashboardResearchRouteImport.update({
+  id: '/research',
+  path: '/research',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardJobsRoute = DashboardJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardHistoryRoute = DashboardHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardFundsRoute = DashboardFundsRouteImport.update({
   id: '/funds',
   path: '/funds',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardFundIntelligenceRoute =
+  DashboardFundIntelligenceRouteImport.update({
+    id: '/fund-intelligence',
+    path: '/fund-intelligence',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCommunityRoute = DashboardCommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => DashboardRoute,
 } as any)
 const ProfilesIdTradesRoute = ProfilesIdTradesRouteImport.update({
@@ -149,6 +199,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardPostPostIdRoute = DashboardPostPostIdRouteImport.update({
+  id: '/post/$postId',
+  path: '/post/$postId',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const ApiProfilesIdTradeHistoryRoute =
   ApiProfilesIdTradeHistoryRouteImport.update({
     id: '/trade-history',
@@ -164,21 +219,31 @@ const ApiProfilesIdPerformanceRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/contributors': typeof ContributorsRoute
   '/debug-db': typeof DebugDbRoute
   '/debug-simple': typeof DebugSimpleRoute
-  '/funds': typeof DashboardFundsRoute
   '/login': typeof LoginRoute
   '/sanity': typeof SanityRoute
+  '/seed': typeof SeedRoute
   '/signup': typeof SignupRoute
-  '/tournaments': typeof TournamentsRoute
+  '/community': typeof DashboardCommunityRoute
   '/dashboard': typeof DashboardDashboardRoute
+  '/fund-intelligence': typeof DashboardFundIntelligenceRoute
+  '/funds': typeof DashboardFundsRoute
+  '/history': typeof DashboardHistoryRoute
+  '/jobs': typeof DashboardJobsRoute
+  '/profile': typeof DashboardProfileRoute
+  '/research': typeof DashboardResearchRoute
+  '/stocks': typeof DashboardStocksRoute
+  '/talent': typeof DashboardTalentRoute
+  '/tournaments': typeof DashboardTournamentsRoute
   '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
   '/funds/$id': typeof FundsIdRoute
   '/posts/$id': typeof PostsIdRoute
   '/profiles/$id': typeof ProfilesIdRouteWithChildren
+  '/corporations': typeof CorporationsIndexRoute
+  '/post/$postId': typeof DashboardPostPostIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
@@ -189,21 +254,31 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/contributors': typeof ContributorsRoute
   '/debug-db': typeof DebugDbRoute
   '/debug-simple': typeof DebugSimpleRoute
-  '/funds': typeof DashboardFundsRoute
   '/login': typeof LoginRoute
   '/sanity': typeof SanityRoute
+  '/seed': typeof SeedRoute
   '/signup': typeof SignupRoute
-  '/tournaments': typeof TournamentsRoute
+  '/community': typeof DashboardCommunityRoute
   '/dashboard': typeof DashboardDashboardRoute
+  '/fund-intelligence': typeof DashboardFundIntelligenceRoute
+  '/funds': typeof DashboardFundsRoute
+  '/history': typeof DashboardHistoryRoute
+  '/jobs': typeof DashboardJobsRoute
+  '/profile': typeof DashboardProfileRoute
+  '/research': typeof DashboardResearchRoute
+  '/stocks': typeof DashboardStocksRoute
+  '/talent': typeof DashboardTalentRoute
+  '/tournaments': typeof DashboardTournamentsRoute
   '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
   '/funds/$id': typeof FundsIdRoute
   '/posts/$id': typeof PostsIdRoute
   '/profiles/$id': typeof ProfilesIdRouteWithChildren
+  '/corporations': typeof CorporationsIndexRoute
+  '/post/$postId': typeof DashboardPostPostIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
@@ -216,22 +291,31 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_dashboard': typeof DashboardRouteWithChildren
-  '/contributors': typeof ContributorsRoute
   '/debug-db': typeof DebugDbRoute
   '/debug-simple': typeof DebugSimpleRoute
-  '/funds': typeof FundsRouteWithChildren
   '/login': typeof LoginRoute
   '/sanity': typeof SanityRoute
+  '/seed': typeof SeedRoute
   '/signup': typeof SignupRoute
-  '/tournaments': typeof TournamentsRoute
+  '/_dashboard/community': typeof DashboardCommunityRoute
   '/_dashboard/dashboard': typeof DashboardDashboardRoute
+  '/_dashboard/fund-intelligence': typeof DashboardFundIntelligenceRoute
   '/_dashboard/funds': typeof DashboardFundsRoute
+  '/_dashboard/history': typeof DashboardHistoryRoute
+  '/_dashboard/jobs': typeof DashboardJobsRoute
+  '/_dashboard/profile': typeof DashboardProfileRoute
+  '/_dashboard/research': typeof DashboardResearchRoute
+  '/_dashboard/stocks': typeof DashboardStocksRoute
+  '/_dashboard/talent': typeof DashboardTalentRoute
+  '/_dashboard/tournaments': typeof DashboardTournamentsRoute
   '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
   '/funds/$id': typeof FundsIdRoute
   '/posts/$id': typeof PostsIdRoute
   '/profiles/$id': typeof ProfilesIdRouteWithChildren
+  '/corporations/': typeof CorporationsIndexRoute
+  '/_dashboard/post/$postId': typeof DashboardPostPostIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
@@ -244,21 +328,31 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/contributors'
     | '/debug-db'
     | '/debug-simple'
-    | '/funds'
     | '/login'
     | '/sanity'
+    | '/seed'
     | '/signup'
-    | '/tournaments'
+    | '/community'
     | '/dashboard'
+    | '/fund-intelligence'
+    | '/funds'
+    | '/history'
+    | '/jobs'
+    | '/profile'
+    | '/research'
+    | '/stocks'
+    | '/talent'
+    | '/tournaments'
     | '/api/contributors'
     | '/api/theses'
     | '/api/tournaments'
     | '/funds/$id'
     | '/posts/$id'
     | '/profiles/$id'
+    | '/corporations'
+    | '/post/$postId'
     | '/api/auth/$'
     | '/api/profiles/$id'
     | '/api/users/update-name'
@@ -269,21 +363,31 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/contributors'
     | '/debug-db'
     | '/debug-simple'
-    | '/funds'
     | '/login'
     | '/sanity'
+    | '/seed'
     | '/signup'
-    | '/tournaments'
+    | '/community'
     | '/dashboard'
+    | '/fund-intelligence'
+    | '/funds'
+    | '/history'
+    | '/jobs'
+    | '/profile'
+    | '/research'
+    | '/stocks'
+    | '/talent'
+    | '/tournaments'
     | '/api/contributors'
     | '/api/theses'
     | '/api/tournaments'
     | '/funds/$id'
     | '/posts/$id'
     | '/profiles/$id'
+    | '/corporations'
+    | '/post/$postId'
     | '/api/auth/$'
     | '/api/profiles/$id'
     | '/api/users/update-name'
@@ -295,22 +399,31 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_dashboard'
-    | '/contributors'
     | '/debug-db'
     | '/debug-simple'
-    | '/funds'
     | '/login'
     | '/sanity'
+    | '/seed'
     | '/signup'
-    | '/tournaments'
+    | '/_dashboard/community'
     | '/_dashboard/dashboard'
+    | '/_dashboard/fund-intelligence'
     | '/_dashboard/funds'
+    | '/_dashboard/history'
+    | '/_dashboard/jobs'
+    | '/_dashboard/profile'
+    | '/_dashboard/research'
+    | '/_dashboard/stocks'
+    | '/_dashboard/talent'
+    | '/_dashboard/tournaments'
     | '/api/contributors'
     | '/api/theses'
     | '/api/tournaments'
     | '/funds/$id'
     | '/posts/$id'
     | '/profiles/$id'
+    | '/corporations/'
+    | '/_dashboard/post/$postId'
     | '/api/auth/$'
     | '/api/profiles/$id'
     | '/api/users/update-name'
@@ -323,19 +436,19 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
-  ContributorsRoute: typeof ContributorsRoute
   DebugDbRoute: typeof DebugDbRoute
   DebugSimpleRoute: typeof DebugSimpleRoute
-  FundsRoute: typeof FundsRouteWithChildren
   LoginRoute: typeof LoginRoute
   SanityRoute: typeof SanityRoute
+  SeedRoute: typeof SeedRoute
   SignupRoute: typeof SignupRoute
-  TournamentsRoute: typeof TournamentsRoute
   ApiContributorsRoute: typeof ApiContributorsRoute
   ApiThesesRoute: typeof ApiThesesRoute
   ApiTournamentsRoute: typeof ApiTournamentsRoute
+  FundsIdRoute: typeof FundsIdRoute
   PostsIdRoute: typeof PostsIdRoute
   ProfilesIdRoute: typeof ProfilesIdRouteWithChildren
+  CorporationsIndexRoute: typeof CorporationsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiProfilesIdRoute: typeof ApiProfilesIdRouteWithChildren
   ApiUsersUpdateNameRoute: typeof ApiUsersUpdateNameRoute
@@ -343,18 +456,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tournaments': {
-      id: '/tournaments'
-      path: '/tournaments'
-      fullPath: '/tournaments'
-      preLoaderRoute: typeof TournamentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seed': {
+      id: '/seed'
+      path: '/seed'
+      fullPath: '/seed'
+      preLoaderRoute: typeof SeedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sanity': {
@@ -371,13 +484,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/funds': {
-      id: '/funds'
-      path: '/funds'
-      fullPath: '/funds'
-      preLoaderRoute: typeof FundsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/debug-simple': {
       id: '/debug-simple'
       path: '/debug-simple'
@@ -392,13 +498,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DebugDbRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/contributors': {
-      id: '/contributors'
-      path: '/contributors'
-      fullPath: '/contributors'
-      preLoaderRoute: typeof ContributorsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_dashboard': {
       id: '/_dashboard'
       path: ''
@@ -411,6 +510,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/corporations/': {
+      id: '/corporations/'
+      path: '/corporations'
+      fullPath: '/corporations'
+      preLoaderRoute: typeof CorporationsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profiles/$id': {
@@ -429,10 +535,10 @@ declare module '@tanstack/react-router' {
     }
     '/funds/$id': {
       id: '/funds/$id'
-      path: '/$id'
+      path: '/funds/$id'
       fullPath: '/funds/$id'
       preLoaderRoute: typeof FundsIdRouteImport
-      parentRoute: typeof FundsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/tournaments': {
       id: '/api/tournaments'
@@ -455,6 +561,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiContributorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_dashboard/tournaments': {
+      id: '/_dashboard/tournaments'
+      path: '/tournaments'
+      fullPath: '/tournaments'
+      preLoaderRoute: typeof DashboardTournamentsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/talent': {
+      id: '/_dashboard/talent'
+      path: '/talent'
+      fullPath: '/talent'
+      preLoaderRoute: typeof DashboardTalentRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/stocks': {
+      id: '/_dashboard/stocks'
+      path: '/stocks'
+      fullPath: '/stocks'
+      preLoaderRoute: typeof DashboardStocksRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/research': {
+      id: '/_dashboard/research'
+      path: '/research'
+      fullPath: '/research'
+      preLoaderRoute: typeof DashboardResearchRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/profile': {
+      id: '/_dashboard/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/jobs': {
+      id: '/_dashboard/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof DashboardJobsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/history': {
+      id: '/_dashboard/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof DashboardHistoryRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/funds': {
       id: '/_dashboard/funds'
       path: '/funds'
@@ -462,11 +617,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardFundsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/fund-intelligence': {
+      id: '/_dashboard/fund-intelligence'
+      path: '/fund-intelligence'
+      fullPath: '/fund-intelligence'
+      preLoaderRoute: typeof DashboardFundIntelligenceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/dashboard': {
       id: '/_dashboard/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardDashboardRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/community': {
+      id: '/_dashboard/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof DashboardCommunityRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/profiles/$id/trades': {
@@ -504,6 +673,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_dashboard/post/$postId': {
+      id: '/_dashboard/post/$postId'
+      path: '/post/$postId'
+      fullPath: '/post/$postId'
+      preLoaderRoute: typeof DashboardPostPostIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/api/profiles/$id/trade-history': {
       id: '/api/profiles/$id/trade-history'
       path: '/trade-history'
@@ -522,28 +698,38 @@ declare module '@tanstack/react-router' {
 }
 
 interface DashboardRouteChildren {
+  DashboardCommunityRoute: typeof DashboardCommunityRoute
   DashboardDashboardRoute: typeof DashboardDashboardRoute
+  DashboardFundIntelligenceRoute: typeof DashboardFundIntelligenceRoute
   DashboardFundsRoute: typeof DashboardFundsRoute
+  DashboardHistoryRoute: typeof DashboardHistoryRoute
+  DashboardJobsRoute: typeof DashboardJobsRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardResearchRoute: typeof DashboardResearchRoute
+  DashboardStocksRoute: typeof DashboardStocksRoute
+  DashboardTalentRoute: typeof DashboardTalentRoute
+  DashboardTournamentsRoute: typeof DashboardTournamentsRoute
+  DashboardPostPostIdRoute: typeof DashboardPostPostIdRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardCommunityRoute: DashboardCommunityRoute,
   DashboardDashboardRoute: DashboardDashboardRoute,
+  DashboardFundIntelligenceRoute: DashboardFundIntelligenceRoute,
   DashboardFundsRoute: DashboardFundsRoute,
+  DashboardHistoryRoute: DashboardHistoryRoute,
+  DashboardJobsRoute: DashboardJobsRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
+  DashboardResearchRoute: DashboardResearchRoute,
+  DashboardStocksRoute: DashboardStocksRoute,
+  DashboardTalentRoute: DashboardTalentRoute,
+  DashboardTournamentsRoute: DashboardTournamentsRoute,
+  DashboardPostPostIdRoute: DashboardPostPostIdRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
-
-interface FundsRouteChildren {
-  FundsIdRoute: typeof FundsIdRoute
-}
-
-const FundsRouteChildren: FundsRouteChildren = {
-  FundsIdRoute: FundsIdRoute,
-}
-
-const FundsRouteWithChildren = FundsRoute._addFileChildren(FundsRouteChildren)
 
 interface ProfilesIdRouteChildren {
   ProfilesIdPerformanceRoute: typeof ProfilesIdPerformanceRoute
@@ -576,19 +762,19 @@ const ApiProfilesIdRouteWithChildren = ApiProfilesIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
-  ContributorsRoute: ContributorsRoute,
   DebugDbRoute: DebugDbRoute,
   DebugSimpleRoute: DebugSimpleRoute,
-  FundsRoute: FundsRouteWithChildren,
   LoginRoute: LoginRoute,
   SanityRoute: SanityRoute,
+  SeedRoute: SeedRoute,
   SignupRoute: SignupRoute,
-  TournamentsRoute: TournamentsRoute,
   ApiContributorsRoute: ApiContributorsRoute,
   ApiThesesRoute: ApiThesesRoute,
   ApiTournamentsRoute: ApiTournamentsRoute,
+  FundsIdRoute: FundsIdRoute,
   PostsIdRoute: PostsIdRoute,
   ProfilesIdRoute: ProfilesIdRouteWithChildren,
+  CorporationsIndexRoute: CorporationsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiProfilesIdRoute: ApiProfilesIdRouteWithChildren,
   ApiUsersUpdateNameRoute: ApiUsersUpdateNameRoute,

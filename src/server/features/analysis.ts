@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getWebRequest } from "vinxi/http";
+import { getRequest } from "@tanstack/react-start/server";
 import { auth } from "@/lib/auth";
-import { db } from "@/db";
+import { db } from "@/db/index";
 import { aiAnalysis } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -12,7 +12,7 @@ export const getAnalysisHistory = createServerFn({ method: "GET" })
         // Security check: Only allow viewing own history?
         // User requested "people to have their own panel on history".
         // Usually private.
-        const request = getWebRequest();
+        const request = getRequest();
         const session = await auth.api.getSession({
             headers: request.headers,
         });

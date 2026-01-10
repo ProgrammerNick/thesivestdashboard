@@ -4,11 +4,19 @@ import { Resource } from "sst";
 let client: ReturnType<typeof neon>
 
 export async function getClient() {
-    if (!Resource.VITE_DATABASE_URL_POOLER.value) {
+    let dbUrl: string | undefined;
+    try {
+        dbUrl = Resource?.VITE_DATABASE_URL_POOLER?.value;
+    } catch (e) {
+        // Ignore SST error
+    }
+    dbUrl = dbUrl || process.env.VITE_DATABASE_URL_POOLER || process.env.DATABASE_URL;
+
+    if (!dbUrl) {
         return undefined
     }
     if (!client) {
-        client = await neon(Resource.VITE_DATABASE_URL_POOLER.value)
+        client = await neon(dbUrl)
     }
     return client
 }

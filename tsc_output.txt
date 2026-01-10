@@ -1,0 +1,151 @@
+﻿.sst/platform/src/components/aws/apigatewayv1-authorizer.ts(4,3): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/apigatewayv1-base-route.ts(1,17): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/apigatewayv1-base-route.ts(1,25): error TS6133: 'interpolate' is declared but its value is never read.
+.sst/platform/src/components/aws/apigatewayv1-integration-route.ts(3,3): error TS6133: 'Input' is declared but its value is never read.
+.sst/platform/src/components/aws/apigatewayv2-url-route.ts(5,3): error TS6133: 'interpolate' is declared but its value is never read.
+.sst/platform/src/components/aws/apigatewayv2.ts(25,3): error TS6133: 'DurationMinutes' is declared but its value is never read.
+.sst/platform/src/components/aws/app-sync-data-source.ts(4,3): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/app-sync-data-source.ts(8,1): error TS6133: 'Function' is declared but its value is never read.
+.sst/platform/src/components/aws/bucket-lambda-subscriber.ts(4,3): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/bucket-lambda-subscriber.ts(9,10): error TS6133: 'Function' is declared but its value is never read.
+.sst/platform/src/components/aws/bus-lambda-subscriber.ts(4,3): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/bus-lambda-subscriber.ts(9,10): error TS6133: 'Function' is declared but its value is never read.
+.sst/platform/src/components/aws/cognito-identity-provider.ts(2,21): error TS6133: 'Transform' is declared but its value is never read.
+.sst/platform/src/components/aws/cognito-identity-provider.ts(4,1): error TS6133: 'Link' is declared but its value is never read.
+.sst/platform/src/components/aws/cognito-identity-provider.ts(7,1): error TS6133: 'OpenIdConnectProvider' is declared but its value is never read.
+.sst/platform/src/components/aws/cognito-user-pool-client.ts(2,21): error TS6133: 'Transform' is declared but its value is never read.
+.sst/platform/src/components/aws/cognito-user-pool.ts(7,10): error TS6133: 'Function' is declared but its value is never read.
+.sst/platform/src/components/aws/cron.ts(1,49): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/dns.ts(134,5): error TS6133: 'namePrefix' is declared but its value is never read.
+.sst/platform/src/components/aws/dns.ts(135,5): error TS6133: 'recordName' is declared but its value is never read.
+.sst/platform/src/components/aws/dns.ts(136,5): error TS6133: 'opts' is declared but its value is never read.
+.sst/platform/src/components/aws/function.ts(1942,17): error TS6133: 'runtime' is declared but its value is never read.
+.sst/platform/src/components/aws/function.ts(1987,11): error TS6133: 'linkData' is declared but its value is never read.
+.sst/platform/src/components/aws/function.ts(2173,11): error TS6133: 'bundle' is declared but its value is never read.
+.sst/platform/src/components/aws/helpers/apigateway-account.ts(7,1): error TS6133: '$print' is declared but its value is never read.
+.sst/platform/src/components/aws/helpers/arn.ts(1,1): error TS6133: 'aws' is declared but its value is never read.
+.sst/platform/src/components/aws/iam-edit.ts(1,40): error TS6133: 'UnwrappedObject' is declared but its value is never read.
+.sst/platform/src/components/aws/linkable.ts(18,3): error TS6133: 'obj' is declared but its value is never read.
+.sst/platform/src/components/aws/linkable.ts(19,3): error TS6133: 'cb' is declared but its value is never read.
+.sst/platform/src/components/aws/nextjs.ts(601,15): error TS6133: 's3Origin' is declared but its value is never read.
+.sst/platform/src/components/aws/open-search.ts(8,10): error TS6133: '$print' is declared but its value is never read.
+.sst/platform/src/components/aws/open-search.ts(290,11): error TS6133: 'policy' is declared but its value is never read.
+.sst/platform/src/components/aws/opencontrol.ts(1,10): error TS6133: 'all' is declared but its value is never read.
+.sst/platform/src/components/aws/providers/rds-role-lookup.ts(1,40): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/queue-lambda-subscriber.ts(4,3): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/queue-lambda-subscriber.ts(8,10): error TS6133: 'Function' is declared but its value is never read.
+.sst/platform/src/components/aws/queue.ts(3,3): error TS6133: 'all' is declared but its value is never read.
+.sst/platform/src/components/aws/realtime-lambda-subscriber.ts(4,3): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/realtime-lambda-subscriber.ts(9,10): error TS6133: 'Function' is declared but its value is never read.
+.sst/platform/src/components/aws/router.ts(1881,20): error TS6133: 'pattern' is declared but its value is never read.
+.sst/platform/src/components/aws/router.ts(1881,44): error TS6133: 'site' is declared but its value is never read.
+.sst/platform/src/components/aws/sns-topic-lambda-subscriber.ts(5,3): error TS6133: 'Output' is declared but its value is never read.
+.sst/platform/src/components/aws/sns-topic-lambda-subscriber.ts(9,10): error TS6133: 'Function' is declared but its value is never read.
+.sst/platform/src/components/aws/step-functions/pass.ts(1,1): error TS6133: 'Input' is declared but its value is never read.
+.sst/platform/src/components/aws/step-functions/state.ts(12,6): error TS6196: 'DefaultError' is declared but never used.
+.sst/platform/src/components/aws/task.ts(280,20): error TS6133: 'dev' is declared but its value is never read.
+.sst/platform/src/components/aws/vpc.ts(535,52): error TS6133: 'i' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/providers/kv-data.ts(32,5): error TS6133: 'id' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/providers/worker-url.ts(34,5): error TS6133: 'id' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/providers/worker-url.ts(35,5): error TS6133: 'olds' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/providers/zone-lookup.ts(31,5): error TS6133: 'id' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/providers/zone-lookup.ts(32,5): error TS6133: 'olds' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/worker.ts(23,1): error TS6133: 'WorkerAssets' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/worker.ts(24,1): error TS6133: 'globSync' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/worker.ts(25,1): error TS6133: 'VisibleError' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/worker.ts(26,1): error TS6133: 'getContentType' is declared but its value is never read.
+.sst/platform/src/components/cloudflare/worker.ts(28,1): error TS6133: 'existsAsync' is declared but its value is never read.
+.sst/platform/src/components/secret.ts(4,21): error TS6133: 'Prettify' is declared but its value is never read.
+.sst/platform/src/components/vercel/dns.ts(101,5): error TS6133: 'recordName' is declared but its value is never read.
+.sst/platform/src/util/fs.ts(2,1): error TS6133: 'fsSync' is declared but its value is never read.
+.sst/platform/src/util/semaphore.ts(10,24): error TS6133: 'name' is declared but its value is never read.
+src/components/auth/sign-in.tsx(80,33): error TS2322: Type '{ id: string; type: "password"; showPasswordToggle: true; value: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void; className: string; required: true; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>'.
+  Property 'showPasswordToggle' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>'.
+src/components/auth/sign-up.tsx(79,9): error TS2322: Type '{ id: any; type: "password"; showPasswordToggle: true; value: any; onBlur: any; onChange: (e: ChangeEvent<HTMLInputElement>) => any; className: string; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>'.
+  Property 'showPasswordToggle' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>'.
+src/components/DashboardHeader.tsx(1,24): error TS6133: 'User' is declared but its value is never read.
+src/components/DashboardHeader.tsx(62,39): error TS2322: Type '`/profiles/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/components/FeedPost.tsx(3,1): error TS6192: All imports in import declaration are unused.
+src/components/FeedPost.tsx(4,40): error TS6133: 'TrendingUp' is declared but its value is never read.
+src/components/FeedPost.tsx(4,52): error TS6133: 'TrendingDown' is declared but its value is never read.
+src/components/FeedPost.tsx(15,11): error TS6133: 'isUpdate' is declared but its value is never read.
+src/components/FeedPost.tsx(27,27): error TS2322: Type '`/profiles/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/components/FeedPost.tsx(41,35): error TS2322: Type '`/profiles/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/components/FundSearch.tsx(121,46): error TS2304: Cannot find name 'Link'.
+src/components/FundSearch.tsx(125,47): error TS2304: Cannot find name 'Link'.
+src/components/Header.tsx(78,21): error TS2322: Type '`/profiles/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/components/jobs/JobApplicationModal.tsx(6,48): error TS6133: 'ShieldCheck' is declared but its value is never read.
+src/components/MiniChart.tsx(4,10): error TS2724: '"../hooks/use-mobile"' has no exported member named 'useMobile'. Did you mean 'useIsMobile'?
+src/components/PortfolioDeck.tsx(4,27): error TS2307: Cannot find module './HeroChart' or its corresponding type declarations.
+src/components/ui/dialog.tsx(16,87): error TS6133: 'props' is declared but its value is never read.
+src/components/ui/dialog.tsx(39,48): error TS6133: 'props' is declared but its value is never read.
+src/components/ui/dialog.tsx(39,57): error TS6133: 'ref' is declared but its value is never read.
+src/components/WhoToFollow.tsx(4,10): error TS6133: 'Check' is declared but its value is never read.
+src/components/WhoToFollow.tsx(25,35): error TS2322: Type '`/profiles/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/components/WhoToFollow.tsx(31,39): error TS2322: Type '`/profiles/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/lib/avatars.ts(13,9): error TS6133: 'cleanEmail' is declared but its value is never read.
+src/routes/__root.tsx(9,1): error TS6133: 'Header' is declared but its value is never read.
+src/routes/_dashboard.tsx(1,35): error TS6133: 'redirect' is declared but its value is never read.
+src/routes/_dashboard.tsx(5,1): error TS6133: 'getSession' is declared but its value is never read.
+src/routes/_dashboard/community.tsx(4,52): error TS6133: 'CardDescription' is declared but its value is never read.
+src/routes/_dashboard/community.tsx(56,21): error TS2322: Type '`/post/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/routes/_dashboard/funds.tsx(36,28): error TS6133: 'setSelectedPeriod' is declared but its value is never read.
+src/routes/_dashboard/jobs.tsx(8,49): error TS6133: 'Clock' is declared but its value is never read.
+src/routes/_dashboard/profile.tsx(23,9): error TS6133: 'getPostsByUserId' is declared but its value is never read.
+src/routes/_dashboard/research.tsx(2,1): error TS6133: 'createServerFn' is declared but its value is never read.
+src/routes/_dashboard/research.tsx(4,1): error TS6133: 'auth' is declared but its value is never read.
+src/routes/_dashboard/talent.tsx(3,1): error TS6133: 'getRequest' is declared but its value is never read.
+src/routes/_dashboard/talent.tsx(4,1): error TS6133: 'auth' is declared but its value is never read.
+src/routes/_dashboard/talent.tsx(10,29): error TS6133: 'TrendingUp' is declared but its value is never read.
+src/routes/_dashboard/talent.tsx(10,41): error TS6133: 'ShieldCheck' is declared but its value is never read.
+src/routes/_dashboard/talent.tsx(115,33): error TS2322: Type '"/_dashboard/jobs"' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/routes/api/theses.ts(7,25): error TS6133: 'request' is declared but its value is never read.
+src/routes/corporations/index.tsx(3,22): error TS6133: 'CheckCircle2' is declared but its value is never read.
+src/routes/corporations/index.tsx(32,21): error TS2322: Type '"/_dashboard/talent"' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/routes/corporations/index.tsx(63,23): error TS2322: Type '"/_dashboard/talent"' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/routes/corporations/index.tsx(134,19): error TS2322: Type '"/_dashboard/talent"' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/routes/funds.tsx(4,10): error TS2724: '"@tanstack/react-start/server"' has no exported member named 'getWebRequest'. Did you mean 'getRequest'?
+src/routes/funds.tsx(19,17): error TS2322: Type '"/dashboard/funds"' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/routes/login.tsx(4,1): error TS6133: 'createServerFn' is declared but its value is never read.
+src/routes/profiles.$id.performance.tsx(23,17): error TS2322: Type '`/profiles/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/routes/profiles.$id.trades.tsx(24,17): error TS2322: Type '`/profiles/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/routes/profiles.$id.tsx(4,1): error TS6133: 'getUserById' is declared but its value is never read.
+src/routes/profiles.$id.tsx(6,3): error TS6133: 'isFollowing' is declared but its value is never read.
+src/routes/profiles.$id.tsx(11,1): error TS6133: 'z' is declared but its value is never read.
+src/routes/profiles.$id.tsx(28,7): error TS6133: 'followFn' is declared but its value is never read.
+src/routes/profiles.$id.tsx(30,5): error TS18046: 'z' is of type 'unknown'.
+src/routes/profiles.$id.tsx(31,19): error TS18046: 'z' is of type 'unknown'.
+src/routes/profiles.$id.tsx(32,20): error TS18046: 'z' is of type 'unknown'.
+src/routes/profiles.$id.tsx(35,21): error TS2339: Property 'input' does not exist on type 'ServerFnCtx<Register, undefined, (z: unknown) => any>'.
+src/routes/profiles.$id.tsx(41,7): error TS6133: 'unfollowFn' is declared but its value is never read.
+src/routes/profiles.$id.tsx(43,5): error TS18046: 'z' is of type 'unknown'.
+src/routes/profiles.$id.tsx(44,19): error TS18046: 'z' is of type 'unknown'.
+src/routes/profiles.$id.tsx(45,20): error TS18046: 'z' is of type 'unknown'.
+src/routes/profiles.$id.tsx(48,21): error TS2339: Property 'input' does not exist on type 'ServerFnCtx<Register, undefined, (z: unknown) => any>'.
+src/routes/profiles.$id.tsx(240,32): error TS2339: Property 'alpha' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(241,35): error TS2339: Property 'alpha' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(245,32): error TS2339: Property 'alpha' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(263,32): error TS2339: Property 'beta' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(266,32): error TS2339: Property 'beta' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(268,35): error TS2339: Property 'beta' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(360,42): error TS2339: Property 'maxDrawdown' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(384,67): error TS2339: Property 'sharpeRatio' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(386,38): error TS2339: Property 'sharpeRatio' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(391,35): error TS2339: Property 'sharpeRatio' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(394,34): error TS2339: Property 'sharpeRatio' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(394,57): error TS2339: Property 'sharpeRatio' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(396,37): error TS2339: Property 'sharpeRatio' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(396,60): error TS2339: Property 'sharpeRatio' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(417,34): error TS2339: Property 'winLossRatio' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(592,25): error TS2322: Type '`/profiles/${string}/trades`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/routes/profiles.$id.tsx(599,26): error TS2339: Property 'recentPosts' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(599,49): error TS2339: Property 'recentPosts' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(601,30): error TS2339: Property 'recentPosts' does not exist on type 'UserProfile'.
+src/routes/profiles.$id.tsx(601,59): error TS7006: Parameter 'post' implicitly has an 'any' type.
+src/routes/profiles.$id.tsx(825,33): error TS2322: Type '`/funds/${string}`' is not assignable to type '"." | "/" | ".." | "/login" | "/debug-db" | "/debug-simple" | "/funds" | "/sanity" | "/seed" | "/signup" | "/community" | "/dashboard" | "/history" | "/jobs" | "/profile" | "/research" | ... 16 more ... | "/api/profiles/$id/trade-history"'.
+src/server/data-access/profiles.ts(271,24): error TS2339: Property 'username' does not exist on type '{ id: string; name: string; displayName: string; email: string; emailVerified: boolean; image: string | null; bio: string | null; location: string | null; website: string | null; linkedin: string | null; ... 11 more ...; updatedAt: Date; }'.
+src/server/data-access/profiles.ts(339,20): error TS2339: Property 'username' does not exist on type 'PgTableWithColumns<{ name: "user"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "user"; dataType: "string"; columnType: "PgText"; data: string; driverParam: string; notNull: true; hasDefault: false; isPrimaryKey: true; ... 5 more ...; generated: undefined; }, {}, {}>; ... 20 more ...; updatedA...'.
+src/server/features/funds.ts(5,1): error TS6133: 'DynamicRetrievalMode' is declared but its value is never read.
+src/server/features/portfolios.ts(5,21): error TS6133: 'portfolioHolding' is declared but its value is never read.
+src/server/features/portfolios.ts(7,1): error TS6133: 'z' is declared but its value is never read.
+src/server/features/theses.ts(7,10): error TS6133: 'getAllPosts' is declared but its value is never read.

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Zap, Newspaper, Users, UserPlus, Search } from "lucide-react";
+import { TrendingUp, Zap, Users, UserPlus, Search } from "lucide-react";
 import { Link, useLoaderData } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getCommunityPosts, getContributors } from "@/server/features/contributors";
@@ -33,7 +33,7 @@ function DashboardHome() {
                     <p className="text-muted-foreground mt-1">Welcome back. Here's your daily briefing.</p>
                 </div>
                 <div className="flex gap-3">
-                    <Link to="/funds">
+                    <Link to="/research">
                         <Button>
                             <TrendingUp className="w-4 h-4 mr-2" /> New Analysis
                         </Button>
@@ -46,6 +46,7 @@ function DashboardHome() {
                 <Card className="bg-gradient-to-br from-primary/10 via-card to-card border-primary/20">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-primary uppercase tracking-wider">Portfolio Alpha</CardTitle>
+                        <CardDescription className="sr-only">Portfolio Performance Metrics</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-heading font-bold">+0.0%</div>
@@ -55,6 +56,7 @@ function DashboardHome() {
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Active Alerts</CardTitle>
+                        <CardDescription className="sr-only">Your active stock price alerts</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-heading font-bold">0</div>
@@ -64,6 +66,7 @@ function DashboardHome() {
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Watchlist Movers</CardTitle>
+                        <CardDescription className="sr-only">Top movers in your watchlist</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-heading font-bold text-muted-foreground">--</div>
@@ -75,9 +78,11 @@ function DashboardHome() {
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Main Feed */}
                 <div className="lg:col-span-2 space-y-6">
-                    <h2 className="text-xl font-bold flex items-center gap-2">
-                        <Zap className="w-5 h-5 text-yellow-500" /> Recent Insights
-                    </h2>
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-bold flex items-center gap-2">
+                            <Zap className="w-5 h-5 text-yellow-500" /> Community Research
+                        </h2>
+                    </div>
 
                     {posts.length === 0 ? (
                         <Card className="border-dashed">
@@ -85,14 +90,11 @@ function DashboardHome() {
                                 <Search className="w-12 h-12 text-muted-foreground mb-4" />
                                 <h3 className="text-lg font-bold mb-2">No Research Found</h3>
                                 <p className="text-muted-foreground max-w-sm mb-6">
-                                    Be the first to share your investment thesis or join a tournament to compete.
+                                    Be the first to share your investment thesis.
                                 </p>
                                 <div className="flex gap-3">
-                                    <Link to="/funds">
+                                    <Link to="/research">
                                         <Button>Post Research</Button>
-                                    </Link>
-                                    <Link to="/tournaments">
-                                        <Button variant="outline">Join Tournament</Button>
                                     </Link>
                                 </div>
                             </CardContent>
@@ -101,29 +103,29 @@ function DashboardHome() {
                         <div className="space-y-4">
                             {posts.map((post) => (
                                 <Link key={post.id} to="/posts/$id" params={{ id: post.id }}>
-                                    <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-                                        <CardContent className="p-6">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Badge variant="secondary" className="text-xs font-normal">
-                                                            {post.type}
-                                                        </Badge>
-                                                        <span className="text-xs text-muted-foreground">{post.publishedAt}</span>
-                                                    </div>
-                                                    <h3 className="text-lg font-bold mb-1">{post.title}</h3>
-                                                    <p className="text-muted-foreground text-sm line-clamp-2">
-                                                        {post.content}
-                                                    </p>
+                                    <Card className="hover:border-primary/50 transition-colors cursor-pointer group">
+                                        <CardHeader className="pb-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant="secondary" className="text-xs font-normal">
+                                                        {post.type}
+                                                    </Badge>
+                                                    <CardDescription className="text-xs">
+                                                        {post.publishedAt}
+                                                    </CardDescription>
                                                 </div>
                                                 {post.performance && (
-                                                    <div className={`text-sm font-bold ${post.performance.status === 'win' ? 'text-green-500' :
-                                                        post.performance.status === 'loss' ? 'text-red-500' : 'text-muted-foreground'
-                                                        }`}>
+                                                    <Badge variant={post.performance.status === 'win' ? 'default' : 'destructive'} className="text-xs font-bold">
                                                         {post.performance.returnPercent > 0 ? '+' : ''}{post.performance.returnPercent}%
-                                                    </div>
+                                                    </Badge>
                                                 )}
                                             </div>
+                                            <CardTitle className="text-lg group-hover:text-primary transition-colors mt-2">{post.title}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-muted-foreground text-sm line-clamp-2">
+                                                {post.content}
+                                            </p>
                                         </CardContent>
                                     </Card>
                                 </Link>
@@ -140,7 +142,6 @@ function DashboardHome() {
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <Users className="w-5 h-5 text-blue-500" /> Discover
                             </h2>
-                            <Link to="/contributors" className="text-xs text-primary hover:underline">View All</Link>
                         </div>
                         <Card>
                             <CardContent className="p-0">
@@ -166,29 +167,10 @@ function DashboardHome() {
                                     ))}
                                     {contributors.length === 0 && (
                                         <div className="p-4 text-center text-sm text-muted-foreground">
-                                            No users found to follow nearby.
+                                            No users found.
                                         </div>
                                     )}
                                 </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Followers / Your Network (Placeholder/Implementation) */}
-                    <div className="space-y-4">
-                        <h2 className="text-xl font-bold flex items-center gap-2">
-                            <Newspaper className="w-5 h-5 text-purple-500" /> Your Network
-                        </h2>
-                        <Card className="bg-muted/20">
-                            <CardContent className="p-6 text-center space-y-3">
-                                <div className="mx-auto w-10 h-10 rounded-full bg-background flex items-center justify-center border border-border">
-                                    <Users className="w-5 h-5 text-muted-foreground" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium">Connect with others</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Follow investors to see their activity here.</p>
-                                </div>
-                                <Button variant="outline" size="sm" className="w-full">Find People</Button>
                             </CardContent>
                         </Card>
                     </div>

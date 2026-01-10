@@ -1,4 +1,4 @@
-import { getWebRequest } from 'vinxi/http';
+import { getRequest } from '@tanstack/react-start/server';
 import { auth } from '../lib/auth';
 
-export { getWebRequest, auth };
+export { getRequest, auth };

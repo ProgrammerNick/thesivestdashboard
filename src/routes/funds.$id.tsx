@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useLoaderData } from "@tanstack/react-router";
 import { searchFund } from "@/server/features/funds";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { FundChat } from "@/components/FundChat";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, Wallet, ArrowRight, ArrowLeft } from "lucide-react";
+import { BrainCircuit, Wallet, ArrowLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
@@ -16,8 +16,11 @@ export const Route = createFileRoute("/funds/$id")({
         // For now, let's assume we pass the fund name as ID or search query.
         // Simplification: We'll just pass the param as the query.
         try {
+            // Debugging 500 error: mocking data to check if page loads
+
             const fundData = await searchFund({ data: params.id });
             return { fundData, query: params.id };
+
         } catch (e) {
             console.error(e);
             return { fundData: null, query: params.id };
@@ -140,9 +143,12 @@ function FundPage() {
                                 </div>
                             </div>
                         </Card>
+
+                        {/* Chat Interface */}
+                        <FundChat fundData={fundData} fundName={fundData.fundName} />
                     </div>
                 </motion.div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

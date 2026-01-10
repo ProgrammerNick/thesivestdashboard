@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Loader2, BrainCircuit, Wallet, ArrowRight } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { Link } from "@tanstack/react-router";
 import { Card } from "./ui/card";
 import { motion, AnimatePresence } from "motion/react";
 import { searchFund } from "../server/features/funds";
@@ -118,7 +119,7 @@ export function FundSearch() {
                                         </div>
 
                                         <div className="pt-2">
-                                            <Link to={`/funds/${encodeURIComponent(query)}`}>
+                                            <Link to="/funds/$id" params={{ id: query }}>
                                                 <Button variant="outline" className="gap-2 w-full sm:w-auto">
                                                     Open Full Research Page <ArrowRight className="w-4 h-4" />
                                                 </Button>

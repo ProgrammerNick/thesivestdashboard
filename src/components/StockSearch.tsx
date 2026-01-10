@@ -5,12 +5,15 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { motion, AnimatePresence } from "motion/react";
 import { searchStock, StockData } from "../server/features/stocks";
+import { getSymbolPosts } from "../server/features/posts";
 import { Badge } from "./ui/badge";
+import { ResearchChart } from "./ResearchChart";
 
 export function StockSearch() {
     const [query, setQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<StockData | null>(null);
+    const [posts, setPosts] = useState<any[]>([]);
     const [error, setError] = useState("");
 
     const handleSearch = async (e: React.FormEvent) => {
@@ -20,12 +23,16 @@ export function StockSearch() {
         setIsLoading(true);
         setError("");
         setResult(null);
+        setPosts([]);
 
         try {
-            const data = await searchStock({
-                data: query
-            });
-            setResult(data);
+            const [stockData, postsData] = await Promise.all([
+                searchStock({ data: query }),
+                getSymbolPosts({ data: { symbol: query.toUpperCase() } })
+            ]);
+
+            setResult(stockData);
+            setPosts(postsData);
         } catch (err) {
             console.error(err);
             setError("Could not fetch stock data. Please try again.");
@@ -42,7 +49,7 @@ export function StockSearch() {
                         Institutional-Grade Stock Analysis
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        Deep dive into any company. Our AI analyzes business quality, moats, and valuation in seconds.
+                        Deep dive into any company. Visualize community thesis stamped directly on the chart.
                     </p>
                 </div>
 
@@ -95,6 +102,9 @@ export function StockSearch() {
                                     AI Generated Analysis
                                 </div>
                             </div>
+
+                            {/* Research Chart with Stamping */}
+                            <ResearchChart symbol={result.symbol} posts={posts} />
 
                             {/* Main Grid */}
                             <div className="grid md:grid-cols-2 gap-6">

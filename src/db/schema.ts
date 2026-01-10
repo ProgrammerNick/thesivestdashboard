@@ -35,24 +35,17 @@ export const user = pgTable("user", {
   verified: boolean("verified").default(false),
   seekingEmployment: boolean("seeking_employment").default(false),
   availableForHire: boolean("available_for_hire").default(false),
+
+  // Corporate Fields
+  isCompany: boolean("is_company").default(false),
+  companyName: text("company_name"),
+  companyDescription: text("company_description"),
+  companyWebsite: text("company_website"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
 
-export const userRelations = relations(user, ({ many }) => ({
-  posts: many(post),
-  followers: many(follow, {
-    relationName: "followers",
-  }),
-  following: many(follow, {
-    relationName: "following",
-  }),
-  postLikes: many(postLike),
-  comments: many(comment),
-  tournamentParticipants: many(tournamentParticipant),
-  educations: many(education),
-  certifications: many(certification),
-}));
+
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
@@ -102,7 +95,7 @@ export const post = pgTable("post", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
-  type: text("type").notNull(), // 'trade', 'thought', 'update'
+  type: text("type").notNull(), // 'trade', 'thought', 'update', 'market_outlook', 'quarterly_letter'
   symbol: text("symbol"), // Required for trades
   title: text("title").notNull(),
   content: text("content").notNull(),
@@ -476,4 +469,91 @@ export const aiAnalysisRelations = relations(aiAnalysis, ({ one }) => ({
     fields: [aiAnalysis.userId],
     references: [user.id],
   }),
+}));
+
+// Job System
+export const jobPosting = pgTable("job_posting", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  companyId: text("company_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  location: text("location").notNull(),
+  type: text("type").notNull(), // 'Full-time', 'Contract', 'Internship'
+  salaryRange: text("salary_range"),
+  tags: text("tags").array(), // Array of strings
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const jobPostingRelations = relations(jobPosting, ({ one, many }) => ({
+  company: one(user, {
+    fields: [jobPosting.companyId],
+    references: [user.id],
+  }),
+  applications: many(jobApplication),
+}));
+
+export const jobApplication = pgTable("job_application", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  jobId: text("job_id")
+    .notNull()
+    .references(() => jobPosting.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("applied"), // 'applied', 'reviewing', 'interview', 'offer', 'rejected'
+  coverNote: text("cover_note"),
+  attachedPortfolioId: text("attached_portfolio_id").references(() => portfolio.id),
+  attachedPostId: text("attached_post_id").references(() => post.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const jobApplicationRelations = relations(jobApplication, ({ one }) => ({
+  job: one(jobPosting, {
+    fields: [jobApplication.jobId],
+    references: [jobPosting.id],
+  }),
+  user: one(user, {
+    fields: [jobApplication.userId],
+    references: [user.id],
+  }),
+  portfolio: one(portfolio, {
+    fields: [jobApplication.attachedPortfolioId],
+    references: [portfolio.id],
+  }),
+  post: one(post, {
+    fields: [jobApplication.attachedPostId],
+    references: [post.id],
+  }),
+}));
+
+export const userRelations = relations(user, ({ many }) => ({
+  posts: many(post),
+  followers: many(follow, {
+    relationName: "followers",
+  }),
+  following: many(follow, {
+    relationName: "following",
+  }),
+  postLikes: many(postLike),
+  comments: many(comment),
+  tournamentParticipants: many(tournamentParticipant),
+  educations: many(education),
+  certifications: many(certification),
+  jobPostings: many(jobPosting),
+  jobApplications: many(jobApplication),
 }));

@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { Resource } from "sst";
 import { z } from "zod";
 
 export type StockData = {
@@ -20,16 +19,18 @@ export const searchStock = createServerFn({ method: "POST" }).inputValidator(z.s
             throw new Error("Query parameter required");
         }
 
-        const geminiKey = Resource.GEMINI_API_KEY.value;
+        // Access (fixed) env var
+        const geminiKey = process.env.GEMINI_API_KEY;
+
         if (!geminiKey) {
             console.error("Missing Gemini API Key");
-            throw new Error("Server configuration error");
+            throw new Error("Server configuration error: Gemini Key Missing");
         }
 
         try {
             const genAI = new GoogleGenerativeAI(geminiKey);
             const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-pro",
+                model: "gemini-2.0-flash-exp",
                 tools: [
                     {
                         google_search: {}
