@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getTournaments } from "../../server/features/tournaments";
+import { getTournaments } from "../../server/fn/tournaments";
 
 export const Route = createFileRoute("/api/tournaments")({
   server: {

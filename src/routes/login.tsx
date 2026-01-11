@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { SignIn } from '../components/auth/sign-in'
 import { motion } from 'motion/react'
 import { createServerFn } from '@tanstack/react-start'
-import { checkAuth } from '../server/features/auth'
+import { checkAuth } from '../server/fn/auth'
 
 export const Route = createFileRoute('/login')({
     loader: async () => {

@@ -2,7 +2,7 @@ import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"; // Assuming these exist or I'll use standard img
 import { MessageSquare, Heart, Share2, TrendingUp, TrendingDown, MoreHorizontal } from "lucide-react";
-import type { UserPost, CommunityMember } from "../server/features/contributors";
+import type { UserPost, CommunityMember } from "../server/fn/contributors";
 import { Link } from "@tanstack/react-router";
 
 interface FeedPostProps {

@@ -64,7 +64,8 @@ const getJobs = createServerFn({ method: "GET" }).handler(async () => {
 });
 
 // Server Functions
-import { getMyPortfolios, getMyResearchPosts } from "@/server/features/portfolios";
+import { getMyPortfolios } from "@/server/fn/portfolios";
+import { getMyResearchPosts } from "@/server/fn/posts";
 
 export const Route = createFileRoute("/_dashboard/jobs")({
   component: JobBoardPage,

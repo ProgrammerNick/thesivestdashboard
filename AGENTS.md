@@ -42,9 +42,10 @@ graph TD
 
 ## Example Structure
 
-- `src/server/features/stocks.ts`: (Shared Logic) `export const getUnderRadarStacks = ...`
+- `src/server/features/stocks.server.ts`: (Shared Logic) `export const getUnderRadarStacks = ...`
 - `src/routes/api/stocks.ts`: (API Route) Calls `getUnderRadarStacks`.
-- `src/routes/index.tsx`: (Page/Loader) Calls `getUnderRadarStacks` via `createServerFn`.
+- `src/server/fn/stocks.ts`: (Server Function) Calls `getUnderRadarStacks` via `createServerFn`.
+- `src/routes/index.tsx`: (Page/Loader) Calls `getUnderRadarStacks` via imported `getStocksFn`.
 
 ## Tech Stack & Project Rules
 

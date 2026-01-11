@@ -3,10 +3,10 @@ import { Send, Loader2, Bot, User } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
-import { chatWithFund } from "@/server/features/chat";
+import { chatWithFund } from "@/server/fn/chat";
 import { ScrollArea } from "./ui/scroll-area";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { FundData } from "@/server/features/funds";
+import { FundData } from "@/server/fn/funds";
 
 interface Message {
     role: "user" | "model";

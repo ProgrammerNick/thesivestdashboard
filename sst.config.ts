@@ -19,8 +19,18 @@ export default $config({
     const qdrant_api_key = new sst.Secret("QDRANT_API_KEY");
     const qdrant_api_url = new sst.Secret("QDRANT_API_URL");
 
+    const bucket = new sst.aws.Bucket("Uploads", { access: "public" });
+
     new sst.aws.TanStackStart("MyWeb", {
-      link: [database_connection, better_auth_secret, better_auth_url, gemini_key, qdrant_api_key, qdrant_api_url],
+      link: [
+        database_connection,
+        better_auth_secret,
+        better_auth_url,
+        gemini_key,
+        qdrant_api_key,
+        qdrant_api_url,
+        bucket,
+      ],
     });
   },
 });

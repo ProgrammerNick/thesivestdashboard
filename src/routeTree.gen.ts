@@ -19,11 +19,13 @@ import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CorporationsIndexRouteImport } from './routes/corporations/index'
 import { Route as ProfilesIdRouteImport } from './routes/profiles.$id'
+import { Route as PostsSlugRouteImport } from './routes/posts/$slug'
 import { Route as PostsIdRouteImport } from './routes/posts.$id'
 import { Route as FundsIdRouteImport } from './routes/funds.$id'
 import { Route as ApiTournamentsRouteImport } from './routes/api/tournaments'
 import { Route as ApiThesesRouteImport } from './routes/api/theses'
 import { Route as ApiContributorsRouteImport } from './routes/api/contributors'
+import { Route as DashboardWriteRouteImport } from './routes/_dashboard/write'
 import { Route as DashboardTournamentsRouteImport } from './routes/_dashboard/tournaments'
 import { Route as DashboardTalentRouteImport } from './routes/_dashboard/talent'
 import { Route as DashboardStocksRouteImport } from './routes/_dashboard/stocks'
@@ -93,6 +95,11 @@ const ProfilesIdRoute = ProfilesIdRouteImport.update({
   path: '/profiles/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PostsSlugRoute = PostsSlugRouteImport.update({
+  id: '/posts/$slug',
+  path: '/posts/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsIdRoute = PostsIdRouteImport.update({
   id: '/posts/$id',
   path: '/posts/$id',
@@ -117,6 +124,11 @@ const ApiContributorsRoute = ApiContributorsRouteImport.update({
   id: '/api/contributors',
   path: '/api/contributors',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardWriteRoute = DashboardWriteRouteImport.update({
+  id: '/write',
+  path: '/write',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardTournamentsRoute = DashboardTournamentsRouteImport.update({
   id: '/tournaments',
@@ -236,11 +248,13 @@ export interface FileRoutesByFullPath {
   '/stocks': typeof DashboardStocksRoute
   '/talent': typeof DashboardTalentRoute
   '/tournaments': typeof DashboardTournamentsRoute
+  '/write': typeof DashboardWriteRoute
   '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
   '/funds/$id': typeof FundsIdRoute
   '/posts/$id': typeof PostsIdRoute
+  '/posts/$slug': typeof PostsSlugRoute
   '/profiles/$id': typeof ProfilesIdRouteWithChildren
   '/corporations': typeof CorporationsIndexRoute
   '/post/$postId': typeof DashboardPostPostIdRoute
@@ -271,11 +285,13 @@ export interface FileRoutesByTo {
   '/stocks': typeof DashboardStocksRoute
   '/talent': typeof DashboardTalentRoute
   '/tournaments': typeof DashboardTournamentsRoute
+  '/write': typeof DashboardWriteRoute
   '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
   '/funds/$id': typeof FundsIdRoute
   '/posts/$id': typeof PostsIdRoute
+  '/posts/$slug': typeof PostsSlugRoute
   '/profiles/$id': typeof ProfilesIdRouteWithChildren
   '/corporations': typeof CorporationsIndexRoute
   '/post/$postId': typeof DashboardPostPostIdRoute
@@ -308,11 +324,13 @@ export interface FileRoutesById {
   '/_dashboard/stocks': typeof DashboardStocksRoute
   '/_dashboard/talent': typeof DashboardTalentRoute
   '/_dashboard/tournaments': typeof DashboardTournamentsRoute
+  '/_dashboard/write': typeof DashboardWriteRoute
   '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
   '/funds/$id': typeof FundsIdRoute
   '/posts/$id': typeof PostsIdRoute
+  '/posts/$slug': typeof PostsSlugRoute
   '/profiles/$id': typeof ProfilesIdRouteWithChildren
   '/corporations/': typeof CorporationsIndexRoute
   '/_dashboard/post/$postId': typeof DashboardPostPostIdRoute
@@ -345,11 +363,13 @@ export interface FileRouteTypes {
     | '/stocks'
     | '/talent'
     | '/tournaments'
+    | '/write'
     | '/api/contributors'
     | '/api/theses'
     | '/api/tournaments'
     | '/funds/$id'
     | '/posts/$id'
+    | '/posts/$slug'
     | '/profiles/$id'
     | '/corporations'
     | '/post/$postId'
@@ -380,11 +400,13 @@ export interface FileRouteTypes {
     | '/stocks'
     | '/talent'
     | '/tournaments'
+    | '/write'
     | '/api/contributors'
     | '/api/theses'
     | '/api/tournaments'
     | '/funds/$id'
     | '/posts/$id'
+    | '/posts/$slug'
     | '/profiles/$id'
     | '/corporations'
     | '/post/$postId'
@@ -416,11 +438,13 @@ export interface FileRouteTypes {
     | '/_dashboard/stocks'
     | '/_dashboard/talent'
     | '/_dashboard/tournaments'
+    | '/_dashboard/write'
     | '/api/contributors'
     | '/api/theses'
     | '/api/tournaments'
     | '/funds/$id'
     | '/posts/$id'
+    | '/posts/$slug'
     | '/profiles/$id'
     | '/corporations/'
     | '/_dashboard/post/$postId'
@@ -447,6 +471,7 @@ export interface RootRouteChildren {
   ApiTournamentsRoute: typeof ApiTournamentsRoute
   FundsIdRoute: typeof FundsIdRoute
   PostsIdRoute: typeof PostsIdRoute
+  PostsSlugRoute: typeof PostsSlugRoute
   ProfilesIdRoute: typeof ProfilesIdRouteWithChildren
   CorporationsIndexRoute: typeof CorporationsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -526,6 +551,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/posts/$slug': {
+      id: '/posts/$slug'
+      path: '/posts/$slug'
+      fullPath: '/posts/$slug'
+      preLoaderRoute: typeof PostsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/$id': {
       id: '/posts/$id'
       path: '/posts/$id'
@@ -560,6 +592,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/contributors'
       preLoaderRoute: typeof ApiContributorsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_dashboard/write': {
+      id: '/_dashboard/write'
+      path: '/write'
+      fullPath: '/write'
+      preLoaderRoute: typeof DashboardWriteRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/_dashboard/tournaments': {
       id: '/_dashboard/tournaments'
@@ -709,6 +748,7 @@ interface DashboardRouteChildren {
   DashboardStocksRoute: typeof DashboardStocksRoute
   DashboardTalentRoute: typeof DashboardTalentRoute
   DashboardTournamentsRoute: typeof DashboardTournamentsRoute
+  DashboardWriteRoute: typeof DashboardWriteRoute
   DashboardPostPostIdRoute: typeof DashboardPostPostIdRoute
 }
 
@@ -724,6 +764,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardStocksRoute: DashboardStocksRoute,
   DashboardTalentRoute: DashboardTalentRoute,
   DashboardTournamentsRoute: DashboardTournamentsRoute,
+  DashboardWriteRoute: DashboardWriteRoute,
   DashboardPostPostIdRoute: DashboardPostPostIdRoute,
 }
 
@@ -773,6 +814,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTournamentsRoute: ApiTournamentsRoute,
   FundsIdRoute: FundsIdRoute,
   PostsIdRoute: PostsIdRoute,
+  PostsSlugRoute: PostsSlugRoute,
   ProfilesIdRoute: ProfilesIdRouteWithChildren,
   CorporationsIndexRoute: CorporationsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

@@ -21,7 +21,7 @@ import { Button } from "../components/ui/button";
 import { TrendingUp, TrendingDown, BarChart3, DollarSign, Activity, BrainCircuit, Search, ArrowRight } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { getAnalysisHistory } from "../server/features/analysis";
+import { getAnalysisHistory } from "../server/fn/analysis";
 
 
 // Follow function

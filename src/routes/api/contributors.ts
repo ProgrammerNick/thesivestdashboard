@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   getContributors,
   getContributorAnalyses,
-} from "../../server/features/contributors";
+} from "../../server/fn/contributors";
 
 export const Route = createFileRoute("/api/contributors")({
   server: {

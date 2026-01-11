@@ -5,8 +5,8 @@ import { Button } from "./ui/button";
 import { Link } from "@tanstack/react-router";
 import { Card } from "./ui/card";
 import { motion, AnimatePresence } from "motion/react";
-import { searchFund } from "../server/features/funds";
-import { getAnalysisHistory, deleteAnalysis } from "../server/features/analysis";
+import { searchFund } from "../server/fn/funds";
+import { getAnalysisHistory, deleteAnalysis } from "../server/fn/analysis";
 import { authClient } from "@/lib/auth-client";
 
 interface Holding {
@@ -22,6 +22,9 @@ interface SearchResult {
     recentActivity: string;
     performanceOutlook: string;
     convictionThesis: string;
+    ownershipConcentration: string;
+    positionSizingLogic: string;
+    cashPosition: string;
 }
 
 interface SavedAnalysis {
@@ -186,6 +189,21 @@ export function FundSearch() {
                                 <Card className="p-6 bg-card/50 border-border/60">
                                     <h4 className="text-sm font-bold uppercase tracking-wider text-primary mb-3">Performance Context</h4>
                                     <p className="text-muted-foreground text-sm leading-relaxed">{result.performanceOutlook}</p>
+                                </Card>
+
+                                <Card className="p-6 bg-card/50 border-border/60">
+                                    <h4 className="text-sm font-bold uppercase tracking-wider text-blue-500 mb-3">Ownership Concentration</h4>
+                                    <p className="text-muted-foreground text-sm leading-relaxed">{result.ownershipConcentration}</p>
+                                </Card>
+
+                                <Card className="p-6 bg-card/50 border-border/60">
+                                    <h4 className="text-sm font-bold uppercase tracking-wider text-amber-500 mb-3">Position Sizing Logic</h4>
+                                    <p className="text-muted-foreground text-sm leading-relaxed">{result.positionSizingLogic}</p>
+                                </Card>
+
+                                <Card className="p-6 bg-card/50 border-border/60">
+                                    <h4 className="text-sm font-bold uppercase tracking-wider text-green-500 mb-3">Cash Position</h4>
+                                    <p className="text-muted-foreground text-sm leading-relaxed">{result.cashPosition}</p>
                                 </Card>
                             </div>
 

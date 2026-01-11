@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useLoaderData } from "@tanstack/react-router";
-import { searchFund } from "@/server/features/funds";
+import { searchFund } from "@/server/fn/funds";
 import { Card } from "@/components/ui/card";
 import { FundChat } from "@/components/FundChat";
 import { Button } from "@/components/ui/button";
@@ -39,9 +39,9 @@ function FundPage() {
                 <p className="text-muted-foreground mb-8">
                     We couldn't generate an analysis for "{query}".
                 </p>
-                <Link to="/funds">
-                    <Button>Back to Research</Button>
-                </Link>
+                <Button asChild>
+                    <Link to="/funds">Back to Research</Link>
+                </Button>
             </div>
         );
     }
@@ -51,11 +51,11 @@ function FundPage() {
             {/* Navbar Placeholder / Back Button */}
             <div className="border-b border-border/40 bg-card/30 backdrop-blur-md sticky top-0 z-50">
                 <div className="container mx-auto px-4 h-16 flex items-center gap-4">
-                    <Link to="/funds">
-                        <Button variant="ghost" size="sm" className="gap-2">
+                    <Button asChild variant="ghost" size="sm" className="gap-2">
+                        <Link to="/funds">
                             <ArrowLeft className="w-4 h-4" /> Back to Funds
-                        </Button>
-                    </Link>
+                        </Link>
+                    </Button>
                     <div className="h-6 w-px bg-border/50" />
                     <h1 className="text-lg font-heading font-bold truncate">
                         {fundData.fundName}

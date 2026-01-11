@@ -98,7 +98,11 @@ export const post = pgTable("post", {
   type: text("type").notNull(), // 'trade', 'thought', 'update', 'market_outlook', 'quarterly_letter'
   symbol: text("symbol"), // Required for trades
   title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  slug: text("slug").unique(),
+  coverImage: text("cover_image"),
   content: text("content").notNull(),
+  published: boolean("published").default(false),
   buyPrice: numeric("buy_price"),
   buyDate: timestamp("buy_date"),
   sellPrice: numeric("sell_price"),
@@ -108,7 +112,7 @@ export const post = pgTable("post", {
   stopLoss: numeric("stop_loss"),
   entryThoughts: text("entry_thoughts"),
   exitThoughts: text("exit_thoughts"),
-  publishedAt: timestamp("published_at").notNull().defaultNow(),
+  publishedAt: timestamp("published_at"),
   updatedAt: timestamp("updated_at")
     .defaultNow()
     .notNull()
@@ -127,7 +131,29 @@ export const postRelations = relations(post, ({ one, many }) => ({
   performance: many(tradePerformance),
   likes: many(postLike),
   comments: many(comment),
+  attachments: many(postAttachment),
   tournamentParticipants: many(tournamentParticipant),
+}));
+
+export const postAttachment = pgTable("post_attachment", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  postId: text("post_id")
+    .notNull()
+    .references(() => post.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  type: text("type").notNull(), // 'image' | 'pdf' | 'other'
+  filename: text("filename").notNull(),
+  size: integer("size").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const postAttachmentRelations = relations(postAttachment, ({ one }) => ({
+  post: one(post, {
+    fields: [postAttachment.postId],
+    references: [post.id],
+  }),
 }));
 
 // Tags

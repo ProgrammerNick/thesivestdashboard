@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { getFeedPosts } from "@/server/features/posts";
+import { getFeedPosts } from "@/server/fn/posts";
 import { useLoaderData } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

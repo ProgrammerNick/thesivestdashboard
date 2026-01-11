@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { redirect } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { getUserPortfolios } from "@/server/fn/portfolios";
+import { PortfolioManager } from "@/components/profile/PortfolioManager";
 
 // Server function to get current profile and posts
 const getProfileData = createServerFn({ method: "GET" }).handler(async () => {
@@ -20,18 +22,14 @@ const getProfileData = createServerFn({ method: "GET" }).handler(async () => {
     throw redirect({ to: "/login" });
   }
 
-  const { getPostsByUserId } = await import("@/server/features/posts");
-  // Wait, getPostsByUserId is a SERVER FUNCTION in src/server/features/posts.ts
-  // Calling a server function from another server function?
-  // It's just a function. But `createServerFn` wrapps it.
-  // If I import it, I get the client proxy usually?
-  // If I am on server, maybe I should call the data-access directly.
   // Ideally I call data-access.
+
 
   const { getPostsByUserId: getPostsByUserIdDA } = await import("@/server/data-access/posts");
   const posts = await getPostsByUserIdDA(session.user.id);
+  const portfolios = await getUserPortfolios({ data: session.user.id });
 
-  return { user: session.user, posts };
+  return { user: session.user, posts, portfolios };
 });
 
 export const Route = createFileRoute("/_dashboard/profile")({
@@ -42,7 +40,7 @@ export const Route = createFileRoute("/_dashboard/profile")({
 });
 
 function ProfilePage() {
-  const { user, posts } = useLoaderData({ from: "/_dashboard/profile" });
+  const { user, posts, portfolios } = useLoaderData({ from: "/_dashboard/profile" });
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -67,6 +65,7 @@ function ProfilePage() {
       <Tabs defaultValue="posts" className="w-full">
         <TabsList>
           <TabsTrigger value="posts">My Research</TabsTrigger>
+          <TabsTrigger value="portfolios">Portfolios</TabsTrigger>
           <TabsTrigger value="saved">Saved</TabsTrigger>
         </TabsList>
         <TabsContent value="posts" className="space-y-4 mt-4">
@@ -90,6 +89,9 @@ function ProfilePage() {
               ))}
             </div>
           )}
+        </TabsContent>
+        <TabsContent value="portfolios" className="mt-4">
+          <PortfolioManager portfolios={portfolios} />
         </TabsContent>
         <TabsContent value="saved">
           <div className="py-12 text-center text-muted-foreground">

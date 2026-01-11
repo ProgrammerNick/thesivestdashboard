@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { checkAuth } from '../server/features/auth'
+import { checkAuth } from '../server/fn/auth'
 import { SignUp } from '../components/auth/sign-up'
 import { motion } from 'motion/react'
 

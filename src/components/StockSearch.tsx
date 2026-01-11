@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Search, Loader2, BrainCircuit, TrendingUp, AlertTriangle, Scale, Activity } from "lucide-react";
+import { Search, Loader2, BrainCircuit, TrendingUp, AlertTriangle, Scale, Activity, Calendar, Target } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { motion, AnimatePresence } from "motion/react";
-import { searchStock, StockData } from "../server/features/stocks";
-import { getSymbolPosts } from "../server/features/posts";
+import { searchStock, StockData } from "../server/fn/stocks";
+import { getSymbolPosts } from "../server/fn/posts";
 import { Badge } from "./ui/badge";
 import { ResearchChart } from "./ResearchChart";
 
@@ -132,7 +132,14 @@ export function StockSearch() {
                                         <AlertTriangle className="w-5 h-5" />
                                         <h4 className="font-bold uppercase tracking-wider text-sm">Key Risks</h4>
                                     </div>
-                                    <p className="text-muted-foreground leading-relaxed">{result.keyRisks}</p>
+                                    <ul className="space-y-2">
+                                        {Array.isArray(result.keyRisks) ? result.keyRisks.map((risk, i) => (
+                                            <li key={i} className="flex items-start gap-2 text-muted-foreground leading-relaxed">
+                                                <span className="text-red-500 mt-1">•</span>
+                                                <span>{risk}</span>
+                                            </li>
+                                        )) : <li className="text-muted-foreground">{result.keyRisks}</li>}
+                                    </ul>
                                 </Card>
 
                                 {/* Financials & Valuation */}
@@ -151,6 +158,96 @@ export function StockSearch() {
                                             <p className="text-muted-foreground text-sm">{result.valuationCommentary}</p>
                                         </div>
                                     </div>
+                                </Card>
+
+                                {/* Capital Allocation */}
+                                <Card className="p-6 bg-card border-border/60">
+                                    <div className="flex items-center gap-2 mb-4 text-amber-500">
+                                        <Activity className="w-5 h-5" />
+                                        <h4 className="font-bold uppercase tracking-wider text-sm">Capital Allocation</h4>
+                                    </div>
+                                    <p className="text-muted-foreground leading-relaxed">{result.capitalAllocation}</p>
+                                </Card>
+
+                                {/* Earnings Quality */}
+                                <Card className="p-6 bg-card border-border/60">
+                                    <div className="flex items-center gap-2 mb-4 text-cyan-500">
+                                        <Activity className="w-5 h-5" />
+                                        <h4 className="font-bold uppercase tracking-wider text-sm">Earnings Quality</h4>
+                                    </div>
+                                    <p className="text-muted-foreground leading-relaxed">{result.earningsQuality}</p>
+                                </Card>
+
+                                {/* Upcoming Catalysts */}
+                                <Card className="p-6 bg-card border-border/60">
+                                    <div className="flex items-center gap-2 mb-4 text-orange-500">
+                                        <Calendar className="w-5 h-5" />
+                                        <h4 className="font-bold uppercase tracking-wider text-sm">Upcoming Catalysts</h4>
+                                    </div>
+                                    {Array.isArray(result.upcomingCatalysts) ? (
+                                        <div className="space-y-3">
+                                            {result.upcomingCatalysts.map((catalyst, i) => (
+                                                <div key={i} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="font-semibold text-foreground">{catalyst.event}</span>
+                                                            <Badge variant={catalyst.impact?.toLowerCase().includes('bullish') ? 'default' : catalyst.impact?.toLowerCase().includes('bearish') ? 'destructive' : 'secondary'} className="text-xs">
+                                                                {catalyst.impact?.split(' ')[0] || 'Neutral'}
+                                                            </Badge>
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">{catalyst.date}</div>
+                                                        <p className="text-sm text-muted-foreground mt-1">{catalyst.impact}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : <p className="text-muted-foreground">{result.upcomingCatalysts}</p>}
+                                </Card>
+
+                                {/* Short Interest - Only show if notable */}
+                                {result.shortInterest && (
+                                    <Card className="p-6 bg-card border-border/60">
+                                        <div className="flex items-center gap-2 mb-4 text-yellow-500">
+                                            <Target className="w-5 h-5" />
+                                            <h4 className="font-bold uppercase tracking-wider text-sm">Short Interest</h4>
+                                            <Badge variant="outline" className="text-xs">Notable</Badge>
+                                        </div>
+                                        <p className="text-muted-foreground leading-relaxed">{result.shortInterest}</p>
+                                    </Card>
+                                )}
+
+                                {/* Comparable Multiples Table */}
+                                <Card className="p-6 bg-card border-border/60 md:col-span-2">
+                                    <div className="flex items-center gap-2 mb-4 text-indigo-500">
+                                        <Scale className="w-5 h-5" />
+                                        <h4 className="font-bold uppercase tracking-wider text-sm">Comparable Multiples</h4>
+                                    </div>
+                                    {Array.isArray(result.comparableMultiples) && result.comparableMultiples.length > 0 ? (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                                <thead>
+                                                    <tr className="border-b border-border/60">
+                                                        <th className="text-left py-2 px-3 font-semibold text-foreground">Ticker</th>
+                                                        <th className="text-left py-2 px-3 font-semibold text-foreground">Company</th>
+                                                        <th className="text-right py-2 px-3 font-semibold text-foreground">P/E</th>
+                                                        <th className="text-right py-2 px-3 font-semibold text-foreground">EV/EBITDA</th>
+                                                        <th className="text-left py-2 px-3 font-semibold text-foreground">vs {result.symbol}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {result.comparableMultiples.map((comp, i) => (
+                                                        <tr key={i} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
+                                                            <td className="py-2 px-3 font-mono font-medium text-primary">{comp.ticker}</td>
+                                                            <td className="py-2 px-3 text-muted-foreground">{comp.name}</td>
+                                                            <td className="py-2 px-3 text-right font-mono">{comp.peRatio}</td>
+                                                            <td className="py-2 px-3 text-right font-mono">{comp.evEbitda}</td>
+                                                            <td className="py-2 px-3 text-muted-foreground text-sm">{comp.premium}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : <p className="text-muted-foreground">{String(result.comparableMultiples)}</p>}
                                 </Card>
                             </div>
                         </motion.div>

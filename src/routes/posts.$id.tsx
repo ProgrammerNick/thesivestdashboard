@@ -5,7 +5,7 @@ import {
   getContributorById,
   getPostById,
   type UserPost,
-} from "../server/features/contributors";
+} from "../server/fn/contributors";
 import { useLoaderData } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import {

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getUnderRadarTheses } from '../../server/features/theses'
+import { getUnderRadarTheses } from '../../server/fn/theses'
 
 export const Route = createFileRoute('/api/theses')({
     server: {
