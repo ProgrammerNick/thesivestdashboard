@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { Search, Loader2, BrainCircuit, Wallet, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Loader2, BrainCircuit, Wallet, ArrowRight, Trash2, History } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Link } from "@tanstack/react-router";
 import { Card } from "./ui/card";
 import { motion, AnimatePresence } from "motion/react";
 import { searchFund } from "../server/features/funds";
+import { getAnalysisHistory, deleteAnalysis } from "../server/features/analysis";
+import { authClient } from "@/lib/auth-client";
 
 interface Holding {
     symbol: string;
@@ -22,11 +24,58 @@ interface SearchResult {
     convictionThesis: string;
 }
 
+interface SavedAnalysis {
+    id: string;
+    query: string;
+    result: string; // JSON string of SearchResult
+    createdAt: Date;
+}
+
 export function FundSearch() {
+    const { data: session } = authClient.useSession();
     const [query, setQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<SearchResult | null>(null);
     const [error, setError] = useState("");
+    const [history, setHistory] = useState<SavedAnalysis[]>([]);
+
+    // Fetch history
+    const loadHistory = async () => {
+        if (session?.user?.id) {
+            try {
+                const data = await getAnalysisHistory({ data: { userId: session.user.id } });
+                const fundHistory = (data as any[]).filter(item => item.type === 'fund');
+                setHistory(fundHistory);
+            } catch (e) {
+                console.error("Failed to load history", e);
+            }
+        }
+    };
+
+    // Load history on mount
+    useEffect(() => {
+        loadHistory();
+    }, []);
+
+    const handleDelete = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            await deleteAnalysis({ data: { id } });
+            setHistory(prev => prev.filter(item => item.id !== id));
+        } catch (err) {
+            console.error("Failed to delete", err);
+        }
+    };
+
+    const handleHistoryClick = (item: SavedAnalysis) => {
+        try {
+            const parsed = JSON.parse(item.result);
+            setResult(parsed);
+            setQuery(item.query);
+        } catch (e) {
+            console.error("Failed to parse saved result", e);
+        }
+    };
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,6 +90,7 @@ export function FundSearch() {
                 data: query
             });
             setResult(data);
+            loadHistory(); // Reload history after new search (it saves automatically)
         } catch (err) {
             console.error(err);
             setError("Could not fetch fund data. Please try again.");
@@ -181,42 +231,44 @@ export function FundSearch() {
                                     </div>
                                 </Card>
                             </div>
-
-                            {/* Holdings Card */}
-                            <Card className="p-0 overflow-hidden border-border/50 bg-card/50">
-                                <div className="p-6 border-b border-border/50 flex items-center justify-between bg-muted/20">
-                                    <div className="flex items-center gap-2">
-                                        <Wallet className="w-5 h-5 text-muted-foreground" />
-                                        <h3 className="font-semibold">Top Holdings Detected</h3>
-                                    </div>
-                                </div>
-                                <div className="divide-y divide-border/50">
-                                    {result.holdings.map((holding) => (
-                                        <div key={holding.symbol} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-lg bg-background border border-border flex items-center justify-center font-bold text-sm">
-                                                    {holding.symbol}
-                                                </div>
-                                                <div>
-                                                    <div className="font-semibold text-foreground">{holding.name}</div>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <div className="font-medium tabular-nums">{holding.percent}%</div>
-                                                <div className="text-xs text-muted-foreground">Portfolio</div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="p-4 bg-muted/20 text-center">
-                                    <Button variant="ghost" className="text-xs text-muted-foreground hover:text-primary w-full">
-                                        View All Holdings <ArrowRight className="w-3 h-3 ml-1" />
-                                    </Button>
-                                </div>
-                            </Card>
                         </motion.div>
                     )}
                 </AnimatePresence>
+
+                {/* History Section */}
+                {history.length > 0 && (
+                    <div className="pt-10 border-t border-border/50">
+                        <h3 className="text-xl font-bold flex items-center gap-2 mb-6 text-muted-foreground">
+                            <History className="w-5 h-5" /> Recent Research
+                        </h3>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {history.map((item) => (
+                                <Card
+                                    key={item.id}
+                                    className="p-4 hover:bg-muted/50 transition-colors cursor-pointer group relative"
+                                    onClick={() => handleHistoryClick(item)}
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="font-bold text-lg">{item.query}</div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {new Date(item.createdAt).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-500"
+                                            onClick={(e) => handleDelete(item.id, e)}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </section>
     );

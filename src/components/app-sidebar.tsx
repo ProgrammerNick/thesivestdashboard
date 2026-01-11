@@ -8,6 +8,7 @@ import {
     Briefcase,
     Settings,
     BrainCircuit,
+    Trophy,
 } from "lucide-react"
 
 import {
@@ -49,6 +50,7 @@ export function AppSidebar() {
         { label: "Profile", href: "/profile", icon: User },
         { label: "Talent Search", href: "/talent", icon: Briefcase },
         { label: "Job Board", href: "/jobs", icon: Briefcase },
+        { label: "Tournaments", href: "/tournaments", icon: Trophy },
     ];
 
     return (

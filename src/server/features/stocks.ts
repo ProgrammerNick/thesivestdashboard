@@ -30,10 +30,10 @@ export const searchStock = createServerFn({ method: "POST" }).inputValidator(z.s
         try {
             const genAI = new GoogleGenerativeAI(geminiKey);
             const model = genAI.getGenerativeModel({
-                model: "gemini-2.0-flash-exp",
+                model: "gemini-3-flash-preview",
                 tools: [
                     {
-                        google_search: {}
+                        googleSearch: {}
                     } as any
                 ],
                 generationConfig: {
@@ -85,7 +85,8 @@ export const searchStock = createServerFn({ method: "POST" }).inputValidator(z.s
 
             const result = await model.generateContent(prompt);
             const responseText = result.response.text();
-            return JSON.parse(responseText) as StockData;
+            const cleanJson = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+            return JSON.parse(cleanJson) as StockData;
         } catch (error) {
             console.error("Gemini stock search failed:", error);
             throw new Error(`Gemini Error: ${error instanceof Error ? error.message : String(error)}`);

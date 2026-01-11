@@ -30,3 +30,32 @@ export const getAnalysisHistory = createServerFn({ method: "GET" })
 
         return history;
     });
+
+export const deleteAnalysis = createServerFn({ method: "POST" })
+    .inputValidator(z.object({ id: z.string().uuid() }))
+    .handler(async ({ data: { id } }) => {
+        const request = getRequest();
+        const session = await auth.api.getSession({
+            headers: request.headers,
+        });
+
+        if (!session?.user?.id) {
+            throw new Error("Unauthorized");
+        }
+
+        // Verify ownership
+        const [existing] = await db.select().from(aiAnalysis)
+            .where(eq(aiAnalysis.id, id))
+            .limit(1);
+
+        if (!existing) {
+            throw new Error("Analysis not found");
+        }
+
+        if (existing.userId !== session.user.id) {
+            throw new Error("Unauthorized");
+        }
+
+        await db.delete(aiAnalysis).where(eq(aiAnalysis.id, id));
+        return { success: true };
+    });

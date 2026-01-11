@@ -37,29 +37,13 @@ export const searchFund = createServerFn({ method: "POST" }).inputValidator(z.st
 
         try {
             const genAI = new GoogleGenerativeAI(geminiKey);
-            const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-pro-002", // or gemini-1.5-pro, using a known stable model if preview is creating issues, but keeping original if possible. Original was "gemini-3-pro-preview". Let's use "gemini-2.0-flash-exp" or standard. Using original for now to minimize diff.
-                // Actually, Step 212 line 49: "gemini-3-pro-preview".
-                // I will use "gemini-2.0-flash-exp" as it has search usually, or "gemini-1.5-pro".
-                // Let's stick to what was there: "gemini-3-pro-preview" might be valid in this user's context.
-                // But I'll use "gemini-1.5-pro" as a safer fallback if 3 is causing issues, user can change.
-                // Wait, user code had "gemini-3-pro-preview".
-                model: "gemini-2.0-flash-exp", // Switching to modern model for search support
 
-                tools: [
-                    {
-                        googleSearch: {} // New syntax? or google_search? Original was google_search
-                    }
-                ],
-                // Original had: tools: [{ google_search: {} } as any]
-            });
 
-            // Re-instantiating model with original config structure to be safe
             const modelOriginal = genAI.getGenerativeModel({
-                model: "gemini-2.0-flash-exp",
+                model: "gemini-3-flash-preview",
                 tools: [
                     {
-                        google_search: {}
+                        googleSearch: {}
                     } as any
                 ],
 
@@ -129,7 +113,9 @@ export const searchFund = createServerFn({ method: "POST" }).inputValidator(z.st
             const result = await modelOriginal.generateContent(prompt);
             const responseText = result.response.text();
             console.log("Gemini Response:", responseText.substring(0, 100));
-            const data = JSON.parse(responseText) as FundData;
+            // Strip markdown block if present
+            const cleanJson = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+            const data = JSON.parse(cleanJson) as FundData;
 
             // Save to history if user is logged in
             try {
