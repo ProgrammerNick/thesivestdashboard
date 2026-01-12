@@ -1,87 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
-import { auth } from "@/lib/auth";
+import { getTalentPool } from "@/server/fn/talent";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Briefcase, TrendingUp, ShieldCheck, MapPin } from "lucide-react";
+import { Search, Briefcase, MapPin } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLoaderData } from "@tanstack/react-router";
 import { useState } from "react";
-
-// Mock Data / Server Function
-const getTalentPool = createServerFn({ method: "GET" }).handler(async () => {
-  // Ideally we fetch from DB here:
-  // const users = await db.select().from(user).where(eq(user.seekingEmployment, true));
-
-  // Returning high-quality mock data for the demo
-  return [
-    {
-      id: "1",
-      name: "Alexander V.",
-      role: "Macro Strategist",
-      location: "New York, NY",
-      ytdReturn: "+42.5%",
-      topSector: "Energy & Utilities",
-      riskScore: "Low",
-      seeking: true,
-      skills: ["Global Macro", "Commodities", "Nuclear Thesis"],
-      avatar: "https://ui-avatars.com/api/?name=Alexander+V&background=0D8ABC&color=fff"
-    },
-    {
-      id: "2",
-      name: "Sarah Chen",
-      role: "Deep Value Analyst",
-      location: "San Francisco, CA",
-      ytdReturn: "+28.1%",
-      topSector: "Technology (Hardware)",
-      riskScore: "Medium",
-      seeking: true,
-      skills: ["Semiconductors", "Supply Chain Analysis", "Financial Modeling"],
-      avatar: "https://ui-avatars.com/api/?name=Sarah+Chen&background=random"
-    },
-    {
-      id: "3",
-      name: "David K.",
-      role: "Options Trader",
-      location: "Chicago, IL",
-      ytdReturn: "+112.4%",
-      topSector: "Derivatives",
-      riskScore: "High",
-      seeking: true,
-      skills: ["Volatility Arbitrage", "Python", "Quant Strategies"],
-      avatar: "https://ui-avatars.com/api/?name=David+K&background=random"
-    },
-    {
-      id: "4",
-      name: "Elena Rodriguez",
-      role: "Biotech Specialist",
-      location: "Boston, MA",
-      ytdReturn: "-5.2%",
-      topSector: "Healthcare",
-      riskScore: "High",
-      seeking: true,
-      skills: ["Clinical Trial Analysis", "FDA Regulations", "Small Cap"],
-      avatar: "https://ui-avatars.com/api/?name=Elena+R&background=random"
-    },
-    {
-      id: "5",
-      name: "Michael Chang",
-      role: "Crypto Native",
-      location: "Remote",
-      ytdReturn: "+210.8%",
-      topSector: "Digital Assets",
-      riskScore: "Very High",
-      seeking: true,
-      skills: ["DeFi", "On-chain Analytics", "Solidity"],
-      avatar: "https://ui-avatars.com/api/?name=Michael+C&background=random"
-    }
-  ];
-});
 
 export const Route = createFileRoute("/_dashboard/talent")({
   component: TalentPage,
@@ -112,7 +40,7 @@ function TalentPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline">Saved Candidates</Button>
-          <Button asChild><Link to="/_dashboard/jobs">View Job Board</Link></Button>
+          <Button asChild><Link to="/jobs">View Job Board</Link></Button>
         </div>
       </div>
 

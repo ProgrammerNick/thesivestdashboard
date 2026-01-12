@@ -1,10 +1,10 @@
 /**
  * Data Access Layer for Posts
- * Handles all database queries related to posts, trade performance, tags, and engagement
+ * Handles all database queries related to posts, tags, and engagement
  */
 
 import { db } from "../../db/index";
-import { post, postTag, tag, tradePerformance, user } from "../../db/schema";
+import { post, postTag, tag, user } from "../../db/schema";
 import { eq, desc, sql, like, or } from "drizzle-orm";
 
 export interface PostWithDetails {
@@ -35,11 +35,6 @@ export interface PostWithDetails {
     isClub?: boolean;
     clubName?: string;
     verified?: boolean;
-  };
-  performance?: {
-    returnPercent: number;
-    returnAmount?: number;
-    status: "active" | "win" | "loss" | "breakeven";
   };
 }
 
@@ -81,21 +76,13 @@ type UserQueryResult = {
   verified: boolean | null;
 };
 
-// Type for performance query result
-type PerformanceQueryResult = {
-  returnPercent: string;
-  returnAmount: string | null;
-  status: string;
-};
-
 /**
  * Helper function to convert database post result to PostWithDetails
  */
 function convertPostToPostWithDetails(
   post: PostQueryResult,
   tags: string[],
-  user?: UserQueryResult,
-  performance?: PerformanceQueryResult
+  user?: UserQueryResult
 ): PostWithDetails {
   return {
     id: post.id,
@@ -126,15 +113,6 @@ function convertPostToPostWithDetails(
         isClub: user.isClub || undefined,
         clubName: user.clubName || undefined,
         verified: user.verified || undefined,
-      }
-      : undefined,
-    performance: performance
-      ? {
-        returnPercent: Number(performance.returnPercent),
-        returnAmount: performance.returnAmount
-          ? Number(performance.returnAmount)
-          : undefined,
-        status: performance.status as "active" | "win" | "loss" | "breakeven",
       }
       : undefined,
   };
@@ -249,30 +227,10 @@ export async function getPostById(id: string): Promise<PostWithDetails | null> {
 
   const usersResult = await (usersQuery as any).limit(1);
 
-  // Get performance if it's a trade
-  let performance = undefined;
-  if (postData.type === "trade") {
-    const performanceQuery = db
-      .select({
-        returnPercent: tradePerformance.returnPercent,
-        returnAmount: tradePerformance.returnAmount,
-        status: tradePerformance.status,
-      })
-      .from(tradePerformance)
-      .where(eq(tradePerformance.postId, id)) as any;
-
-    const performances = await (performanceQuery as any).limit(1);
-
-    if (performances.length > 0) {
-      performance = performances[0] as PerformanceQueryResult;
-    }
-  }
-
   return convertPostToPostWithDetails(
     postData,
     tagsResult.map((t: TagQueryResult) => t.name),
-    usersResult[0] as UserQueryResult,
-    performance
+    usersResult[0] as UserQueryResult
   );
 }
 
@@ -442,44 +400,6 @@ export async function incrementPostViews(id: string): Promise<void> {
     .update(post)
     .set({ views: sql`${post.views} + 1` })
     .where(eq(post.id, id));
-}
-
-/**
- * Get trade performance for a post
- */
-export async function getTradePerformance(postId: string) {
-  const performance = (await db
-    .select()
-    .from(tradePerformance)
-    .where(eq(tradePerformance.postId, postId))) as any;
-
-  const result = await (performance as any).limit(1);
-
-  return result[0] || null;
-}
-
-/**
- * Update trade performance
- */
-export async function updateTradePerformance(
-  postId: string,
-  data: {
-    currentPrice: number;
-    returnPercent: number;
-    returnAmount?: number;
-    status: "active" | "win" | "loss" | "breakeven";
-  }
-) {
-  await db
-    .update(tradePerformance)
-    .set({
-      currentPrice: String(data.currentPrice),
-      returnPercent: String(data.returnPercent),
-      returnAmount: data.returnAmount ? String(data.returnAmount) : null,
-      status: data.status,
-      updatedAt: new Date(),
-    })
-    .where(eq(tradePerformance.postId, postId));
 }
 
 /**

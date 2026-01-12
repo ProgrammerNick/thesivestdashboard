@@ -33,9 +33,7 @@ export const user = pgTable("user", {
   isClub: boolean("is_club").default(false),
   clubName: text("club_name"),
   verified: boolean("verified").default(false),
-  seekingEmployment: boolean("seeking_employment").default(false),
   availableForHire: boolean("available_for_hire").default(false),
-
   // Corporate Fields
   isCompany: boolean("is_company").default(false),
   companyName: text("company_name"),
@@ -44,8 +42,6 @@ export const user = pgTable("user", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
-
-
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
@@ -128,7 +124,6 @@ export const postRelations = relations(post, ({ one, many }) => ({
     references: [user.id],
   }),
   tags: many(postTag),
-  performance: many(tradePerformance),
   likes: many(postLike),
   comments: many(comment),
   attachments: many(postAttachment),
@@ -187,41 +182,6 @@ export const postTagRelations = relations(postTag, ({ one }) => ({
     references: [tag.id],
   }),
 }));
-
-// Trade Performance
-export const tradePerformance = pgTable("trade_performance", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  postId: text("post_id")
-    .notNull()
-    .references(() => post.id),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id),
-  currentPrice: numeric("current_price").notNull(),
-  returnPercent: numeric("return_percent").notNull(),
-  returnAmount: numeric("return_amount"),
-  status: text("status").notNull(), // 'active', 'win', 'loss', 'breakeven'
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
-
-export const tradePerformanceRelations = relations(
-  tradePerformance,
-  ({ one }) => ({
-    post: one(post, {
-      fields: [tradePerformance.postId],
-      references: [post.id],
-    }),
-    user: one(user, {
-      fields: [tradePerformance.userId],
-      references: [user.id],
-    }),
-  })
-);
 
 // Follow System
 export const follow = pgTable("follow", {
@@ -407,75 +367,6 @@ export const certificationRelations = relations(certification, ({ one }) => ({
   }),
 }));
 
-// Portfolio System
-export const portfolio = pgTable("portfolio", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  description: text("description"),
-  isPublic: boolean("is_public").default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
-
-export const portfolioRelations = relations(portfolio, ({ one, many }) => ({
-  user: one(user, {
-    fields: [portfolio.userId],
-    references: [user.id],
-  }),
-  holdings: many(portfolioHolding),
-  snapshots: many(portfolioSnapshot),
-}));
-
-export const portfolioHolding = pgTable("portfolio_holding", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  portfolioId: text("portfolio_id")
-    .notNull()
-    .references(() => portfolio.id, { onDelete: "cascade" }),
-  symbol: text("symbol").notNull(),
-  shares: numeric("shares").notNull(),
-  averageCost: numeric("average_cost").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
-
-export const portfolioHoldingRelations = relations(portfolioHolding, ({ one }) => ({
-  portfolio: one(portfolio, {
-    fields: [portfolioHolding.portfolioId],
-    references: [portfolio.id],
-  }),
-}));
-
-export const portfolioSnapshot = pgTable("portfolio_snapshot", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  portfolioId: text("portfolio_id")
-    .notNull()
-    .references(() => portfolio.id, { onDelete: "cascade" }),
-  date: timestamp("date").notNull().defaultNow(),
-  totalValue: numeric("total_value").notNull(),
-});
-
-export const portfolioSnapshotRelations = relations(portfolioSnapshot, ({ one }) => ({
-  portfolio: one(portfolio, {
-    fields: [portfolioSnapshot.portfolioId],
-    references: [portfolio.id],
-  }),
-}));
-
 // AI Analysis History
 export const aiAnalysis = pgTable("ai_analysis", {
   id: text("id")
@@ -497,7 +388,87 @@ export const aiAnalysisRelations = relations(aiAnalysis, ({ one }) => ({
   }),
 }));
 
-// Job System
+// Stock Analysis (RAG)
+export const stock = pgTable("stock", {
+  symbol: text("symbol").primaryKey(),
+  name: text("name").notNull(),
+  ragAnalysisId: text("rag_analysis_id"),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const stockRelations = relations(stock, ({ many }) => ({
+  analyses: many(stockAnalysis),
+}));
+
+export const stockAnalysis = pgTable("stock_analysis", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  symbol: text("symbol")
+    .notNull()
+    .references(() => stock.symbol, { onDelete: "cascade" }),
+  ragAnalysisId: text("rag_analysis_id").notNull(),
+  title: text("title"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const stockAnalysisRelations = relations(stockAnalysis, ({ one }) => ({
+  user: one(user, {
+    fields: [stockAnalysis.userId],
+    references: [user.id],
+  }),
+  stock: one(stock, {
+    fields: [stockAnalysis.symbol],
+    references: [stock.symbol],
+  }),
+}));
+
+// Fund Analysis (RAG)
+export const fund = pgTable("fund", {
+  id: text("id").primaryKey(), // Ticker or slug, e.g. "bridgewater"
+  name: text("name").notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const fundRelations = relations(fund, ({ many }) => ({
+  analyses: many(fundAnalysis),
+}));
+
+export const fundAnalysis = pgTable("fund_analysis", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .references(() => user.id, { onDelete: "cascade" }),
+  fundId: text("fund_id")
+    .notNull()
+    .references(() => fund.id, { onDelete: "cascade" }),
+  ragAnalysisId: text("rag_analysis_id").notNull(),
+  title: text("title"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const fundAnalysisRelations = relations(fundAnalysis, ({ one }) => ({
+  user: one(user, {
+    fields: [fundAnalysis.userId],
+    references: [user.id],
+  }),
+  fund: one(fund, {
+    fields: [fundAnalysis.fundId],
+    references: [fund.id],
+  }),
+}));
+
+// Job Posting System (external job links)
 export const jobPosting = pgTable("job_posting", {
   id: text("id")
     .primaryKey()
@@ -510,6 +481,7 @@ export const jobPosting = pgTable("job_posting", {
   location: text("location").notNull(),
   type: text("type").notNull(), // 'Full-time', 'Contract', 'Internship'
   salaryRange: text("salary_range"),
+  externalUrl: text("external_url"), // Link to external application
   tags: text("tags").array(), // Array of strings
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -519,54 +491,14 @@ export const jobPosting = pgTable("job_posting", {
     .$onUpdate(() => new Date()),
 });
 
-export const jobPostingRelations = relations(jobPosting, ({ one, many }) => ({
+export const jobPostingRelations = relations(jobPosting, ({ one }) => ({
   company: one(user, {
     fields: [jobPosting.companyId],
     references: [user.id],
   }),
-  applications: many(jobApplication),
 }));
 
-export const jobApplication = pgTable("job_application", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  jobId: text("job_id")
-    .notNull()
-    .references(() => jobPosting.id, { onDelete: "cascade" }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  status: text("status").notNull().default("applied"), // 'applied', 'reviewing', 'interview', 'offer', 'rejected'
-  coverNote: text("cover_note"),
-  attachedPortfolioId: text("attached_portfolio_id").references(() => portfolio.id),
-  attachedPostId: text("attached_post_id").references(() => post.id),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
-
-export const jobApplicationRelations = relations(jobApplication, ({ one }) => ({
-  job: one(jobPosting, {
-    fields: [jobApplication.jobId],
-    references: [jobPosting.id],
-  }),
-  user: one(user, {
-    fields: [jobApplication.userId],
-    references: [user.id],
-  }),
-  portfolio: one(portfolio, {
-    fields: [jobApplication.attachedPortfolioId],
-    references: [portfolio.id],
-  }),
-  post: one(post, {
-    fields: [jobApplication.attachedPostId],
-    references: [post.id],
-  }),
-}));
-
+// User Relations (consolidated)
 export const userRelations = relations(user, ({ many }) => ({
   posts: many(post),
   followers: many(follow, {
@@ -580,6 +512,8 @@ export const userRelations = relations(user, ({ many }) => ({
   tournamentParticipants: many(tournamentParticipant),
   educations: many(education),
   certifications: many(certification),
+  aiAnalyses: many(aiAnalysis),
+  stockAnalyses: many(stockAnalysis),
+  fundAnalyses: many(fundAnalysis),
   jobPostings: many(jobPosting),
-  jobApplications: many(jobApplication),
 }));

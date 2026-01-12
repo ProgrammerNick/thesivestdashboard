@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1766980473480,
-      "tag": "0000_common_klaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1766981107792,
-      "tag": "0001_smiling_albert_cleary",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1767770264673,
-      "tag": "0002_chilly_amphibian",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1768009200838,
-      "tag": "0003_lowly_talon",
+      "when": 1768191633004,
+      "tag": "0000_outstanding_the_santerians",
       "breakpoints": true
     }
   ]

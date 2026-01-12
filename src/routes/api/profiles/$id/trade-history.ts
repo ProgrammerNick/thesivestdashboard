@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getUserTradeHistory } from "../../../../server/data-access/profiles";
+import { getUserTrades } from "../../../../server/data-access/profiles";
 
 export const Route = createFileRoute("/api/profiles/$id/trade-history")({
   server: {
@@ -7,12 +7,12 @@ export const Route = createFileRoute("/api/profiles/$id/trade-history")({
       GET: async ({ params, request }) => {
         const url = new URL(request.url);
         const limit = url.searchParams.get("limit");
-        const tradeHistory = await getUserTradeHistory(
+        const trades = await getUserTrades(
           params.id,
           limit ? parseInt(limit) : undefined
         );
 
-        return new Response(JSON.stringify(tradeHistory), {
+        return new Response(JSON.stringify(trades), {
           headers: { "Content-Type": "application/json" },
         });
       },

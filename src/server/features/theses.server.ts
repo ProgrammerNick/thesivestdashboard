@@ -4,7 +4,7 @@
  * Uses the data access layer to fetch data from the database.
  */
 
-import { getAllPosts, getPostsByType } from "../data-access/posts";
+import { getPostsByType } from "../data-access/posts";
 
 export interface Thesis {
     id: string;
@@ -19,16 +19,18 @@ export interface Thesis {
 }
 
 // Helper function to format date for display
-function formatDate(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  const now = new Date();
-  const diffInHours = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60));
+function formatDate(date: Date | string | null | undefined): string {
+    if (!date) return "Just now";
+    const d = typeof date === "string" ? new Date(date) : date;
+    if (isNaN(d.getTime())) return "Just now";
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60));
 
-  if (diffInHours < 1) return "Just now";
-  if (diffInHours < 24) return `${diffInHours}h ago`;
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) return `${diffInDays}d ago`;
-  return d.toLocaleDateString();
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return d.toLocaleDateString();
 }
 
 /**

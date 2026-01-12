@@ -3,8 +3,9 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import { Bold, Italic, Heading1, Heading2, Quote, List, ListOrdered, Image as ImageIcon, Link as LinkIcon, Undo, Redo } from 'lucide-react';
-import { Button } from "@/components/ui/button"; // Assuming shared UI components
+import { Button } from "@/components/ui/button";
 import { useCallback } from 'react';
+import '@/editor-styles.css';
 
 interface TiptapEditorProps {
     content: any;
@@ -50,7 +51,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
     }, [editor]);
 
     return (
-        <div className="flex flex-wrap gap-2 border-b p-2 bg-muted/20">
+        <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 py-2 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <Button
                 variant="ghost"
                 size="sm"
@@ -62,7 +63,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                         .toggleBold()
                         .run()
                 }
-                className={editor.isActive('bold') ? 'is-active bg-muted' : ''}
+                className={editor.isActive('bold') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <Bold className="w-4 h-4" />
             </Button>
@@ -77,7 +78,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                         .toggleItalic()
                         .run()
                 }
-                className={editor.isActive('italic') ? 'is-active bg-muted' : ''}
+                className={editor.isActive('italic') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <Italic className="w-4 h-4" />
             </Button>
@@ -86,7 +87,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                className={editor.isActive('heading', { level: 1 }) ? 'is-active bg-muted' : ''}
+                className={editor.isActive('heading', { level: 1 }) ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <Heading1 className="w-4 h-4" />
             </Button>
@@ -94,7 +95,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                className={editor.isActive('heading', { level: 2 }) ? 'is-active bg-muted' : ''}
+                className={editor.isActive('heading', { level: 2 }) ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <Heading2 className="w-4 h-4" />
             </Button>
@@ -103,7 +104,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
-                className={editor.isActive('bulletList') ? 'is-active bg-muted' : ''}
+                className={editor.isActive('bulletList') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <List className="w-4 h-4" />
             </Button>
@@ -111,7 +112,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                className={editor.isActive('orderedList') ? 'is-active bg-muted' : ''}
+                className={editor.isActive('orderedList') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <ListOrdered className="w-4 h-4" />
             </Button>
@@ -120,7 +121,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                className={editor.isActive('blockquote') ? 'is-active bg-muted' : ''}
+                className={editor.isActive('blockquote') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <Quote className="w-4 h-4" />
             </Button>
@@ -128,7 +129,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                 variant="ghost"
                 size="sm"
                 onClick={setLink}
-                className={editor.isActive('link') ? 'is-active bg-muted' : ''}
+                className={editor.isActive('link') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <LinkIcon className="w-4 h-4" />
             </Button>
@@ -188,15 +189,15 @@ export default function TiptapEditor({ content, onChange, onUploadImage }: Tipta
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4',
+                class: 'prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[600px] py-6 prose-headings:font-heading prose-p:text-base prose-p:leading-relaxed',
             },
         },
     });
 
     return (
-        <div className="border rounded-md shadow-sm overflow-hidden bg-background">
+        <div className="relative">
             <MenuBar editor={editor} onImageUpload={onUploadImage} />
-            <EditorContent editor={editor} />
+            <EditorContent editor={editor} className="[&_.ProseMirror]:focus:outline-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child]:before:text-muted-foreground/50 [&_.ProseMirror_p.is-editor-empty:first-child]:before:float-left [&_.ProseMirror_p.is-editor-empty:first-child]:before:pointer-events-none" />
         </div>
     );
 }

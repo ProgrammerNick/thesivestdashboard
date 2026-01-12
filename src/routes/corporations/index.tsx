@@ -29,7 +29,7 @@ function CorporationsLandingPage() {
               <Link to="/login">Log in</Link>
             </Button>
             <Button asChild>
-              <Link to="/_dashboard/talent">Find Talent</Link>
+              <Link to="/talent">Find Talent</Link>
             </Button>
           </div>
         </div>
@@ -60,7 +60,7 @@ function CorporationsLandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" className="h-12 px-8 text-lg rounded-full" asChild>
-                <Link to="/_dashboard/talent">
+                <Link to="/talent">
                   Start Scouting Talent <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
@@ -131,7 +131,7 @@ function CorporationsLandingPage() {
           <h2 className="text-4xl font-bold mb-6">Ready to find your next star analyst?</h2>
           <p className="text-xl opacity-90 mb-10 max-w-2xl mx-auto">Join top hedge funds and proprietary trading firms using Thesivest to recruit.</p>
           <Button size="lg" variant="secondary" className="h-14 px-10 text-lg rounded-full text-primary" asChild>
-            <Link to="/_dashboard/talent">
+            <Link to="/talent">
               View the Talent Pool
             </Link>
           </Button>

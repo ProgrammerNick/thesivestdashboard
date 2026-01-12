@@ -52,7 +52,7 @@ function CommunityPage() {
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Featured Analysis</span>
             </div>
 
-            <Link to="/post/featured-example" className="block group">
+            <div className="block group cursor-pointer" onClick={() => { /* Featured example - no navigation */ }}>
               <Card className="border-border/60 shadow-sm transition-all hover:border-primary/50 hover:shadow-md bg-card/50">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -97,7 +97,7 @@ function CommunityPage() {
                   </div>
                 </CardFooter>
               </Card>
-            </Link>
+            </div>
           </div>
         </TabsContent>
         <TabsContent value="following">

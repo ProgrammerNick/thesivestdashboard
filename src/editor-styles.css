@@ -1,0 +1,229 @@
+/* ===========================================
+   TipTap Editor - Premium Editorial Styles
+   Inspired by Substack/Medium typography
+   =========================================== */
+
+/* Editor Container - Clean, no overlay */
+.tiptap.ProseMirror {
+    background: transparent;
+    border-radius: 0.5rem;
+    padding: 1.5rem 0;
+    transition: background 0.2s ease;
+    min-height: 500px;
+}
+
+.tiptap.ProseMirror:focus {
+    background: transparent;
+    outline: none;
+}
+
+/* Heading 1 - Large, Bold, Statement */
+.tiptap h1 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    margin-top: 2.5rem;
+    margin-bottom: 1.25rem;
+    color: var(--foreground);
+}
+
+/* Heading 2 - Medium, Strong, Section Divider */
+.tiptap h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin-top: 2.25rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(128, 128, 128, 0.15);
+    color: var(--foreground);
+}
+
+/* Heading 3 */
+.tiptap h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+    color: var(--foreground);
+}
+
+/* Paragraphs - Larger, Readable */
+.tiptap p {
+    font-size: 1.25rem;
+    line-height: 1.85;
+    margin-bottom: 1.5rem;
+}
+
+/* Blockquotes - Premium Editorial Style */
+.tiptap blockquote {
+    position: relative;
+    margin: 2.5rem 0;
+    padding: 1.75rem 2.5rem 1.75rem 3rem;
+    background: linear-gradient(135deg,
+            rgba(20, 83, 45, 0.08) 0%,
+            rgba(20, 83, 45, 0.03) 100%);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-style: italic;
+    font-size: 1.35rem;
+    line-height: 1.7;
+}
+
+.tiptap blockquote::before {
+    content: '"';
+    position: absolute;
+    top: 0.25rem;
+    left: 0.75rem;
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: rgba(20, 83, 45, 0.2);
+    line-height: 1;
+}
+
+.tiptap blockquote p {
+    margin: 0;
+    font-size: inherit;
+}
+
+/* Dark mode blockquote */
+.dark .tiptap blockquote {
+    background: linear-gradient(135deg,
+            rgba(34, 197, 94, 0.12) 0%,
+            rgba(34, 197, 94, 0.04) 100%);
+}
+
+.dark .tiptap blockquote::before {
+    color: rgba(34, 197, 94, 0.3);
+}
+
+/* LISTS - Ensure bullets and numbers show */
+.tiptap ul {
+    list-style-type: disc !important;
+    padding-left: 2rem;
+    margin: 1.25rem 0;
+}
+
+.tiptap ol {
+    list-style-type: decimal !important;
+    padding-left: 2rem;
+    margin: 1.25rem 0;
+}
+
+.tiptap li {
+    font-size: 1.25rem;
+    line-height: 1.75;
+    margin-bottom: 0.5rem;
+    display: list-item !important;
+}
+
+.tiptap ul>li {
+    list-style-type: disc !important;
+}
+
+.tiptap ol>li {
+    list-style-type: decimal !important;
+}
+
+.tiptap ul li::marker {
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.tiptap ol li::marker {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* Nested lists */
+.tiptap ul ul {
+    list-style-type: circle !important;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.tiptap ol ol {
+    list-style-type: lower-alpha !important;
+}
+
+/* Links */
+.tiptap a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: all 0.15s ease;
+}
+
+.tiptap a:hover {
+    text-decoration-thickness: 2px;
+}
+
+/* Code - Inline */
+.tiptap code {
+    background: rgba(128, 128, 128, 0.15);
+    border-radius: 4px;
+    padding: 0.2em 0.4em;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+}
+
+/* Code Blocks */
+.tiptap pre {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+}
+
+.tiptap pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Placeholder text */
+.tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: rgba(128, 128, 128, 0.5);
+    pointer-events: none;
+    height: 0;
+    font-style: italic;
+}
+
+/* Strong/Bold */
+.tiptap strong {
+    font-weight: 700;
+}
+
+/* Horizontal Rules */
+.tiptap hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right,
+            transparent,
+            rgba(128, 128, 128, 0.3),
+            transparent);
+    margin: 3rem 0;
+}
+
+/* Images */
+.tiptap img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5rem 0;
+}

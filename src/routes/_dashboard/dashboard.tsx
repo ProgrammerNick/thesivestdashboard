@@ -3,18 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Zap, Users, UserPlus, Search } from "lucide-react";
 import { Link, useLoaderData } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { getCommunityPosts, getContributors } from "@/server/fn/contributors";
+import { getDashboardData } from "@/server/fn/dashboard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-
-const getDashboardData = createServerFn({ method: "GET" }).handler(async () => {
-    const [posts, contributors] = await Promise.all([
-        getCommunityPosts(10),
-        getContributors()
-    ]);
-    return { posts, contributors: contributors.slice(0, 5) };
-});
 
 export const Route = createFileRoute("/_dashboard/dashboard")({
     component: DashboardHome,

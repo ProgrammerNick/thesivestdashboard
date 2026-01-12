@@ -1,89 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { createServerFn } from "@tanstack/react-start";
+import { getJobs } from "@/server/fn/jobs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Briefcase, DollarSign, Clock, Building2 } from "lucide-react";
+import { Search, MapPin, Briefcase, DollarSign, Building2, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { JobApplicationModal } from "@/components/jobs/JobApplicationModal";
 
-// Mock Data / Server Function
-const getJobs = createServerFn({ method: "GET" }).handler(async () => {
-  return [
-    {
-      id: "1",
-      title: "Equity Research Analyst (TMT)",
-      company: "BlueRidge Capital",
-      location: "New York, NY",
-      type: "Full-time",
-      salary: "$150k - $250k",
-      posted: "2 days ago",
-      logo: "https://ui-avatars.com/api/?name=BlueRidge+Capital&background=0D8ABC&color=fff",
-      tags: ["TMT", "L/S Equity", "Modeling"],
-      description: "Seeking an analyst with deep conviction in the semiconductor space. Must have a proven track record of generating alpha."
-    },
-    {
-      id: "2",
-      title: "Junior Macro Trader",
-      company: "Atlas Global",
-      location: "London, UK (Remote Option)",
-      type: "Full-time",
-      salary: "$120k - $200k + Bonus",
-      posted: "5 hours ago",
-      logo: "https://ui-avatars.com/api/?name=Atlas+Global&background=random",
-      tags: ["Macro", "FX", "Commodities"],
-      description: "Join our global macro desk. We value independent thinkers who can navigate volatility."
-    },
-    {
-      id: "3",
-      title: "Crypto Quant Researcher",
-      company: "DeFi Params",
-      location: "Remote",
-      type: "Contract",
-      salary: "$150/hr",
-      posted: "1 day ago",
-      logo: "https://ui-avatars.com/api/?name=DeFi+Params&background=random",
-      tags: ["DeFi", "Solidity", "Python"],
-      description: "Looking for a researcher to design AMM bonding curves and governance mechanisms."
-    },
-    {
-      id: "4",
-      title: "Investment Intern",
-      company: "Sequoia Heritage",
-      location: "Menlo Park, CA",
-      type: "Internship",
-      salary: "$8k/month",
-      posted: "1 week ago",
-      logo: "https://ui-avatars.com/api/?name=Sequoia+Heritage&background=random",
-      tags: ["Venture", "Growth", "Research"],
-      description: "Summer internship for students passionate about long-term compounding and business quality."
-    }
-  ];
-});
-
-// Server Functions
-import { getMyPortfolios } from "@/server/fn/portfolios";
-import { getMyResearchPosts } from "@/server/fn/posts";
 
 export const Route = createFileRoute("/_dashboard/jobs")({
   component: JobBoardPage,
   loader: async () => {
-    const [jobs, portfolios, posts] = await Promise.all([
-      getJobs(),
-      getMyPortfolios(),
-      getMyResearchPosts(),
-    ]);
-    return { jobs, portfolios, posts };
+    const jobs = await getJobs();
+    return { jobs };
   },
 });
 
 function JobBoardPage() {
   // @ts-ignore
-  const { jobs, portfolios, posts } = Route.useLoaderData();
+  const { jobs } = Route.useLoaderData();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedJob, setSelectedJob] = useState<any>(null); // For modal
 
   const filteredJobs = jobs.filter((job: any) =>
     job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -189,22 +126,17 @@ function JobBoardPage() {
 
                 {/* Action */}
                 <div className="flex flex-col justify-center min-w-[120px]">
-                  <Button onClick={() => setSelectedJob(job)}>Apply Now</Button>
+                  <Button asChild>
+                    <a href={job.externalUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                      Apply <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
-
-      {/* Application Modal */}
-      <JobApplicationModal
-        job={selectedJob}
-        open={!!selectedJob}
-        onOpenChange={(open) => !open && setSelectedJob(null)}
-        userPortfolios={portfolios}
-        userPosts={posts}
-      />
     </div>
   );
 }

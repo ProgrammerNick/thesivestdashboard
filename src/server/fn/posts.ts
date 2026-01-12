@@ -10,7 +10,7 @@ const postSchema = z.object({
     title: z.string().min(1),
     subtitle: z.string().optional(),
     slug: z.string().optional(),
-    content: z.any(), // JSON content from Tiptap
+    content: z.union([z.string(), z.any()]), // Accept markdown string or Tiptap JSON
     published: z.boolean().default(false),
     coverImage: z.string().optional(),
     attachments: z.array(z.object({
@@ -19,7 +19,16 @@ const postSchema = z.object({
         filename: z.string(),
         size: z.number(),
     })).optional(),
+    // Fields for research.tsx trades
+    type: z.enum(["trade", "thought", "update", "close_trade", "market_outlook", "quarterly_letter"]).optional(),
+    symbol: z.string().optional(),
+    buyPrice: z.number().optional(),
+    targetPrice: z.number().optional(),
+    stopLoss: z.number().optional(),
+    referencePostId: z.string().optional(),
+    closePrice: z.number().optional(),
 });
+
 
 export const createPost = createServerFn({ method: "POST" })
     .inputValidator(postSchema)
@@ -36,10 +45,22 @@ export const createPost = createServerFn({ method: "POST" })
         const [newPost] = await db
             .insert(post)
             .values({
-                ...data,
-                content: JSON.stringify(data.content), // Ensure content is stored as string
+                title: data.title,
+                subtitle: data.subtitle,
+                slug: data.slug,
+                coverImage: data.coverImage,
+                published: data.published ?? false,
+                publishedAt: data.published ? new Date() : null,
+                // Handle content: if string (markdown), store as-is; if object (Tiptap), stringify
+                content: typeof data.content === 'string' ? data.content : JSON.stringify(data.content),
                 userId: session.user.id,
-                type: "thought", // Default type for now
+                type: data.type || "thought",
+                // Trade-specific fields
+                symbol: data.symbol,
+                buyPrice: data.buyPrice?.toString(),
+                buyDate: data.buyPrice ? new Date() : null,
+                targetPrice: data.targetPrice?.toString(),
+                stopLoss: data.stopLoss?.toString(),
             })
             .returning();
 
@@ -84,13 +105,35 @@ export const updatePost = createServerFn({ method: "POST" })
             throw new Error("Unauthorized");
         }
 
+        const updateValues: Record<string, any> = {
+            updatedAt: new Date(),
+        };
+
+        // Copy simple string fields
+        if (data.data.title !== undefined) updateValues.title = data.data.title;
+        if (data.data.subtitle !== undefined) updateValues.subtitle = data.data.subtitle;
+        if (data.data.slug !== undefined) updateValues.slug = data.data.slug;
+        if (data.data.coverImage !== undefined) updateValues.coverImage = data.data.coverImage;
+        if (data.data.published !== undefined) updateValues.published = data.data.published;
+        if (data.data.type !== undefined) updateValues.type = data.data.type;
+        if (data.data.symbol !== undefined) updateValues.symbol = data.data.symbol;
+
+        // Handle content
+        if (data.data.content !== undefined) {
+            updateValues.content = typeof data.data.content === 'string'
+                ? data.data.content
+                : JSON.stringify(data.data.content);
+        }
+
+        // Convert numeric fields to strings for DB
+        if (data.data.buyPrice !== undefined) updateValues.buyPrice = data.data.buyPrice.toString();
+        if (data.data.targetPrice !== undefined) updateValues.targetPrice = data.data.targetPrice.toString();
+        if (data.data.stopLoss !== undefined) updateValues.stopLoss = data.data.stopLoss.toString();
+        if (data.data.closePrice !== undefined) updateValues.closePrice = data.data.closePrice?.toString();
+
         const [updatedPost] = await db
             .update(post)
-            .set({
-                ...data.data,
-                content: data.data.content ? JSON.stringify(data.data.content) : undefined,
-                updatedAt: new Date(),
-            })
+            .set(updateValues)
             .where(eq(post.id, data.id))
             .returning();
 
@@ -98,10 +141,13 @@ export const updatePost = createServerFn({ method: "POST" })
     });
 
 export const getPost = createServerFn({ method: "GET" })
-    .inputValidator(z.object({ slug: z.string() }))
+    .inputValidator(z.object({
+        id: z.string().optional(),
+        slug: z.string().optional()
+    }).refine(data => data.id || data.slug, { message: "Either id or slug is required" }))
     .handler(async ({ data }) => {
         const foundPost = await db.query.post.findFirst({
-            where: eq(post.slug, data.slug),
+            where: data.id ? eq(post.id, data.id) : eq(post.slug, data.slug!),
             with: {
                 user: true,
                 attachments: true,

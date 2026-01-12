@@ -3,10 +3,8 @@ import { z } from "zod";
 import {
   getUserProfile,
   getUserProfileByUsername,
-  getUserTradeHistory,
-  getUserActiveTrades,
-  getUserClosedTrades,
-  getUserPerformanceMetrics,
+  getUserPostHistory,
+  getUserTrades,
   addEducation,
   updateEducation,
   deleteEducation,
@@ -37,8 +35,8 @@ export const getProfileByUsernameFn = createServerFn({ method: "GET" })
     return await getUserProfileByUsername(data.username);
   });
 
-// Get trade history
-export const getTradeHistoryFn = createServerFn({ method: "GET" })
+// Get post history
+export const getPostHistoryFn = createServerFn({ method: "GET" })
   .inputValidator(
     z.object({
       userId: z.string(),
@@ -46,22 +44,11 @@ export const getTradeHistoryFn = createServerFn({ method: "GET" })
     })
   )
   .handler(async ({ data }) => {
-    return await getUserTradeHistory(data.userId, data.limit);
+    return await getUserPostHistory(data.userId, data.limit);
   });
 
-// Get active trades
-export const getActiveTradesFn = createServerFn({ method: "GET" })
-  .inputValidator(
-    z.object({
-      userId: z.string(),
-    })
-  )
-  .handler(async ({ data }) => {
-    return await getUserActiveTrades(data.userId);
-  });
-
-// Get closed trades
-export const getClosedTradesFn = createServerFn({ method: "GET" })
+// Get user trades
+export const getUserTradesFn = createServerFn({ method: "GET" })
   .inputValidator(
     z.object({
       userId: z.string(),
@@ -69,18 +56,7 @@ export const getClosedTradesFn = createServerFn({ method: "GET" })
     })
   )
   .handler(async ({ data }) => {
-    return await getUserClosedTrades(data.userId, data.limit);
-  });
-
-// Get performance metrics
-export const getPerformanceMetricsFn = createServerFn({ method: "GET" })
-  .inputValidator(
-    z.object({
-      userId: z.string(),
-    })
-  )
-  .handler(async ({ data }) => {
-    return await getUserPerformanceMetrics(data.userId);
+    return await getUserTrades(data.userId, data.limit);
   });
 
 // Add education
