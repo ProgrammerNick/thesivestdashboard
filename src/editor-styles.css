@@ -3,6 +3,9 @@
    Inspired by Substack/Medium typography
    =========================================== */
 
+/* Import Inter for clean, readable content */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 /* Editor Container - Clean, no overlay */
 .tiptap.ProseMirror {
     background: transparent;
@@ -10,6 +13,7 @@
     padding: 1.5rem 0;
     transition: background 0.2s ease;
     min-height: 500px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .tiptap.ProseMirror:focus {
@@ -19,61 +23,97 @@
 
 /* Heading 1 - Large, Bold, Statement */
 .tiptap h1 {
-    font-family: var(--font-heading);
-    font-size: 3rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 2.25rem;
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.15;
     letter-spacing: -0.04em;
-    margin-top: 2.5rem;
-    margin-bottom: 1.25rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
     color: var(--foreground);
 }
 
 /* Heading 2 - Medium, Strong, Section Divider */
 .tiptap h2 {
-    font-family: var(--font-heading);
-    font-size: 2rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 1.75rem;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.25;
     letter-spacing: -0.025em;
-    margin-top: 2.25rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.375rem;
     border-bottom: 2px solid rgba(128, 128, 128, 0.15);
     color: var(--foreground);
 }
 
-/* Heading 3 */
+/* Heading 3 - Subsection */
 .tiptap h3 {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 1.375rem;
     font-weight: 600;
     line-height: 1.3;
     letter-spacing: -0.015em;
-    margin-top: 1.75rem;
-    margin-bottom: 0.75rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
     color: var(--foreground);
 }
 
-/* Paragraphs - Larger, Readable */
-.tiptap p {
-    font-size: 1.25rem;
-    line-height: 1.85;
-    margin-bottom: 1.5rem;
+/* Heading 4 - Minor Section */
+.tiptap h4 {
+    font-family: var(--font-heading);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--foreground);
 }
 
-/* Blockquotes - Premium Editorial Style */
+/* Heading 5 - Small Label */
+.tiptap h5 {
+    font-family: var(--font-heading);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    margin-top: 1rem;
+    margin-bottom: 0.375rem;
+    color: var(--muted-foreground);
+}
+
+/* Heading 6 - Tiny Label */
+.tiptap h6 {
+    font-family: var(--font-heading);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    margin-top: 0.875rem;
+    margin-bottom: 0.25rem;
+    color: var(--muted-foreground);
+}
+
+/* Paragraphs - Smaller, More Readable */
+.tiptap p {
+    font-size: 0.9375rem;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+}
+
+/* Blockquotes - Clean Editorial Style */
 .tiptap blockquote {
     position: relative;
-    margin: 2.5rem 0;
-    padding: 1.75rem 2.5rem 1.75rem 3rem;
+    margin: 2rem 0;
+    padding: 1.25rem 2rem 1.25rem 2.5rem;
     background: linear-gradient(135deg,
             rgba(20, 83, 45, 0.08) 0%,
             rgba(20, 83, 45, 0.03) 100%);
     border-left: 4px solid var(--primary);
     border-radius: 0 0.5rem 0.5rem 0;
-    font-style: italic;
-    font-size: 1.35rem;
+    font-size: 1rem;
     line-height: 1.7;
 }
 
@@ -81,9 +121,9 @@
     content: '"';
     position: absolute;
     top: 0.25rem;
-    left: 0.75rem;
+    left: 0.5rem;
     font-family: var(--font-heading);
-    font-size: 3.5rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: rgba(20, 83, 45, 0.2);
     line-height: 1;
@@ -108,20 +148,20 @@
 /* LISTS - Ensure bullets and numbers show */
 .tiptap ul {
     list-style-type: disc !important;
-    padding-left: 2rem;
-    margin: 1.25rem 0;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
 }
 
 .tiptap ol {
     list-style-type: decimal !important;
-    padding-left: 2rem;
-    margin: 1.25rem 0;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
 }
 
 .tiptap li {
-    font-size: 1.25rem;
-    line-height: 1.75;
-    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    margin-bottom: 0.375rem;
     display: list-item !important;
 }
 
@@ -135,20 +175,20 @@
 
 .tiptap ul li::marker {
     color: var(--primary);
-    font-size: 1rem;
+    font-size: 0.875rem;
 }
 
 .tiptap ol li::marker {
     color: var(--primary);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.875rem;
 }
 
 /* Nested lists */
 .tiptap ul ul {
     list-style-type: circle !important;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin-top: 0.375rem;
+    margin-bottom: 0.375rem;
 }
 
 .tiptap ol ol {
@@ -172,9 +212,9 @@
 .tiptap code {
     background: rgba(128, 128, 128, 0.15);
     border-radius: 4px;
-    padding: 0.2em 0.4em;
+    padding: 0.15em 0.35em;
     font-family: var(--font-mono);
-    font-size: 0.9em;
+    font-size: 0.85em;
 }
 
 /* Code Blocks */
@@ -182,15 +222,15 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 0.5rem;
-    padding: 1rem;
-    margin: 1.5rem 0;
+    padding: 0.875rem;
+    margin: 1.25rem 0;
     overflow-x: auto;
 }
 
 .tiptap pre code {
     background: none;
     padding: 0;
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     line-height: 1.6;
 }
 
@@ -209,6 +249,11 @@
     font-weight: 700;
 }
 
+/* Italic */
+.tiptap em {
+    font-style: italic;
+}
+
 /* Horizontal Rules */
 .tiptap hr {
     border: none;
@@ -217,7 +262,7 @@
             transparent,
             rgba(128, 128, 128, 0.3),
             transparent);
-    margin: 3rem 0;
+    margin: 2rem 0;
 }
 
 /* Images */
@@ -225,5 +270,5 @@
     max-width: 100%;
     height: auto;
     border-radius: 0.5rem;
-    margin: 1.5rem 0;
+    margin: 1.25rem 0;
 }

@@ -2,8 +2,30 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import { Bold, Italic, Heading1, Heading2, Quote, List, ListOrdered, Image as ImageIcon, Link as LinkIcon, Undo, Redo } from 'lucide-react';
+import {
+    Bold,
+    Italic,
+    Heading1,
+    Heading2,
+    Heading3,
+    Heading4,
+    Heading5,
+    Quote,
+    List,
+    ListOrdered,
+    Image as ImageIcon,
+    Link as LinkIcon,
+    Undo,
+    Redo,
+    Minus
+} from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCallback } from 'react';
 import '@/editor-styles.css';
 
@@ -50,19 +72,24 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
         editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
     }, [editor]);
 
+    // Get current heading level for dropdown label
+    const getCurrentHeading = () => {
+        for (let i = 1; i <= 6; i++) {
+            if (editor.isActive('heading', { level: i })) {
+                return `H${i}`;
+            }
+        }
+        return 'Heading';
+    };
+
     return (
         <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 py-2 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            {/* Text Formatting */}
             <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleBold().run()}
-                disabled={
-                    !editor.can()
-                        .chain()
-                        .focus()
-                        .toggleBold()
-                        .run()
-                }
+                disabled={!editor.can().chain().focus().toggleBold().run()}
                 className={editor.isActive('bold') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <Bold className="w-4 h-4" />
@@ -71,35 +98,52 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().toggleItalic().run()}
-                disabled={
-                    !editor.can()
-                        .chain()
-                        .focus()
-                        .toggleItalic()
-                        .run()
-                }
+                disabled={!editor.can().chain().focus().toggleItalic().run()}
                 className={editor.isActive('italic') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <Italic className="w-4 h-4" />
             </Button>
+
             <div className="w-px h-6 bg-border mx-1" />
-            <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                className={editor.isActive('heading', { level: 1 }) ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
-            >
-                <Heading1 className="w-4 h-4" />
-            </Button>
-            <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                className={editor.isActive('heading', { level: 2 }) ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
-            >
-                <Heading2 className="w-4 h-4" />
-            </Button>
+
+            {/* Headings Dropdown */}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className={editor.isActive('heading') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
+                    >
+                        {getCurrentHeading()}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                    <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
+                        <Heading1 className="w-4 h-4 mr-2" />
+                        <span className="font-bold text-lg">Heading 1</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
+                        <Heading2 className="w-4 h-4 mr-2" />
+                        <span className="font-semibold text-base">Heading 2</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
+                        <Heading3 className="w-4 h-4 mr-2" />
+                        <span className="font-medium">Heading 3</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}>
+                        <Heading4 className="w-4 h-4 mr-2" />
+                        <span className="font-medium text-sm">Heading 4</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}>
+                        <Heading5 className="w-4 h-4 mr-2" />
+                        <span className="text-xs uppercase tracking-wide">Heading 5</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
             <div className="w-px h-6 bg-border mx-1" />
+
+            {/* Lists */}
             <Button
                 variant="ghost"
                 size="sm"
@@ -116,7 +160,10 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
             >
                 <ListOrdered className="w-4 h-4" />
             </Button>
+
             <div className="w-px h-6 bg-border mx-1" />
+
+            {/* Block Elements */}
             <Button
                 variant="ghost"
                 size="sm"
@@ -124,6 +171,13 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                 className={editor.isActive('blockquote') ? 'bg-primary/20 text-primary ring-1 ring-primary/30' : ''}
             >
                 <Quote className="w-4 h-4" />
+            </Button>
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            >
+                <Minus className="w-4 h-4" />
             </Button>
             <Button
                 variant="ghost"
@@ -140,18 +194,15 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
             >
                 <ImageIcon className="w-4 h-4" />
             </Button>
+
             <div className="flex-grow" />
+
+            {/* Undo/Redo */}
             <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().undo().run()}
-                disabled={
-                    !editor.can()
-                        .chain()
-                        .focus()
-                        .undo()
-                        .run()
-                }
+                disabled={!editor.can().chain().focus().undo().run()}
             >
                 <Undo className="w-4 h-4" />
             </Button>
@@ -159,13 +210,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any, onImageUpload?: (file
                 variant="ghost"
                 size="sm"
                 onClick={() => editor.chain().focus().redo().run()}
-                disabled={
-                    !editor.can()
-                        .chain()
-                        .focus()
-                        .redo()
-                        .run()
-                }
+                disabled={!editor.can().chain().focus().redo().run()}
             >
                 <Redo className="w-4 h-4" />
             </Button>
@@ -189,7 +234,7 @@ export default function TiptapEditor({ content, onChange, onUploadImage }: Tipta
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[600px] py-6 prose-headings:font-heading prose-p:text-base prose-p:leading-relaxed',
+                class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[600px] py-4 prose-headings:font-heading',
             },
         },
     });

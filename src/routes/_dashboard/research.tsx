@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import { Loader2, TrendingUp, PenTool, RefreshCw, CheckCircle2 } from "lucide-react";
+import { Loader2, TrendingUp, ArrowUpRight, ArrowDownRight, RefreshCw, CheckCircle2 } from "lucide-react";
 import TiptapEditor from "@/components/Editor/TiptapEditor";
 
 export const Route = createFileRoute("/_dashboard/research")({
@@ -16,7 +16,8 @@ export const Route = createFileRoute("/_dashboard/research")({
 function ResearchPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [type, setType] = useState<"trade" | "thought" | "update" | "close_trade" | "market_outlook" | "quarterly_letter">("thought");
+  const [type, setType] = useState<"trade" | "thesis" | "update" | "close_trade" | "market_outlook">("thesis");
+  const [positionType, setPositionType] = useState<"long" | "short">("long");
   const [content, setContent] = useState<any>(null);
   const [openTrades, setOpenTrades] = useState<any[]>([]);
   const [selectedTradeId, setSelectedTradeId] = useState<string>("");
@@ -39,6 +40,7 @@ function ResearchPage() {
           title: formData.get("title") as string,
           content: content,
           type: type as any,
+          published: true, // Publish immediately so it appears in community feed
           symbol: (formData.get("symbol") as string)?.toUpperCase(),
           buyPrice: formData.get("buyPrice") ? Number(formData.get("buyPrice")) : undefined,
           targetPrice: formData.get("targetPrice") ? Number(formData.get("targetPrice")) : undefined,
@@ -56,28 +58,20 @@ function ResearchPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      {/* Compact Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-primary/10">
-            <PenTool className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-xl font-heading font-semibold">Write Research</h1>
-            <p className="text-muted-foreground text-xs">Share your analysis</p>
-          </div>
-        </div>
+    <div className="max-w-5xl mx-auto px-2 py-4 space-y-5">
+      {/* Compact Header - No Icon */}
+      <div>
+        <h1 className="text-3xl font-heading font-bold">Write Research</h1>
+        <p className="text-muted-foreground text-sm mt-1">Share your analysis with the community</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Post Type - Inline pills style */}
         <div className="flex flex-wrap items-center gap-2">
           {[
-            { value: "thought", label: "Investment Thesis", icon: PenTool },
-            { value: "trade", label: "New Trade", icon: TrendingUp },
-            { value: "market_outlook", label: "Market Outlook", icon: TrendingUp },
-            { value: "quarterly_letter", label: "Quarterly Letter", icon: PenTool },
+            { value: "thesis", label: "Thesis" },
+            { value: "trade", label: "Trade" },
+            { value: "market_outlook", label: "Market Outlook" },
           ].map((option) => (
             <Button
               key={option.value}
@@ -93,32 +87,76 @@ function ResearchPage() {
         </div>
 
         {/* Title - Large, prominent input */}
-        <div>
+        <div className="py-2">
           <Input
             id="title"
             name="title"
-            placeholder={type === 'close_trade' ? "Exiting [Symbol]: Thesis Changed" : "Your headline..."}
+            placeholder={type === 'close_trade' ? "Exiting [Symbol]: Thesis Changed" : "Enter your headline..."}
             required
-            className="text-2xl font-semibold border-none shadow-none p-0 h-auto focus-visible:ring-0 placeholder:text-muted-foreground/50"
+            className="!text-4xl font-heading font-bold border-none shadow-none p-0 h-auto focus-visible:ring-0 placeholder:text-muted-foreground/40 placeholder:font-normal"
           />
         </div>
 
-        {/* Trade Details - Cleaner card */}
+        {/* Ticker Field - Required for all post types */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            <Label htmlFor="symbol" className="text-sm font-medium">Ticker</Label>
+          </div>
+          <Input
+            id="symbol"
+            name="symbol"
+            placeholder="AAPL"
+            required
+            className="w-32 uppercase font-mono text-center"
+          />
+        </div>
+
+        {/* Trade Details - Position Type, Entry, Target/Exit */}
         {(type === 'trade') && (
           <Card className="bg-muted/30 border-dashed">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 mb-4">
+            <CardContent className="pt-4 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">Trade Details</span>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="symbol" className="text-xs">Symbol</Label>
-                  <Input id="symbol" name="symbol" placeholder="AAPL" className="uppercase font-mono" required />
+
+              {/* Long/Short Selection */}
+              <div className="space-y-2">
+                <Label className="text-xs">Position Type</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={positionType === "long" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPositionType("long")}
+                    className="flex-1"
+                  >
+                    <ArrowUpRight className="w-4 h-4 mr-2 text-green-500" />
+                    Long
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={positionType === "short" ? "destructive" : "outline"}
+                    size="sm"
+                    onClick={() => setPositionType("short")}
+                    className="flex-1"
+                  >
+                    <ArrowDownRight className="w-4 h-4 mr-2 text-red-500" />
+                    Short
+                  </Button>
                 </div>
+              </div>
+
+              {/* Entry and Exit Price */}
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="buyPrice" className="text-xs">Entry Price</Label>
                   <Input id="buyPrice" name="buyPrice" type="number" step="0.01" placeholder="0.00" required />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="targetPrice" className="text-xs">Target Price (optional)</Label>
+                  <Input id="targetPrice" name="targetPrice" type="number" step="0.01" placeholder="0.00" />
                 </div>
               </div>
             </CardContent>
@@ -185,3 +223,4 @@ function ResearchPage() {
     </div>
   );
 }
+

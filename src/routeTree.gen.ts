@@ -29,6 +29,7 @@ import { Route as DashboardWriteRouteImport } from './routes/_dashboard/write'
 import { Route as DashboardTournamentsRouteImport } from './routes/_dashboard/tournaments'
 import { Route as DashboardTalentRouteImport } from './routes/_dashboard/talent'
 import { Route as DashboardStocksRouteImport } from './routes/_dashboard/stocks'
+import { Route as DashboardSettingsRouteImport } from './routes/_dashboard/settings'
 import { Route as DashboardResearchRouteImport } from './routes/_dashboard/research'
 import { Route as DashboardProfileRouteImport } from './routes/_dashboard/profile'
 import { Route as DashboardJobsRouteImport } from './routes/_dashboard/jobs'
@@ -145,6 +146,11 @@ const DashboardStocksRoute = DashboardStocksRouteImport.update({
   path: '/stocks',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardResearchRoute = DashboardResearchRouteImport.update({
   id: '/research',
   path: '/research',
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof DashboardJobsRoute
   '/profile': typeof DashboardProfileRoute
   '/research': typeof DashboardResearchRoute
+  '/settings': typeof DashboardSettingsRoute
   '/stocks': typeof DashboardStocksRoute
   '/talent': typeof DashboardTalentRoute
   '/tournaments': typeof DashboardTournamentsRoute
@@ -282,6 +289,7 @@ export interface FileRoutesByTo {
   '/jobs': typeof DashboardJobsRoute
   '/profile': typeof DashboardProfileRoute
   '/research': typeof DashboardResearchRoute
+  '/settings': typeof DashboardSettingsRoute
   '/stocks': typeof DashboardStocksRoute
   '/talent': typeof DashboardTalentRoute
   '/tournaments': typeof DashboardTournamentsRoute
@@ -321,6 +329,7 @@ export interface FileRoutesById {
   '/_dashboard/jobs': typeof DashboardJobsRoute
   '/_dashboard/profile': typeof DashboardProfileRoute
   '/_dashboard/research': typeof DashboardResearchRoute
+  '/_dashboard/settings': typeof DashboardSettingsRoute
   '/_dashboard/stocks': typeof DashboardStocksRoute
   '/_dashboard/talent': typeof DashboardTalentRoute
   '/_dashboard/tournaments': typeof DashboardTournamentsRoute
@@ -360,6 +369,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/profile'
     | '/research'
+    | '/settings'
     | '/stocks'
     | '/talent'
     | '/tournaments'
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/profile'
     | '/research'
+    | '/settings'
     | '/stocks'
     | '/talent'
     | '/tournaments'
@@ -435,6 +446,7 @@ export interface FileRouteTypes {
     | '/_dashboard/jobs'
     | '/_dashboard/profile'
     | '/_dashboard/research'
+    | '/_dashboard/settings'
     | '/_dashboard/stocks'
     | '/_dashboard/talent'
     | '/_dashboard/tournaments'
@@ -621,6 +633,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardStocksRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/settings': {
+      id: '/_dashboard/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/research': {
       id: '/_dashboard/research'
       path: '/research'
@@ -745,6 +764,7 @@ interface DashboardRouteChildren {
   DashboardJobsRoute: typeof DashboardJobsRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardResearchRoute: typeof DashboardResearchRoute
+  DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardStocksRoute: typeof DashboardStocksRoute
   DashboardTalentRoute: typeof DashboardTalentRoute
   DashboardTournamentsRoute: typeof DashboardTournamentsRoute
@@ -761,6 +781,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardJobsRoute: DashboardJobsRoute,
   DashboardProfileRoute: DashboardProfileRoute,
   DashboardResearchRoute: DashboardResearchRoute,
+  DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardStocksRoute: DashboardStocksRoute,
   DashboardTalentRoute: DashboardTalentRoute,
   DashboardTournamentsRoute: DashboardTournamentsRoute,

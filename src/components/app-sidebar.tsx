@@ -6,9 +6,10 @@ import {
     LayoutDashboard,
     PieChart,
     Briefcase,
-    Settings,
-    BrainCircuit,
     Trophy,
+    PenTool,
+    UserSearch,
+    Sparkles,
 } from "lucide-react"
 
 import {
@@ -16,6 +17,7 @@ import {
     SidebarContent,
     SidebarGroup,
     SidebarGroupContent,
+    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
@@ -25,9 +27,25 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { Link, useRouterState } from "@tanstack/react-router";
 
+interface NavItem {
+    label: string;
+    href: string;
+    icon: any;
+    employerOnly?: boolean; // Only show to employers/companies
+}
+
+interface NavGroup {
+    label: string;
+    items: NavItem[];
+}
+
 export function AppSidebar() {
     const router = useRouterState();
     const currentPath = router.location.pathname;
+    const { data: session } = authClient.useSession();
+
+    // Check if user is an employer (isCompany flag) - cast to any to access custom field
+    const isEmployer = (session?.user as any)?.isCompany ?? false;
 
     const isActive = (path: string) => currentPath.startsWith(path);
 
@@ -41,16 +59,38 @@ export function AppSidebar() {
         });
     };
 
-    const navItems = [
-        { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-        { label: "Stock Research", href: "/stocks", icon: TrendingUp },
-        { label: "Fund Research", href: "/funds", icon: PieChart },
-        { label: "Fund Intelligence", href: "/fund-intelligence", icon: BrainCircuit },
-        { label: "Community", href: "/community", icon: Users },
-        { label: "Profile", href: "/profile", icon: User },
-        { label: "Talent Search", href: "/talent", icon: Briefcase },
-        { label: "Job Board", href: "/jobs", icon: Briefcase },
-        { label: "Tournaments", href: "/tournaments", icon: Trophy },
+    // Grouped navigation items
+    const navGroups: NavGroup[] = [
+        {
+            label: "Overview",
+            items: [
+                { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+            ],
+        },
+        {
+            label: "AI Research",
+            items: [
+                { label: "Stock Research", href: "/stocks", icon: TrendingUp },
+                { label: "Fund Research", href: "/funds", icon: PieChart },
+                { label: "Fund Intelligence", href: "/fund-intelligence", icon: Sparkles },
+            ],
+        },
+        {
+            label: "Community",
+            items: [
+                { label: "Feed", href: "/community", icon: Users },
+                { label: "Write", href: "/research", icon: PenTool },
+                { label: "Profile", href: "/profile", icon: User },
+            ],
+        },
+        {
+            label: "Career",
+            items: [
+                { label: "Talent Search", href: "/talent", icon: UserSearch, employerOnly: true },
+                { label: "Job Board", href: "/jobs", icon: Briefcase },
+                { label: "Tournaments", href: "/tournaments", icon: Trophy },
+            ],
+        },
     ];
 
     return (
@@ -66,26 +106,41 @@ export function AppSidebar() {
                 </Link>
             </SidebarHeader>
             <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            {navItems.map((item) => (
-                                <SidebarMenuItem key={item.label}>
-                                    <SidebarMenuButton
-                                        asChild
-                                        isActive={isActive(item.href)}
-                                        className="h-10 transition-all font-medium"
-                                    >
-                                        <Link to={item.href}>
-                                            <item.icon className={isActive(item.href) ? "text-primary" : "text-muted-foreground"} />
-                                            <span>{item.label}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                {navGroups.map((group) => {
+                    // Filter items based on employer status
+                    const visibleItems = group.items.filter(
+                        (item) => !item.employerOnly || isEmployer
+                    );
+
+                    // Skip group if no visible items
+                    if (visibleItems.length === 0) return null;
+
+                    return (
+                        <SidebarGroup key={group.label}>
+                            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 px-3 py-2">
+                                {group.label}
+                            </SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    {visibleItems.map((item) => (
+                                        <SidebarMenuItem key={item.label}>
+                                            <SidebarMenuButton
+                                                asChild
+                                                isActive={isActive(item.href)}
+                                                className="h-10 transition-all font-medium"
+                                            >
+                                                <Link to={item.href}>
+                                                    <item.icon className={isActive(item.href) ? "text-primary" : "text-muted-foreground"} />
+                                                    <span>{item.label}</span>
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    );
+                })}
             </SidebarContent>
             <SidebarFooter className="border-t border-border/50 p-4">
                 <SidebarMenu>

@@ -12,8 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, ArrowRight, Check, X } from "lucide-react";
-import { motion } from "motion/react";
+import { Loader2, ArrowRight, Check, X, User, Building2 } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 
@@ -80,11 +79,10 @@ function PasswordField({
         value={field.state.value}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
-        className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
-          field.state.meta.isTouched && field.state.meta.errors.length > 0
-            ? "border-destructive focus:ring-destructive/20"
-            : ""
-        }`}
+        className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${field.state.meta.isTouched && field.state.meta.errors.length > 0
+          ? "border-destructive focus:ring-destructive/20"
+          : ""
+          }`}
       />
       {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
         <p className="text-sm text-destructive font-medium">
@@ -134,6 +132,7 @@ function PasswordField({
 export function SignUp() {
   const navigate = useNavigate();
   const [authError, setAuthError] = useState("");
+  const [accountType, setAccountType] = useState<"contributor" | "employer">("contributor");
   const [passwordEverMet, setPasswordEverMet] = useState<Set<string>>(
     new Set()
   );
@@ -156,6 +155,7 @@ export function SignUp() {
           password: value.password,
           name: value.name,
           displayName: value.name,
+          isCompany: accountType === "employer",
         },
         {
           onSuccess: async () => {
@@ -170,19 +170,43 @@ export function SignUp() {
   });
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div>
       <Card className="w-full bg-card/50 backdrop-blur-xl border-border shadow-2xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold tracking-tight text-center">
             Create an account
           </CardTitle>
           <CardDescription className="text-center text-muted-foreground">
-            Enter your information to get started
+            Join as a contributor or employer
           </CardDescription>
+
+          {/* Account Type Toggle */}
+          <div className="grid grid-cols-2 gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setAccountType("contributor")}
+              className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${accountType === "contributor"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border hover:border-muted-foreground/50 text-muted-foreground"
+                }`}
+            >
+              <User className="w-6 h-6" />
+              <span className="text-sm font-medium">Contributor</span>
+              <span className="text-[10px] text-center opacity-70">Research & invest</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAccountType("employer")}
+              className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${accountType === "employer"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border hover:border-muted-foreground/50 text-muted-foreground"
+                }`}
+            >
+              <Building2 className="w-6 h-6" />
+              <span className="text-sm font-medium">Employer</span>
+              <span className="text-[10px] text-center opacity-70">Hire talent</span>
+            </button>
+          </div>
         </CardHeader>
         <CardContent>
           <form
@@ -204,12 +228,11 @@ export function SignUp() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
-                      field.state.meta.isTouched &&
+                    className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${field.state.meta.isTouched &&
                       field.state.meta.errors.length > 0
-                        ? "border-destructive focus:ring-destructive/20"
-                        : ""
-                    }`}
+                      ? "border-destructive focus:ring-destructive/20"
+                      : ""
+                      }`}
                   />
                   {field.state.meta.isTouched &&
                     field.state.meta.errors.length > 0 && (
@@ -217,7 +240,7 @@ export function SignUp() {
                         {typeof field.state.meta.errors[0] === "string"
                           ? field.state.meta.errors[0]
                           : field.state.meta.errors[0]?.message ||
-                            "Invalid value"}
+                          "Invalid value"}
                       </p>
                     )}
                   <p className="text-xs text-muted-foreground">
@@ -238,12 +261,11 @@ export function SignUp() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
-                      field.state.meta.isTouched &&
+                    className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${field.state.meta.isTouched &&
                       field.state.meta.errors.length > 0
-                        ? "border-destructive focus:ring-destructive/20"
-                        : ""
-                    }`}
+                      ? "border-destructive focus:ring-destructive/20"
+                      : ""
+                      }`}
                   />
                   {field.state.meta.isTouched &&
                     field.state.meta.errors.length > 0 && (
@@ -251,7 +273,7 @@ export function SignUp() {
                         {typeof field.state.meta.errors[0] === "string"
                           ? field.state.meta.errors[0]
                           : field.state.meta.errors[0]?.message ||
-                            "Invalid value"}
+                          "Invalid value"}
                       </p>
                     )}
                 </div>
@@ -346,6 +368,6 @@ export function SignUp() {
           </Link>
         </CardFooter>
       </Card>
-    </motion.div>
+    </div>
   );
 }

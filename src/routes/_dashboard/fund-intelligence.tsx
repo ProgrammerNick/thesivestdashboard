@@ -24,9 +24,15 @@ import {
     Download,
     Layers,
     Activity,
-    AlertCircle
+    AlertCircle,
+    ChevronDown,
+    ChevronUp
 } from "lucide-react";
 import { useState } from "react";
+import { FundSearchPanel } from "@/components/FundSearchPanel";
+import { FundDetailPanel } from "@/components/FundDetailPanel";
+import { FundChatSlidePanel } from "@/components/FundChatSlidePanel";
+import { InstitutionalFund, institutionalFunds } from "@/server/data/fund-data";
 
 export const Route = createFileRoute("/_dashboard/fund-intelligence")({
     component: FundsDashboard,
@@ -34,6 +40,14 @@ export const Route = createFileRoute("/_dashboard/fund-intelligence")({
 
 function FundsDashboard() {
     const [selectedPeriod] = useState("Q3 2025");
+    const [selectedFund, setSelectedFund] = useState<InstitutionalFund | null>(null);
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [showSearchPanel, setShowSearchPanel] = useState(true);
+
+    // Get aggregated data from all funds
+    const aggregatedMoves = institutionalFunds
+        .flatMap(f => f.recentMoves.map(m => ({ ...m, fund: f.name })))
+        .slice(0, 6);
 
     return (
         <div className="space-y-6 max-w-full">
@@ -45,7 +59,7 @@ function FundsDashboard() {
                         <Badge variant="outline" className="text-xs font-normal ml-2">PRO</Badge>
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Institutional money flow analysis. Latest 13F filings parsed and aggregated.
+                        Institutional money flow analysis. Search funds, analyze positions, and chat with AI.
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -111,6 +125,48 @@ function FundsDashboard() {
                 </Card>
             </div>
 
+            {/* Fund Search Section (Collapsible) */}
+            <Card className="border-primary/20">
+                <CardHeader
+                    className="cursor-pointer hover:bg-muted/20 transition-colors"
+                    onClick={() => setShowSearchPanel(!showSearchPanel)}
+                >
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">Search Institutional Funds</CardTitle>
+                        <Button variant="ghost" size="sm" className="gap-1">
+                            {showSearchPanel ? (
+                                <>Hide <ChevronUp className="w-4 h-4" /></>
+                            ) : (
+                                <>Show <ChevronDown className="w-4 h-4" /></>
+                            )}
+                        </Button>
+                    </div>
+                    <CardDescription>
+                        Click on a fund to view their portfolio and ask AI questions
+                    </CardDescription>
+                </CardHeader>
+                {showSearchPanel && (
+                    <CardContent className="pt-0">
+                        <FundSearchPanel
+                            onSelectFund={(fund) => {
+                                setSelectedFund(fund);
+                                setShowSearchPanel(false);
+                            }}
+                            selectedFundId={selectedFund?.id}
+                        />
+                    </CardContent>
+                )}
+            </Card>
+
+            {/* Selected Fund Detail */}
+            {selectedFund && (
+                <FundDetailPanel
+                    fund={selectedFund}
+                    onAskAI={() => setIsChatOpen(true)}
+                    onClose={() => setSelectedFund(null)}
+                />
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main: 13F Change Log Table */}
                 <div className="lg:col-span-2 space-y-6">
@@ -136,14 +192,18 @@ function FundsDashboard() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {[
-                                        { fund: "Bridgewater", ticker: "IEMG", action: "Buy", type: "New Position", shares: "+2.4M", value: "$120M" },
-                                        { fund: "Sequoia", ticker: "GOOGL", action: "Buy", type: "Add", shares: "+450K", value: "$78M" },
-                                        { fund: "Oakmark", ticker: "CRM", action: "Sell", type: "Liquidate", shares: "-1.2M", value: "$280M" },
-                                        { fund: "Pershing Sq", ticker: "CMG", action: "Sell", type: "Trim", shares: "-150K", value: "$450M" },
-                                        { fund: "Renaissance", ticker: "PLTR", action: "Buy", type: "New Position", shares: "+5.1M", value: "$140M" },
-                                    ].map((move, i) => (
-                                        <TableRow key={i}>
+                                    {aggregatedMoves.map((move, i) => (
+                                        <TableRow
+                                            key={i}
+                                            className="cursor-pointer hover:bg-muted/50"
+                                            onClick={() => {
+                                                const fund = institutionalFunds.find(f => f.name === move.fund);
+                                                if (fund) {
+                                                    setSelectedFund(fund);
+                                                    setShowSearchPanel(false);
+                                                }
+                                            }}
+                                        >
                                             <TableCell className="font-medium">{move.fund}</TableCell>
                                             <TableCell>
                                                 <Badge variant="outline" className="font-mono">{move.ticker}</Badge>
@@ -163,7 +223,7 @@ function FundsDashboard() {
                         </CardContent>
                     </Card>
 
-                    {/* Heatmap Placeholder */}
+                    {/* Heatmap */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -215,7 +275,19 @@ function FundsDashboard() {
                                 { ticker: "GOOGL", fund: "TCI Fund Mgmt", weight: "18.2%" },
                                 { ticker: "AMZN", fund: "Tiger Global", weight: "12.8%" },
                             ].map((item, i) => (
-                                <div key={i} className="flex justify-between items-center p-3 bg-card rounded-lg border border-border/50 shadow-sm">
+                                <div
+                                    key={i}
+                                    className="flex justify-between items-center p-3 bg-card rounded-lg border border-border/50 shadow-sm cursor-pointer hover:bg-muted/50 transition-colors"
+                                    onClick={() => {
+                                        const fund = institutionalFunds.find(f =>
+                                            f.name.toLowerCase().includes(item.fund.toLowerCase().split(' ')[0])
+                                        );
+                                        if (fund) {
+                                            setSelectedFund(fund);
+                                            setShowSearchPanel(false);
+                                        }
+                                    }}
+                                >
                                     <div>
                                         <div className="font-bold text-lg">{item.ticker}</div>
                                         <div className="text-xs text-muted-foreground">{item.fund}</div>
@@ -252,6 +324,15 @@ function FundsDashboard() {
                     </Card>
                 </div>
             </div>
+
+            {/* AI Chat Slide Panel */}
+            {selectedFund && (
+                <FundChatSlidePanel
+                    fund={selectedFund}
+                    isOpen={isChatOpen}
+                    onClose={() => setIsChatOpen(false)}
+                />
+            )}
         </div>
     );
 }

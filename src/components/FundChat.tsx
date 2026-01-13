@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Bot, User } from "lucide-react";
+import { Send, Loader2, Bot, User, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
@@ -24,17 +24,50 @@ export function FundChat({ fundData, fundName }: FundChatProps) {
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Initial greeting
+    // Cache key for localStorage
+    const getCacheKey = (name: string) => `thesivest_chat_fund_${name.replace(/\s+/g, '_').toLowerCase()}`;
+
+    // Load cached messages on mount
     useEffect(() => {
-        if (messages.length === 0) {
-            setMessages([
-                {
-                    role: "model",
-                    content: `Hi! I've analyzed ${fundName}'s latest activity. Ask me anything about their strategy, recent moves, or specific holdings.`
+        const cached = localStorage.getItem(getCacheKey(fundName));
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setMessages(parsed);
+                    return; // Don't show initial greeting if we have cached messages
                 }
-            ]);
+            } catch (e) {
+                console.error("Failed to parse cached fund chat:", e);
+            }
         }
+
+        // Show initial greeting if no cached messages
+        setMessages([
+            {
+                role: "model",
+                content: `Hi! I've analyzed ${fundName}'s latest activity. Ask me anything about their strategy, recent moves, or specific holdings.`
+            }
+        ]);
     }, [fundName]);
+
+    // Save messages to localStorage when they change
+    useEffect(() => {
+        if (messages.length > 0) {
+            localStorage.setItem(getCacheKey(fundName), JSON.stringify(messages));
+        }
+    }, [messages, fundName]);
+
+    // Clear chat history
+    const handleClearHistory = () => {
+        localStorage.removeItem(getCacheKey(fundName));
+        setMessages([
+            {
+                role: "model",
+                content: `Hi! I've analyzed ${fundName}'s latest activity. Ask me anything about their strategy, recent moves, or specific holdings.`
+            }
+        ]);
+    };
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -82,10 +115,23 @@ export function FundChat({ fundData, fundName }: FundChatProps) {
     return (
         <Card className="h-[600px] flex flex-col border-primary/20 bg-card/60 backdrop-blur-sm">
             <CardHeader className="border-b border-border/50 pb-4">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                    <Bot className="w-5 h-5 text-primary" />
-                    AI Analyst Chat
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                        <Bot className="w-5 h-5 text-primary" />
+                        AI Analyst Chat
+                    </CardTitle>
+                    {messages.length > 1 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClearHistory}
+                            className="text-muted-foreground hover:text-foreground"
+                        >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Clear
+                        </Button>
+                    )}
+                </div>
                 <CardDescription>
                     Ask follow-up questions about this fund.
                 </CardDescription>

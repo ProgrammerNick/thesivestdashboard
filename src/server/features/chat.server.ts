@@ -63,7 +63,28 @@ export async function generateFundChatResponse(
         }
     });
 
-    // @ts-ignore
-    const responseText = result?.response?.candidates?.[0]?.content?.parts?.[0]?.text || result?.text?.() || "";
+    // Handle different response formats from the Gemini SDK
+    let responseText = "";
+
+    // Try various response paths based on SDK version
+    if (result?.text) {
+        // Some SDK versions have text as a property
+        responseText = typeof result.text === 'function' ? result.text() : result.text;
+    } else if (result?.response?.text) {
+        // Other versions wrap in response
+        responseText = typeof result.response.text === 'function' ? result.response.text() : result.response.text;
+    } else if (result?.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+        // Raw candidate format
+        responseText = result.response.candidates[0].content.parts[0].text;
+    } else if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
+        // Alternative candidate format  
+        responseText = result.candidates[0].content.parts[0].text;
+    }
+
+    if (!responseText) {
+        console.error("Could not extract text from Gemini response:", JSON.stringify(result, null, 2));
+        throw new Error("Failed to get response from AI");
+    }
+
     return responseText;
 }

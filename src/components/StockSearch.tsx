@@ -1,13 +1,21 @@
-import { useState } from "react";
-import { Search, Loader2, BrainCircuit, TrendingUp, AlertTriangle, Scale, Activity, Calendar, Target } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Search, Loader2, BrainCircuit, TrendingUp, AlertTriangle, Scale, Activity, Calendar, Target, Send, MessageSquare, Bot, User, Trash2 } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { motion, AnimatePresence } from "motion/react";
 import { searchStock, StockData } from "../server/fn/stocks";
+import { chatWithStock } from "../server/fn/stock-chat";
 import { getSymbolPosts } from "../server/fn/posts";
 import { Badge } from "./ui/badge";
 import { ResearchChart } from "./ResearchChart";
+import { ScrollArea } from "./ui/scroll-area";
+import { Avatar, AvatarFallback } from "./ui/avatar";
+
+interface ChatMessage {
+    role: "user" | "model";
+    content: string;
+}
 
 export function StockSearch() {
     const [query, setQuery] = useState("");
@@ -15,6 +23,39 @@ export function StockSearch() {
     const [result, setResult] = useState<StockData | null>(null);
     const [posts, setPosts] = useState<any[]>([]);
     const [error, setError] = useState("");
+
+    // Chat state
+    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [chatInput, setChatInput] = useState("");
+    const [isChatLoading, setIsChatLoading] = useState(false);
+    const chatScrollRef = useRef<HTMLDivElement>(null);
+
+    // Cache key for localStorage
+    const getCacheKey = (symbol: string) => `thesivest_chat_stock_${symbol}`;
+
+    // Load cached messages when result changes
+    useEffect(() => {
+        if (result?.symbol) {
+            const cached = localStorage.getItem(getCacheKey(result.symbol));
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        setChatMessages(parsed);
+                    }
+                } catch (e) {
+                    console.error("Failed to parse cached chat:", e);
+                }
+            }
+        }
+    }, [result?.symbol]);
+
+    // Save messages to localStorage when they change
+    useEffect(() => {
+        if (result?.symbol && chatMessages.length > 0) {
+            localStorage.setItem(getCacheKey(result.symbol), JSON.stringify(chatMessages));
+        }
+    }, [chatMessages, result?.symbol]);
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,6 +65,7 @@ export function StockSearch() {
         setError("");
         setResult(null);
         setPosts([]);
+        setChatMessages([]); // Reset chat on new search (will load from cache if exists)
 
         try {
             const [stockData, postsData] = await Promise.all([
@@ -40,6 +82,64 @@ export function StockSearch() {
             setIsLoading(false);
         }
     };
+
+    // Build context from the analysis for chat
+    const buildChatContext = () => {
+        if (!result) return "";
+        return `
+Symbol: ${result.symbol}
+Company: ${result.companyName}
+Business: ${result.businessSummary}
+Moat: ${result.moatAnalysis}
+Growth Catalysts: ${result.growthCatalysts}
+Key Risks: ${Array.isArray(result.keyRisks) ? result.keyRisks.join(", ") : result.keyRisks}
+Financial Health: ${result.financialHealth}
+Valuation: ${result.valuationCommentary}
+Earnings Quality: ${result.earningsQuality}
+Capital Allocation: ${result.capitalAllocation}
+        `.trim();
+    };
+
+    const handleSendChat = async () => {
+        if (!chatInput.trim() || !result) return;
+
+        const userMessage: ChatMessage = { role: "user", content: chatInput };
+        setChatMessages(prev => [...prev, userMessage]);
+        setChatInput("");
+        setIsChatLoading(true);
+
+        try {
+            const response = await chatWithStock({
+                data: {
+                    symbol: result.symbol,
+                    context: buildChatContext(),
+                    messages: [...chatMessages, userMessage],
+                }
+            });
+
+            setChatMessages(prev => [...prev, { role: "model", content: response }]);
+        } catch (err) {
+            console.error("Chat error:", err);
+            setChatMessages(prev => [...prev, { role: "model", content: "I encountered an error. Please try again." }]);
+        } finally {
+            setIsChatLoading(false);
+        }
+    };
+
+    // Clear chat history for current stock
+    const handleClearStockChat = () => {
+        if (result?.symbol) {
+            localStorage.removeItem(getCacheKey(result.symbol));
+            setChatMessages([]);
+        }
+    };
+
+    // Auto-scroll chat
+    useEffect(() => {
+        if (chatScrollRef.current) {
+            chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+        }
+    }, [chatMessages]);
 
     return (
         <section className="py-12 container mx-auto px-6">
@@ -250,6 +350,84 @@ export function StockSearch() {
                                     ) : <p className="text-muted-foreground">{String(result.comparableMultiples)}</p>}
                                 </Card>
                             </div>
+
+                            {/* Chat Section for Follow-up Questions */}
+                            <Card className="p-6 bg-card border-border/60">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2 text-primary">
+                                        <MessageSquare className="w-5 h-5" />
+                                        <h4 className="font-bold uppercase tracking-wider text-sm">Ask Follow-up Questions</h4>
+                                    </div>
+                                    {chatMessages.length > 0 && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleClearStockChat}
+                                            className="text-muted-foreground hover:text-foreground"
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-1" />
+                                            Clear
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Chat Messages */}
+                                {chatMessages.length > 0 && (
+                                    <div
+                                        ref={chatScrollRef}
+                                        className="max-h-80 overflow-y-auto space-y-4 mb-4 p-4 bg-muted/20 rounded-lg"
+                                    >
+                                        {chatMessages.map((msg, i) => (
+                                            <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}>
+                                                {msg.role === "model" && (
+                                                    <Avatar className="w-8 h-8 bg-primary/10">
+                                                        <AvatarFallback><Bot className="w-4 h-4 text-primary" /></AvatarFallback>
+                                                    </Avatar>
+                                                )}
+                                                <div className={`max-w-[80%] p-3 rounded-lg ${msg.role === "user"
+                                                    ? "bg-primary text-primary-foreground"
+                                                    : "bg-muted"
+                                                    }`}>
+                                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                </div>
+                                                {msg.role === "user" && (
+                                                    <Avatar className="w-8 h-8 bg-muted">
+                                                        <AvatarFallback><User className="w-4 h-4" /></AvatarFallback>
+                                                    </Avatar>
+                                                )}
+                                            </div>
+                                        ))}
+                                        {isChatLoading && (
+                                            <div className="flex gap-3">
+                                                <Avatar className="w-8 h-8 bg-primary/10">
+                                                    <AvatarFallback><Bot className="w-4 h-4 text-primary" /></AvatarFallback>
+                                                </Avatar>
+                                                <div className="bg-muted p-3 rounded-lg">
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Chat Input */}
+                                <div className="flex gap-2">
+                                    <Input
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendChat()}
+                                        placeholder={`Ask anything about ${result.symbol}...`}
+                                        className="flex-1"
+                                        disabled={isChatLoading}
+                                    />
+                                    <Button
+                                        onClick={handleSendChat}
+                                        disabled={isChatLoading || !chatInput.trim()}
+                                    >
+                                        <Send className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </Card>
                         </motion.div>
                     )}
                 </AnimatePresence>

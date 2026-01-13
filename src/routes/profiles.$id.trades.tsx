@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLoaderData } from "@tanstack/react-router";
-import { getTradeHistoryFn } from "../server/fn/profile";
+import { getUserTradesFn } from "../server/fn/profile";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/profiles/$id/trades")({
   loader: async ({ params }) => {
-    const trades = await getTradeHistoryFn({ data: { userId: params.id, limit: 50 } });
+    const trades = await getUserTradesFn({ data: { userId: params.id, limit: 50 } });
     return { trades };
   },
   component: ProfileTrades,
@@ -46,8 +46,8 @@ function ProfileTrades() {
                             trade.status === "win"
                               ? "default"
                               : trade.status === "loss"
-                              ? "destructive"
-                              : "secondary"
+                                ? "destructive"
+                                : "secondary"
                           }
                         >
                           {trade.status.toUpperCase()}
@@ -63,22 +63,20 @@ function ProfileTrades() {
                     {trade.returnPercent !== undefined && (
                       <div className="text-right">
                         <div
-                          className={`text-2xl font-bold ${
-                            trade.returnPercent >= 0
+                          className={`text-2xl font-bold ${trade.returnPercent >= 0
                               ? "text-green-500"
                               : "text-red-500"
-                          }`}
+                            }`}
                         >
                           {trade.returnPercent >= 0 ? "+" : ""}
                           {trade.returnPercent.toFixed(2)}%
                         </div>
                         {trade.returnAmount !== undefined && (
                           <div
-                            className={`text-sm ${
-                              trade.returnAmount >= 0
+                            className={`text-sm ${trade.returnAmount >= 0
                                 ? "text-green-500"
                                 : "text-red-500"
-                            }`}
+                              }`}
                           >
                             {trade.returnAmount >= 0 ? "+" : ""}$
                             {trade.returnAmount.toLocaleString()}
@@ -223,11 +221,10 @@ function ProfileTrades() {
                                   Unrealized Return
                                 </div>
                                 <div
-                                  className={`font-semibold ${
-                                    trade.currentPrice >= trade.buyPrice
+                                  className={`font-semibold ${trade.currentPrice >= trade.buyPrice
                                       ? "text-green-500"
                                       : "text-red-500"
-                                  }`}
+                                    }`}
                                 >
                                   {(
                                     ((trade.currentPrice - trade.buyPrice) /

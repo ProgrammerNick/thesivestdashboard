@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, ArrowRight } from "lucide-react"
-import { motion } from "motion/react"
 import { Link } from "@tanstack/react-router"
 
 export function SignIn() {
@@ -38,11 +37,7 @@ export function SignIn() {
 
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-        >
+        <div>
             <Card className="w-full bg-card/50 backdrop-blur-xl border-border shadow-2xl">
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-2xl font-bold tracking-tight text-center">Welcome back</CardTitle>
@@ -134,6 +129,6 @@ export function SignIn() {
                     </Link>
                 </CardFooter>
             </Card>
-        </motion.div>
+        </div>
     )
 }

@@ -1,6 +1,5 @@
-import { Search, Bell, User } from "lucide-react";
+import { Bell } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { authClient } from "@/lib/auth-client";
@@ -19,16 +18,9 @@ export function DashboardHeader() {
 
     return (
         <header className="h-16 border-b border-border/50 bg-background/50 backdrop-blur-md sticky top-0 z-10 px-6 flex items-center justify-between">
-            {/* Search Bar - Global Command Center */}
-            <div className="flex items-center gap-4 flex-1 max-w-xl">
+            {/* Left side - Sidebar trigger */}
+            <div className="flex items-center">
                 <SidebarTrigger />
-                <div className="relative group flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                    <Input
-                        placeholder="Search funds, stocks, or recent analysis..."
-                        className="pl-10 bg-muted/30 border-transparent focus:bg-background focus:border-primary/50 transition-all font-medium"
-                    />
-                </div>
             </div>
 
             {/* Right Actions */}
@@ -59,7 +51,7 @@ export function DashboardHeader() {
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
-                                <Link to={`/profiles/${session.user.id}`}>Profile</Link>
+                                <Link to="/profile">Profile</Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem>Settings</DropdownMenuItem>
                             <DropdownMenuSeparator />

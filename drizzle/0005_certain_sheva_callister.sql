@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "featured_post_id" text;

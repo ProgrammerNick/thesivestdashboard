@@ -58,6 +58,16 @@ export interface UserProfile {
   // Educations and certifications
   educations: Education[];
   certifications: Certification[];
+  featuredPost?: {
+    id: string;
+    title: string;
+    slug: string | null;
+    type: string;
+    content: string;
+    publishedAt: Date | null;
+    coverImage: string | null;
+    symbol: string | null;
+  };
 }
 
 /**
@@ -228,6 +238,22 @@ export async function getUserProfile(id: string): Promise<UserProfile | null> {
       credentialId: c.credentialId || undefined,
       credentialUrl: c.credentialUrl || undefined,
     })),
+    // Get featured post if it exists
+    featuredPost: userData.featuredPostId
+      ? await db.query.post.findFirst({
+        where: eq(post.id, userData.featuredPostId),
+        columns: {
+          id: true,
+          title: true,
+          slug: true,
+          type: true,
+          content: true,
+          publishedAt: true,
+          coverImage: true,
+          symbol: true,
+        },
+      })
+      : undefined,
   };
 }
 

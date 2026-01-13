@@ -1,105 +1,96 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Zap, Users, UserPlus, Search } from "lucide-react";
+import { Search, Clock, ChevronRight, TrendingUp, MessageSquare } from "lucide-react";
 import { Link, useLoaderData } from "@tanstack/react-router";
 import { getDashboardData } from "@/server/fn/dashboard";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/_dashboard/dashboard")({
     component: DashboardHome,
-    loader: async () => await getDashboardData(),
+    loader: async () => {
+        const dashboardData = await getDashboardData();
+        // Chat sessions require auth - will be fetched client-side or via parent layout
+        return { ...dashboardData, chatSessions: [] as any[] };
+    },
 });
 
+
+// Helper to parse Tiptap JSON and get text preview
+const getContentPreview = (content: string) => {
+    try {
+        const doc = JSON.parse(content);
+        if (doc.type === 'doc' && doc.content) {
+            return doc.content
+                .filter((node: any) => node.type === 'paragraph' && node.content)
+                .map((node: any) => node.content.map((c: any) => c.text || '').join(''))
+                .join(' ')
+                .slice(0, 100);
+        }
+        return content.slice(0, 100);
+    } catch {
+        return content.slice(0, 100);
+    }
+};
+
 function DashboardHome() {
-    const { posts, contributors } = useLoaderData({ from: "/_dashboard/dashboard" });
+    const { posts, chatSessions } = useLoaderData({ from: "/_dashboard/dashboard" });
 
     return (
-        <div className="space-y-8 max-w-7xl mx-auto p-6 md:p-8">
+        <div className="space-y-8 max-w-6xl mx-auto p-6 md:p-8">
             {/* Welcome Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-heading font-bold">Market Overview</h1>
-                    <p className="text-muted-foreground mt-1">Welcome back. Here's your daily briefing.</p>
+                    <h1 className="text-3xl font-heading font-bold">Welcome Back</h1>
+                    <p className="text-muted-foreground mt-1">Here's what's happening in your research community.</p>
                 </div>
                 <div className="flex gap-3">
                     <Link to="/research">
                         <Button>
-                            <TrendingUp className="w-4 h-4 mr-2" /> New Analysis
+                            <TrendingUp className="w-4 h-4 mr-2" /> Write Research
                         </Button>
                     </Link>
                 </div>
             </div>
 
-            {/* Quick Stats Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-gradient-to-br from-primary/10 via-card to-card border-primary/20">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-primary uppercase tracking-wider">Portfolio Alpha</CardTitle>
-                        <CardDescription className="sr-only">Portfolio Performance Metrics</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-heading font-bold">+0.0%</div>
-                        <p className="text-xs text-muted-foreground mt-1">Start tracking to see metrics</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Active Alerts</CardTitle>
-                        <CardDescription className="sr-only">Your active stock price alerts</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-heading font-bold">0</div>
-                        <p className="text-xs text-muted-foreground mt-1">No active alerts</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Watchlist Movers</CardTitle>
-                        <CardDescription className="sr-only">Top movers in your watchlist</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-heading font-bold text-muted-foreground">--</div>
-                        <p className="text-xs text-muted-foreground mt-1">Add stocks to watchlist</p>
-                    </CardContent>
-                </Card>
-            </div>
-
             <div className="grid lg:grid-cols-3 gap-8">
-                {/* Main Feed */}
+                {/* Main Feed - Trending Research */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold flex items-center gap-2">
-                            <Zap className="w-5 h-5 text-yellow-500" /> Community Research
+                        <h2 className="text-xl font-bold">
+                            Trending Research
                         </h2>
+                        <Link to="/community">
+                            <Button variant="ghost" size="sm">
+                                View All <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                        </Link>
                     </div>
 
                     {posts.length === 0 ? (
                         <Card className="border-dashed">
                             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                                 <Search className="w-12 h-12 text-muted-foreground mb-4" />
-                                <h3 className="text-lg font-bold mb-2">No Research Found</h3>
+                                <h3 className="text-lg font-bold mb-2">No Research Yet</h3>
                                 <p className="text-muted-foreground max-w-sm mb-6">
-                                    Be the first to share your investment thesis.
+                                    Be the first to share your investment thesis with the community.
                                 </p>
-                                <div className="flex gap-3">
-                                    <Link to="/research">
-                                        <Button>Post Research</Button>
-                                    </Link>
-                                </div>
+                                <Link to="/research">
+                                    <Button>Post Research</Button>
+                                </Link>
                             </CardContent>
                         </Card>
                     ) : (
                         <div className="space-y-4">
-                            {posts.map((post) => (
-                                <Link key={post.id} to="/posts/$id" params={{ id: post.id }}>
+                            {posts.slice(0, 5).map((post) => (
+                                <Link key={post.id} to="/post/$postId" params={{ postId: post.id }}>
                                     <Card className="hover:border-primary/50 transition-colors cursor-pointer group">
                                         <CardHeader className="pb-3">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
                                                     <Badge variant="secondary" className="text-xs font-normal">
-                                                        {post.type}
+                                                        {post.type === 'thought' ? 'Thesis' : post.type}
                                                     </Badge>
                                                     <CardDescription className="text-xs">
                                                         {post.publishedAt}
@@ -115,7 +106,7 @@ function DashboardHome() {
                                         </CardHeader>
                                         <CardContent>
                                             <p className="text-muted-foreground text-sm line-clamp-2">
-                                                {post.content}
+                                                {getContentPreview(post.content)}
                                             </p>
                                         </CardContent>
                                     </Card>
@@ -125,48 +116,99 @@ function DashboardHome() {
                     )}
                 </div>
 
-                {/* Right Sidebar */}
-                <div className="space-y-8">
-                    {/* Discover / Suggested Users */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
-                                <Users className="w-5 h-5 text-blue-500" /> Discover
-                            </h2>
-                        </div>
-                        <Card>
-                            <CardContent className="p-0">
-                                <div className="divide-y divide-border">
-                                    {contributors.map((user) => (
-                                        <div key={user.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={user.avatar} />
-                                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <div className="text-sm font-medium leading-none">{user.name}</div>
-                                                    <div className="text-xs text-muted-foreground mt-1">
-                                                        {user.totalPosts} posts
+                {/* Right Sidebar - Recent AI Chats */}
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold">
+                            Recent Chats
+                        </h2>
+                    </div>
+
+                    <Card>
+                        <CardContent className="p-0">
+                            <div className="divide-y divide-border">
+                                {chatSessions.length === 0 ? (
+                                    <div className="p-6 text-center">
+                                        <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                                        <p className="text-sm text-muted-foreground mb-4">
+                                            Start analyzing stocks and funds with AI
+                                        </p>
+                                        <div className="flex flex-col gap-2">
+                                            <Link to="/stocks">
+                                                <Button variant="outline" size="sm" className="w-full">
+                                                    Stock Research
+                                                </Button>
+                                            </Link>
+                                            <Link to="/fund-intelligence">
+                                                <Button variant="outline" size="sm" className="w-full">
+                                                    Fund Intelligence
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    chatSessions.slice(0, 5).map((session) => (
+                                        <Link
+                                            key={session.id}
+                                            to={session.sessionType === 'fund' ? '/fund-intelligence' : '/stocks'}
+                                            className="block"
+                                        >
+                                            <div className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <Badge variant="outline" className="text-xs">
+                                                                {session.sessionType === 'fund' ? 'Fund' : 'Stock'}
+                                                            </Badge>
+                                                            {session.ticker && (
+                                                                <span className="text-xs font-mono text-primary font-medium">
+                                                                    {session.ticker}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-sm font-medium truncate">
+                                                            {session.title || `${session.ticker} Analysis`}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center text-xs text-muted-foreground">
+                                                        <Clock className="w-3 h-3 mr-1" />
+                                                        {formatDistanceToNow(new Date(session.updatedAt), { addSuffix: true })}
                                                     </div>
                                                 </div>
                                             </div>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                                                <UserPlus className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    ))}
-                                    {contributors.length === 0 && (
-                                        <div className="p-4 text-center text-sm text-muted-foreground">
-                                            No users found.
-                                        </div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+                                        </Link>
+                                    ))
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Quick Actions */}
+                    <Card className="bg-gradient-to-br from-primary/5 to-card">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            <Link to="/stocks" className="block">
+                                <Button variant="ghost" className="w-full justify-start" size="sm">
+                                    <Search className="w-4 h-4 mr-2" /> Research a Stock
+                                </Button>
+                            </Link>
+                            <Link to="/fund-intelligence" className="block">
+                                <Button variant="ghost" className="w-full justify-start" size="sm">
+                                    <TrendingUp className="w-4 h-4 mr-2" /> Analyze a Fund
+                                </Button>
+                            </Link>
+                            <Link to="/community" className="block">
+                                <Button variant="ghost" className="w-full justify-start" size="sm">
+                                    <MessageSquare className="w-4 h-4 mr-2" /> Browse Community
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </div>
     );
 }
+

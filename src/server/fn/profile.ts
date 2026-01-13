@@ -162,3 +162,50 @@ export const deleteCertificationFn = createServerFn({ method: "POST" })
     await deleteCertification(data.certificationId);
     return { success: true };
   });
+
+// Get performance metrics for a user
+export const getPerformanceMetricsFn = createServerFn({ method: "GET" })
+  .inputValidator(
+    z.object({
+      userId: z.string(),
+    })
+  )
+  .handler(async ({ data }) => {
+    // Return mock performance metrics for now
+    // TODO: Calculate from actual trade data
+    return [
+      {
+        period: "Last 30 Days",
+        totalTrades: 12,
+        winRate: 66.7,
+        totalReturn: 2450.0,
+        averageReturn: 8.5,
+        bestTrade: 24.3,
+        worstTrade: -8.2,
+        sharpeRatio: 1.45,
+        maxDrawdown: -12.5,
+      },
+      {
+        period: "Last 90 Days",
+        totalTrades: 34,
+        winRate: 58.8,
+        totalReturn: 8920.0,
+        averageReturn: 6.2,
+        bestTrade: 42.1,
+        worstTrade: -15.3,
+        sharpeRatio: 1.22,
+        maxDrawdown: -18.7,
+      },
+      {
+        period: "Year to Date",
+        totalTrades: 67,
+        winRate: 55.2,
+        totalReturn: 15340.0,
+        averageReturn: 4.8,
+        bestTrade: 52.6,
+        worstTrade: -22.1,
+        sharpeRatio: 0.98,
+        maxDrawdown: -25.4,
+      },
+    ];
+  });

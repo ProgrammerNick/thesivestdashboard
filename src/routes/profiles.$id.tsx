@@ -1,14 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLoaderData } from "@tanstack/react-router";
 import { getProfileFn } from "../server/fn/profile";
-import { getUserById } from "../server/data-access/users";
-import {
-  isFollowing,
-  followUser,
-  unfollowUser,
-} from "../server/data-access/users";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 import {
   Card,
   CardContent,
@@ -24,31 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { getAnalysisHistory } from "../server/fn/analysis";
 
 
-// Follow function
-const followFn = createServerFn({ method: "POST" })
-  .inputValidator((z) =>
-    z.object({
-      followerId: z.string().cuid("Invalid follower ID"),
-      followingId: z.string().cuid("Invalid following ID"),
-    })
-  )
-  .handler(async ({ input: { followerId, followingId } }) => {
-    await followUser(followerId, followingId);
-    return { success: true };
-  });
-
-// Unfollow function
-const unfollowFn = createServerFn({ method: "POST" })
-  .inputValidator((z) =>
-    z.object({
-      followerId: z.string().cuid("Invalid follower ID"),
-      followingId: z.string().cuid("Invalid following ID"),
-    })
-  )
-  .handler(async ({ input: { followerId, followingId } }) => {
-    await unfollowUser(followerId, followingId);
-    return { success: true };
-  });
 
 export const Route = createFileRoute("/profiles/$id")({
   loader: async ({ params }) => {
@@ -213,6 +180,57 @@ function Profile() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
+
+        {/* Featured Thesis Section */}
+        {profile.featuredPost && (
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+              <BrainCircuit className="w-6 h-6 text-primary" />
+              Featured Investment Thesis
+            </h2>
+            <Card className="bg-gradient-to-br from-primary/10 via-card to-card border-primary/20 shadow-lg overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <BrainCircuit className="w-32 h-32" />
+              </div>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <Badge className="mb-2 bg-primary/20 text-primary hover:bg-primary/30 border-primary/20">
+                      Best Pitch
+                    </Badge>
+                    <CardTitle className="text-2xl md:text-3xl font-heading leading-tight">
+                      <Link to={`/post/${profile.featuredPost.id}`} className="hover:underline">
+                        {profile.featuredPost.title}
+                      </Link>
+                    </CardTitle>
+                    <CardDescription className="text-base mt-2 flex items-center gap-2">
+                      <span>{new Date(profile.featuredPost.publishedAt).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
+                      {profile.featuredPost.symbol && <Badge variant="outline">{profile.featuredPost.symbol}</Badge>}
+                    </CardDescription>
+                  </div>
+                  <Link to={`/post/${profile.featuredPost.id}`}>
+                    <Button size="lg" className="hidden md:flex gap-2 shadow-md">
+                      Read Full Thesis <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="prose dark:prose-invert max-w-none text-muted-foreground line-clamp-3 md:line-clamp-4 leading-relaxed">
+                  {profile.featuredPost.content}
+                </div>
+                <div className="mt-6 flex md:hidden">
+                  <Link to={`/post/${profile.featuredPost.id}`} className="w-full">
+                    <Button className="w-full gap-2 shadow-md">
+                      Read Full Thesis <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Performance Overview Cards */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
@@ -263,9 +281,9 @@ function Profile() {
                       {profile.beta?.toFixed(2) || "1.00"}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {profile.beta > 1
+                      {(profile.beta || 1) > 1
                         ? "Higher volatility than market"
-                        : profile.beta < 1
+                        : (profile.beta || 1) < 1
                           ? "Lower volatility than market"
                           : "Matches market volatility"}
                     </p>

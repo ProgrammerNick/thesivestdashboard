@@ -5,6 +5,7 @@ import {
   boolean,
   integer,
   numeric,
+  real,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -26,6 +27,8 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
   bio: text("bio"),
+  investingStyle: text("investing_style"), // Value, Growth, Momentum, Dividend, Index, Quantitative, Day Trading
+  experienceLevel: text("experience_level"), // Beginner, Intermediate, Advanced, Professional
   location: text("location"),
   website: text("website"),
   linkedin: text("linkedin"),
@@ -39,6 +42,9 @@ export const user = pgTable("user", {
   companyName: text("company_name"),
   companyDescription: text("company_description"),
   companyWebsite: text("company_website"),
+  // Creator Fields
+  premiumContentEnabled: boolean("premium_content_enabled").default(false),
+  featuredPostId: text("featured_post_id"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
@@ -498,6 +504,131 @@ export const jobPostingRelations = relations(jobPosting, ({ one }) => ({
   }),
 }));
 
+// Chat Sessions - persistent AI conversations
+export const chatSession = pgTable("chat_session", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'fund' | 'stock' | 'fund-intelligence'
+  contextId: text("context_id").notNull(), // Fund name or stock symbol
+  title: text("title").notNull(), // Auto-generated from first message
+  preview: text("preview"), // Preview of last message
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const chatSessionRelations = relations(chatSession, ({ one, many }) => ({
+  user: one(user, {
+    fields: [chatSession.userId],
+    references: [user.id],
+  }),
+  messages: many(chatMessage),
+}));
+
+// Chat Messages - individual messages in a conversation
+export const chatMessage = pgTable("chat_message", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => chatSession.id, { onDelete: "cascade" }),
+  role: text("role").notNull(), // 'user' | 'model'
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const chatMessageRelations = relations(chatMessage, ({ one }) => ({
+  session: one(chatSession, {
+    fields: [chatMessage.sessionId],
+    references: [chatSession.id],
+  }),
+}));
+
+// Portfolio Tracking System
+export const portfolio = pgTable("portfolio", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(), // e.g., "My Brokerage", "Roth IRA"
+  type: text("type").notNull().default("manual"), // 'manual' | 'plaid'
+  plaidItemId: text("plaid_item_id"), // For Plaid-connected portfolios
+  isPublic: boolean("is_public").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const portfolioRelations = relations(portfolio, ({ one, many }) => ({
+  user: one(user, {
+    fields: [portfolio.userId],
+    references: [user.id],
+  }),
+  transactions: many(portfolioTransaction),
+  holdings: many(portfolioHolding),
+}));
+
+// Portfolio Transactions - Buy/Sell records
+export const portfolioTransaction = pgTable("portfolio_transaction", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  portfolioId: text("portfolio_id")
+    .notNull()
+    .references(() => portfolio.id, { onDelete: "cascade" }),
+  symbol: text("symbol").notNull(), // e.g., "AAPL"
+  type: text("type").notNull(), // 'buy' | 'sell'
+  shares: real("shares").notNull(),
+  pricePerShare: real("price_per_share").notNull(),
+  totalValue: real("total_value").notNull(),
+  date: timestamp("date").notNull(), // When the transaction happened
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const portfolioTransactionRelations = relations(portfolioTransaction, ({ one }) => ({
+  portfolio: one(portfolio, {
+    fields: [portfolioTransaction.portfolioId],
+    references: [portfolio.id],
+  }),
+}));
+
+// Portfolio Holdings - Current position snapshots
+export const portfolioHolding = pgTable("portfolio_holding", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  portfolioId: text("portfolio_id")
+    .notNull()
+    .references(() => portfolio.id, { onDelete: "cascade" }),
+  symbol: text("symbol").notNull(),
+  shares: real("shares").notNull(),
+  avgCostBasis: real("avg_cost_basis").notNull(),
+  currentPrice: real("current_price"), // Updated when fetching prices
+  currentValue: real("current_value"), // shares * currentPrice
+  gainLoss: real("gain_loss"), // currentValue - (shares * avgCostBasis)
+  gainLossPercent: real("gain_loss_percent"),
+  lastUpdated: timestamp("last_updated"),
+});
+
+export const portfolioHoldingRelations = relations(portfolioHolding, ({ one }) => ({
+  portfolio: one(portfolio, {
+    fields: [portfolioHolding.portfolioId],
+    references: [portfolio.id],
+  }),
+}));
+
 // User Relations (consolidated)
 export const userRelations = relations(user, ({ many }) => ({
   posts: many(post),
@@ -516,4 +647,6 @@ export const userRelations = relations(user, ({ many }) => ({
   stockAnalyses: many(stockAnalysis),
   fundAnalyses: many(fundAnalysis),
   jobPostings: many(jobPosting),
+  chatSessions: many(chatSession),
+  portfolios: many(portfolio),
 }));
