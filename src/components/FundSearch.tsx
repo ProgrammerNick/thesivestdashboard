@@ -41,6 +41,7 @@ export function FundSearch() {
     const [result, setResult] = useState<SearchResult | null>(null);
     const [error, setError] = useState("");
     const [history, setHistory] = useState<SavedAnalysis[]>([]);
+    const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
     // Fetch history
     const loadHistory = async () => {
@@ -94,12 +95,92 @@ export function FundSearch() {
             });
             setResult(data);
             loadHistory(); // Reload history after new search (it saves automatically)
+
+            // Initialize chat session if user is logged in
+            if (session?.user?.id) {
+                const sessionData = await getOrCreateChatSession({
+                    data: {
+                        userId: session.user.id,
+                        type: "fund",
+                        contextId: query,
+                        title: `${data.fundName} Analysis`,
+                    },
+                });
+                setCurrentSessionId(sessionData.id);
+            }
         } catch (err) {
             console.error(err);
             setError("Could not fetch fund data. Please try again.");
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const buildFundContext = () => {
+        if (!result) return "";
+        return `
+Fund: ${result.fundName}
+Strategy: ${result.strategy}
+Recent Activity: ${result.recentActivity}
+Performance Outlook: ${result.performanceOutlook}
+Conviction Thesis: ${result.convictionThesis}
+Ownership Concentration: ${result.ownershipConcentration}
+Position Sizing Logic: ${result.positionSizingLogic}
+Cash Position: ${result.cashPosition}
+Top Holdings: ${result.holdings.map(h => `${h.symbol} (${h.percent}%)`).join(", ")}
+        `.trim();
+    };
+
+    const handleSendMessage = async (message: string): Promise<string> => {
+        if (!result) return "Please search for a fund first.";
+
+        // Ensure we have a session
+        let sessionId = currentSessionId;
+        if (!sessionId && session?.user?.id) {
+            const sessionData = await getOrCreateChatSession({
+                data: {
+                    userId: session.user.id,
+                    type: "fund",
+                    contextId: query,
+                    title: `${result.fundName} Analysis`,
+                },
+            });
+            sessionId = sessionData.id;
+            setCurrentSessionId(sessionId);
+        }
+
+        // Save user message
+        if (sessionId) {
+            await addChatMessage({
+                data: {
+                    sessionId: sessionId,
+                    role: "user",
+                    content: message,
+                },
+            });
+        }
+
+        // Get AI response
+        const response = await chatWithFund({
+            data: {
+                fundName: result.fundName,
+                context: buildFundContext(),
+                messages: [{ role: "user", content: message }],
+            }
+        });
+
+        // Save AI response
+        if (sessionId) {
+            await addChatMessage({
+                data: {
+                    sessionId: sessionId,
+                    role: "model",
+                    content: response,
+                },
+            });
+        }
+
+        return response;
     };
 
     return (
@@ -207,47 +288,13 @@ export function FundSearch() {
                                 </Card>
                             </div>
 
-                            {/* Holdings & Conviction Column */}
-                            <div className="space-y-6">
-                                <Card className="p-6 bg-card/50 border-border/60 h-auto">
-                                    <h4 className="text-sm font-bold uppercase tracking-wider text-primary mb-3">Conviction Thesis</h4>
-                                    <p className="text-muted-foreground text-sm leading-relaxed italic border-l-2 border-primary/20 pl-4">
-                                        "{result.convictionThesis}"
-                                    </p>
-                                </Card>
-
-                                <Card className="p-0 overflow-hidden border-border/50 bg-card/50">
-                                    <div className="p-6 border-b border-border/50 flex items-center justify-between bg-muted/20">
-                                        <div className="flex items-center gap-2">
-                                            <Wallet className="w-5 h-5 text-muted-foreground" />
-                                            <h3 className="font-semibold">Top Holdings Detected</h3>
-                                        </div>
-                                    </div>
-                                    <div className="divide-y divide-border/50">
-                                        {result.holdings.map((holding) => (
-                                            <div key={holding.symbol} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-lg bg-background border border-border flex items-center justify-center font-bold text-sm">
-                                                        {holding.symbol}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-semibold text-foreground">{holding.name}</div>
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="font-medium tabular-nums">{holding.percent}%</div>
-                                                    <div className="text-xs text-muted-foreground">Portfolio</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="p-4 bg-muted/20 text-center">
-                                        <div className="pt-2 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                            Analysis generated just now based on latest available holdings.
-                                        </div>
-                                    </div>
-                                </Card>
+                            {/* Chat Column */}
+                            <div className="lg:sticky lg:top-24 h-[800px]">
+                                <CleanChatInterface
+                                    onSendMessage={handleSendMessage}
+                                    initialMessage={`I've analyzed ${result.fundName}'s investment strategy and holdings. What would you like to know about this fund?`}
+                                    placeholder={`Ask anything about ${result.fundName}...`}
+                                />
                             </div>
                         </motion.div>
                     )}

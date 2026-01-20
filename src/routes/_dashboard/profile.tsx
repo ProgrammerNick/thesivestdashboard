@@ -32,10 +32,14 @@ import {
   ArrowDownRight,
   Loader2,
   Trash2,
-  Settings
+  Settings,
+  Home,
+  ExternalLink,
+  Activity
 } from "lucide-react";
 import { Link } from "@tanstack/react-router"; // Added Link import
 import { getPortfolios, createPortfolio, getPortfolio, addTransaction, deletePortfolio } from "@/server/fn/portfolio";
+import { getUserTradesFn } from "@/server/fn/profile";
 
 // Server function to get current profile and posts
 const getProfileData = createServerFn({ method: "GET" }).handler(async () => {
@@ -48,8 +52,11 @@ const getProfileData = createServerFn({ method: "GET" }).handler(async () => {
 
   const { getPostsByUserId: getPostsByUserIdDA } = await import("@/server/data-access/posts");
   const posts = await getPostsByUserIdDA(session.user.id);
+  
+  // Get user trades for trading data
+  const trades = await getUserTradesFn({ data: { userId: session.user.id, limit: 100 } });
 
-  return { user: session.user, posts };
+  return { user: session.user, posts, trades };
 });
 
 export const Route = createFileRoute("/_dashboard/profile")({
@@ -60,14 +67,60 @@ export const Route = createFileRoute("/_dashboard/profile")({
 });
 
 function ProfilePage() {
-  const { user, posts } = useLoaderData({ from: "/_dashboard/profile" });
+  const { user, posts, trades } = useLoaderData({ from: "/_dashboard/profile" });
   // Removed edit profile state and handlers
+  
+  // Calculate trading stats from actual trades
+  const tradingStats = {
+    totalTrades: trades.length,
+    activeTrades: trades.filter(t => !t.sellPrice && !t.sellDate).length,
+    closedTrades: trades.filter(t => t.sellPrice && t.sellDate).length,
+    totalProfit: trades
+      .filter(t => t.sellPrice && t.buyPrice)
+      .reduce((sum, t) => {
+        // Calculate profit based on buy/sell prices
+        // For now, calculate percentage return (can be enhanced with position size if available)
+        const profitPercent = ((t.sellPrice! - t.buyPrice!) / t.buyPrice!) * 100;
+        // Assume $1000 position size for calculation (can be made configurable)
+        return sum + (profitPercent * 10); // $10 per 1% return
+      }, 0),
+    winRate: (() => {
+      const closed = trades.filter(t => t.sellPrice && t.buyPrice);
+      if (closed.length === 0) return 0;
+      const wins = closed.filter(t => t.sellPrice! > t.buyPrice!).length;
+      return (wins / closed.length) * 100;
+    })(),
+  };
 
   const investingStyles = ["Value", "Growth", "Momentum", "Dividend", "Index", "Quantitative", "Day Trading"];
   const experienceLevels = ["Beginner", "Intermediate", "Advanced", "Professional"];
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+      {/* Navigation Header */}
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" asChild>
+          <Link to="/dashboard">
+            <Home className="w-4 h-4 mr-2" />
+            Dashboard
+          </Link>
+        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link to={`/profiles/${user.id}`} target="_blank">
+              <ExternalLink className="w-4 h-4 mr-2" />
+              View Public Profile
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/settings">
+              <Settings className="w-4 h-4 mr-2" />
+              Edit Profile
+            </Link>
+          </Button>
+        </div>
+      </div>
+
       {/* Profile Header */}
       <div className="flex flex-col md:flex-row items-center gap-6 p-6 bg-card rounded-xl border border-border shadow-sm">
         <Avatar className="w-24 h-24 border-4 border-background shadow-md">
@@ -89,17 +142,60 @@ function ProfilePage() {
               <Badge variant="outline">{(user as any).experienceLevel}</Badge>
             )}
             {posts.length > 0 && <Badge variant="secondary">{posts.length} Posts</Badge>}
+            {tradingStats.totalTrades > 0 && (
+              <Badge variant="secondary" className="gap-1">
+                <Activity className="w-3 h-3" />
+                {tradingStats.totalTrades} Trades
+              </Badge>
+            )}
           </div>
         </div>
-
-        {/* Edit Profile Button */}
-        <Button variant="outline" asChild>
-          <Link to="/settings">
-            <Settings className="w-4 h-4 mr-2" />
-            Edit Profile
-          </Link>
-        </Button>
       </div>
+
+      {/* Trading Stats Card */}
+      {tradingStats.totalTrades > 0 && (
+        <Card className="bg-gradient-to-br from-card to-card/50 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-primary" />
+              Trading Performance
+            </CardTitle>
+            <CardDescription>
+              Based on your self-reported trades
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-4 rounded-lg bg-muted/30">
+                <p className="text-sm text-muted-foreground mb-1">Total Trades</p>
+                <p className="text-2xl font-bold">{tradingStats.totalTrades}</p>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/30">
+                <p className="text-sm text-muted-foreground mb-1">Active Positions</p>
+                <p className="text-2xl font-bold text-primary">{tradingStats.activeTrades}</p>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/30">
+                <p className="text-sm text-muted-foreground mb-1">Win Rate</p>
+                <p className="text-2xl font-bold">{tradingStats.winRate.toFixed(1)}%</p>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/30">
+                <p className="text-sm text-muted-foreground mb-1">Total Profit</p>
+                <p className={`text-2xl font-bold ${tradingStats.totalProfit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  ${tradingStats.totalProfit >= 0 ? '+' : ''}{tradingStats.totalProfit.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <Button variant="outline" asChild>
+                <Link to={`/profiles/${user.id}`}>
+                  View Full Trading History
+                  <ExternalLink className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Content Tabs */}
       <Tabs defaultValue="posts" className="w-full">
@@ -110,9 +206,41 @@ function ProfilePage() {
         </TabsList>
 
         <TabsContent value="posts" className="space-y-4 mt-4">
-          <h2 className="text-xl font-bold">Your Contributions</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold">Your Contributions</h2>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" asChild>
+                <Link to="/research?type=trade">
+                  <Activity className="w-4 h-4 mr-2" />
+                  Record Trade
+                </Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/write">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New Research
+                </Link>
+              </Button>
+            </div>
+          </div>
           {posts.length === 0 ? (
-            <p className="text-muted-foreground italic">You haven't posted any research yet.</p>
+            <div className="text-center py-12 border border-dashed rounded-lg">
+              <p className="text-muted-foreground mb-4">You haven't posted any research yet.</p>
+              <div className="flex gap-2 justify-center">
+                <Button variant="outline" asChild>
+                  <Link to="/research?type=trade">
+                    <Activity className="w-4 h-4 mr-2" />
+                    Record Trade
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/write">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New Research
+                  </Link>
+                </Button>
+              </div>
+            </div>
           ) : (
             <div className="grid gap-4">
               {posts.map((post) => {

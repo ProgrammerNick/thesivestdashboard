@@ -4,6 +4,7 @@
  */
 
 import { GoogleGenAI } from "@google/genai";
+import { retryGeminiCall } from "../utils/gemini-retry";
 
 export type Catalyst = {
     event: string;
@@ -83,89 +84,92 @@ export async function generateStockAnalysis(query: string): Promise<StockData> {
 
         Write in plain English. Return data in the specified JSON format.`;
 
-        // @ts-ignore
-        const result = await client.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            config: {
-                tools: [{ googleSearch: {} }],
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "OBJECT",
-                    properties: {
-                        symbol: { type: "STRING" },
-                        companyName: { type: "STRING" },
-                        businessSummary: {
-                            type: "STRING",
-                            description: "How the company makes money (2-3 sentences in plain English)."
-                        },
-                        moatAnalysis: {
-                            type: "STRING",
-                            description: "Competitive advantages protecting the business."
-                        },
-                        keyRisks: {
-                            type: "ARRAY",
-                            items: { type: "STRING" },
-                            description: "Top 3 risks as separate list items."
-                        },
-                        growthCatalysts: {
-                            type: "STRING",
-                            description: "Near-term drivers of revenue and earnings growth."
-                        },
-                        financialHealth: {
-                            type: "STRING",
-                            description: "Comment on profitability, margins, and debt levels."
-                        },
-                        valuationCommentary: {
-                            type: "STRING",
-                            description: "Is it expensive or cheap vs history and peers?"
-                        },
-                        capitalAllocation: {
-                            type: "STRING",
-                            description: "How management deploys capital. Are they shareholder-friendly?"
-                        },
-                        earningsQuality: {
-                            type: "STRING",
-                            description: "Is earnings growth real? Compare cash flow to net income."
-                        },
-                        shortInterest: {
-                            type: "STRING",
-                            nullable: true,
-                            description: "Only include if notable (>5% of float). Otherwise null."
-                        },
-                        upcomingCatalysts: {
-                            type: "ARRAY",
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    event: { type: "STRING", description: "What is happening" },
-                                    date: { type: "STRING", description: "When (approximate if needed)" },
-                                    impact: { type: "STRING", description: "Bullish/Bearish/Neutral and why" }
-                                },
-                                required: ["event", "date", "impact"]
+        // Wrap the API call in retry logic
+        const result = await retryGeminiCall(async () => {
+            // @ts-ignore
+            return await client.models.generateContent({
+                model: "gemini-3-flash-preview",
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                config: {
+                    tools: [{ googleSearch: {} }],
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            symbol: { type: "STRING" },
+                            companyName: { type: "STRING" },
+                            businessSummary: {
+                                type: "STRING",
+                                description: "How the company makes money (2-3 sentences in plain English)."
                             },
-                            description: "Upcoming events that could move the stock."
-                        },
-                        comparableMultiples: {
-                            type: "ARRAY",
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    ticker: { type: "STRING" },
-                                    name: { type: "STRING" },
-                                    peRatio: { type: "STRING", description: "e.g. 25.3x" },
-                                    evEbitda: { type: "STRING", description: "e.g. 15.2x" },
-                                    premium: { type: "STRING", description: "Why they trade at premium/discount" }
-                                },
-                                required: ["ticker", "name", "peRatio", "evEbitda", "premium"]
+                            moatAnalysis: {
+                                type: "STRING",
+                                description: "Competitive advantages protecting the business."
                             },
-                            description: "3-4 competitors for valuation comparison."
-                        }
+                            keyRisks: {
+                                type: "ARRAY",
+                                items: { type: "STRING" },
+                                description: "Top 3 risks as separate list items."
+                            },
+                            growthCatalysts: {
+                                type: "STRING",
+                                description: "Near-term drivers of revenue and earnings growth."
+                            },
+                            financialHealth: {
+                                type: "STRING",
+                                description: "Comment on profitability, margins, and debt levels."
+                            },
+                            valuationCommentary: {
+                                type: "STRING",
+                                description: "Is it expensive or cheap vs history and peers?"
+                            },
+                            capitalAllocation: {
+                                type: "STRING",
+                                description: "How management deploys capital. Are they shareholder-friendly?"
+                            },
+                            earningsQuality: {
+                                type: "STRING",
+                                description: "Is earnings growth real? Compare cash flow to net income."
+                            },
+                            shortInterest: {
+                                type: "STRING",
+                                nullable: true,
+                                description: "Only include if notable (>5% of float). Otherwise null."
+                            },
+                            upcomingCatalysts: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        event: { type: "STRING", description: "What is happening" },
+                                        date: { type: "STRING", description: "When (approximate if needed)" },
+                                        impact: { type: "STRING", description: "Bullish/Bearish/Neutral and why" }
+                                    },
+                                    required: ["event", "date", "impact"]
+                                },
+                                description: "Upcoming events that could move the stock."
+                            },
+                            comparableMultiples: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        ticker: { type: "STRING" },
+                                        name: { type: "STRING" },
+                                        peRatio: { type: "STRING", description: "e.g. 25.3x" },
+                                        evEbitda: { type: "STRING", description: "e.g. 15.2x" },
+                                        premium: { type: "STRING", description: "Why they trade at premium/discount" }
+                                    },
+                                    required: ["ticker", "name", "peRatio", "evEbitda", "premium"]
+                                },
+                                description: "3-4 competitors for valuation comparison."
+                            }
+                        },
+                        required: ["symbol", "companyName", "businessSummary", "moatAnalysis", "keyRisks", "growthCatalysts", "financialHealth", "valuationCommentary", "capitalAllocation", "earningsQuality", "upcomingCatalysts", "comparableMultiples"],
                     },
-                    required: ["symbol", "companyName", "businessSummary", "moatAnalysis", "keyRisks", "growthCatalysts", "financialHealth", "valuationCommentary", "capitalAllocation", "earningsQuality", "upcomingCatalysts", "comparableMultiples"],
                 },
-            },
-        });
+            });
+        }, { maxRetries: 3 });
 
         const responseText = result.text;
 

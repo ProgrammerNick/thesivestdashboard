@@ -852,8 +852,8 @@ function Profile() {
                     <div className="text-center py-12 text-muted-foreground">
                       <Search className="w-12 h-12 mx-auto mb-4 opacity-20" />
                       <p>No research history found.</p>
-                      <Link to="/funds">
-                        <Button variant="link" className="mt-2">Start new research</Button>
+                      <Link to="/write">
+                        <Button variant="link" className="mt-2">Create new research</Button>
                       </Link>
                     </div>
                   )}

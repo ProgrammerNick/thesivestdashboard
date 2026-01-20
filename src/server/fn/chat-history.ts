@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "../../db/index";
 import { chatSession, chatMessage } from "../../db/schema";
 import { eq, desc, and } from "drizzle-orm";
+import { GoogleGenAI } from "@google/genai";
 
 // Types for the chat history
 export type ChatSessionType = "fund" | "stock" | "fund-intelligence";
@@ -137,6 +138,22 @@ export const addChatMessage = createServerFn({ method: "POST" })
         return newMessage[0];
     });
 
+// Update a chat session title
+export const updateChatSessionTitle = createServerFn({ method: "POST" })
+    .inputValidator(
+        z.object({
+            sessionId: z.string(),
+            title: z.string(),
+        })
+    )
+    .handler(async ({ data }) => {
+        await db
+            .update(chatSession)
+            .set({ title: data.title })
+            .where(eq(chatSession.id, data.sessionId));
+        return { success: true };
+    });
+
 // Delete a chat session (and all its messages via cascade)
 export const deleteChatSession = createServerFn({ method: "POST" })
     .inputValidator(
@@ -147,6 +164,87 @@ export const deleteChatSession = createServerFn({ method: "POST" })
     .handler(async ({ data }) => {
         await db.delete(chatSession).where(eq(chatSession.id, data.sessionId));
         return { success: true };
+    });
+
+// Generate a smart summary for a chat session using AI
+export const generateChatSummary = createServerFn({ method: "POST" })
+    .inputValidator(
+        z.object({
+            sessionId: z.string(),
+            messages: z.array(
+                z.object({
+                    role: z.enum(["user", "model"]),
+                    content: z.string(),
+                })
+            ),
+        })
+    )
+    .handler(async ({ data }) => {
+        const geminiKey = process.env.GEMINI_API_KEY;
+
+        if (!geminiKey) {
+            console.warn("Missing Gemini API Key - skipping summary generation");
+            return null;
+        }
+
+        try {
+            const client = new GoogleGenAI({
+                apiKey: geminiKey,
+            });
+
+            // Take first 3 messages for summary context
+            const contextMessages = data.messages.slice(0, 3);
+            const conversationText = contextMessages
+                .map((m) => `${m.role === "user" ? "User" : "AI"}: ${m.content}`)
+                .join("\n");
+
+            const prompt = `Generate a short, descriptive title (max 6 words) for this financial research conversation. Focus on the main topic or question. Do not include quotes or punctuation at the end.
+
+Conversation:
+${conversationText}
+
+Title:`;
+
+            // @ts-ignore
+            const result = await client.models.generateContent({
+                model: "gemini-3-flash-preview",
+                contents: [
+                    {
+                        role: "user",
+                        parts: [{ text: prompt }],
+                    },
+                ],
+            });
+
+            let summary = "";
+            if (result?.text) {
+                summary = typeof result.text === "function" ? result.text() : result.text;
+            } else if (result?.response?.text) {
+                summary = typeof result.response.text === "function" ? result.response.text() : result.response.text;
+            } else if (result?.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                summary = result.response.candidates[0].content.parts[0].text;
+            } else if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                summary = result.candidates[0].content.parts[0].text;
+            }
+
+            // Clean up the summary
+            summary = summary.trim().replace(/^["']|["']$/g, "");
+
+            if (summary) {
+                // Update the session title
+                await db
+                    .update(chatSession)
+                    .set({ title: summary })
+                    .where(eq(chatSession.id, data.sessionId));
+
+                return summary;
+            }
+
+            return null;
+        } catch (error) {
+            console.error("Failed to generate chat summary:", error);
+            return null;
+        }
     });
 
 // Get or create a session for continuing a conversation
@@ -160,6 +258,53 @@ export const getOrCreateChatSession = createServerFn({ method: "POST" })
         })
     )
     .handler(async ({ data }) => {
+        // Validate that user exists to prevent foreign key constraint error
+        const { user: userTable } = await import("../../db/schema");
+
+        try {
+            const userExists = await db
+                .select({ id: userTable.id })
+                .from(userTable)
+                .where(eq(userTable.id, data.userId))
+                .limit(1);
+
+            if (!userExists || userExists.length === 0) {
+                console.warn(`User ${data.userId} not found in database. This might be a sync issue with Better Auth.`);
+
+                // Instead of failing, return a temporary session that doesn't persist
+                // This allows the chat to work even if database sync is delayed
+                return {
+                    id: `temp-${crypto.randomUUID()}`,
+                    userId: data.userId,
+                    type: data.type,
+                    contextId: data.contextId,
+                    title: data.title,
+                    preview: null,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    messages: [],
+                    isNew: true,
+                    isTemporary: true, // Flag to indicate this won't persist
+                };
+            }
+        } catch (error) {
+            console.error("Error validating user:", error);
+            // Fall back to temporary session on error
+            return {
+                id: `temp-${crypto.randomUUID()}`,
+                userId: data.userId,
+                type: data.type,
+                contextId: data.contextId,
+                title: data.title,
+                preview: null,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                messages: [],
+                isNew: true,
+                isTemporary: true,
+            };
+        }
+
         // Check for existing recent session with same context
         const existing = await db
             .select()
@@ -190,19 +335,24 @@ export const getOrCreateChatSession = createServerFn({ method: "POST" })
         }
 
         // Create new session
-        const newSession = await db
-            .insert(chatSession)
-            .values({
-                userId: data.userId,
-                type: data.type,
-                contextId: data.contextId,
-                title: data.title,
-            })
-            .returning();
+        try {
+            const newSession = await db
+                .insert(chatSession)
+                .values({
+                    userId: data.userId,
+                    type: data.type,
+                    contextId: data.contextId,
+                    title: data.title,
+                })
+                .returning();
 
-        return {
-            ...newSession[0],
-            messages: [],
-            isNew: true,
-        };
+            return {
+                ...newSession[0],
+                messages: [],
+                isNew: true,
+            };
+        } catch (error) {
+            console.error("Failed to create chat session:", error);
+            throw new Error(`Failed to create session: ${error instanceof Error ? error.message : String(error)}`);
+        }
     });

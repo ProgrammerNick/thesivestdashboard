@@ -38,12 +38,14 @@ import { Route as DashboardFundsRouteImport } from './routes/_dashboard/funds'
 import { Route as DashboardFundIntelligenceRouteImport } from './routes/_dashboard/fund-intelligence'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard/dashboard'
 import { Route as DashboardCommunityRouteImport } from './routes/_dashboard/community'
+import { Route as DashboardChatsRouteImport } from './routes/_dashboard/chats'
 import { Route as ProfilesIdTradesRouteImport } from './routes/profiles.$id.trades'
 import { Route as ProfilesIdPerformanceRouteImport } from './routes/profiles.$id.performance'
 import { Route as ApiUsersUpdateNameRouteImport } from './routes/api/users/update-name'
 import { Route as ApiProfilesIdRouteImport } from './routes/api/profiles/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as DashboardPostPostIdRouteImport } from './routes/_dashboard/post.$postId'
+import { Route as DashboardChatSessionIdRouteImport } from './routes/_dashboard/chat.$sessionId'
 import { Route as ApiProfilesIdTradeHistoryRouteImport } from './routes/api/profiles/$id/trade-history'
 import { Route as ApiProfilesIdPerformanceRouteImport } from './routes/api/profiles/$id/performance'
 
@@ -192,6 +194,11 @@ const DashboardCommunityRoute = DashboardCommunityRouteImport.update({
   path: '/community',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardChatsRoute = DashboardChatsRouteImport.update({
+  id: '/chats',
+  path: '/chats',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const ProfilesIdTradesRoute = ProfilesIdTradesRouteImport.update({
   id: '/trades',
   path: '/trades',
@@ -222,6 +229,11 @@ const DashboardPostPostIdRoute = DashboardPostPostIdRouteImport.update({
   path: '/post/$postId',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardChatSessionIdRoute = DashboardChatSessionIdRouteImport.update({
+  id: '/chat/$sessionId',
+  path: '/chat/$sessionId',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const ApiProfilesIdTradeHistoryRoute =
   ApiProfilesIdTradeHistoryRouteImport.update({
     id: '/trade-history',
@@ -243,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/sanity': typeof SanityRoute
   '/seed': typeof SeedRoute
   '/signup': typeof SignupRoute
+  '/chats': typeof DashboardChatsRoute
   '/community': typeof DashboardCommunityRoute
   '/dashboard': typeof DashboardDashboardRoute
   '/fund-intelligence': typeof DashboardFundIntelligenceRoute
@@ -264,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/posts/$slug': typeof PostsSlugRoute
   '/profiles/$id': typeof ProfilesIdRouteWithChildren
   '/corporations': typeof CorporationsIndexRoute
+  '/chat/$sessionId': typeof DashboardChatSessionIdRoute
   '/post/$postId': typeof DashboardPostPostIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
@@ -281,6 +295,7 @@ export interface FileRoutesByTo {
   '/sanity': typeof SanityRoute
   '/seed': typeof SeedRoute
   '/signup': typeof SignupRoute
+  '/chats': typeof DashboardChatsRoute
   '/community': typeof DashboardCommunityRoute
   '/dashboard': typeof DashboardDashboardRoute
   '/fund-intelligence': typeof DashboardFundIntelligenceRoute
@@ -302,6 +317,7 @@ export interface FileRoutesByTo {
   '/posts/$slug': typeof PostsSlugRoute
   '/profiles/$id': typeof ProfilesIdRouteWithChildren
   '/corporations': typeof CorporationsIndexRoute
+  '/chat/$sessionId': typeof DashboardChatSessionIdRoute
   '/post/$postId': typeof DashboardPostPostIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
@@ -321,6 +337,7 @@ export interface FileRoutesById {
   '/sanity': typeof SanityRoute
   '/seed': typeof SeedRoute
   '/signup': typeof SignupRoute
+  '/_dashboard/chats': typeof DashboardChatsRoute
   '/_dashboard/community': typeof DashboardCommunityRoute
   '/_dashboard/dashboard': typeof DashboardDashboardRoute
   '/_dashboard/fund-intelligence': typeof DashboardFundIntelligenceRoute
@@ -342,6 +359,7 @@ export interface FileRoutesById {
   '/posts/$slug': typeof PostsSlugRoute
   '/profiles/$id': typeof ProfilesIdRouteWithChildren
   '/corporations/': typeof CorporationsIndexRoute
+  '/_dashboard/chat/$sessionId': typeof DashboardChatSessionIdRoute
   '/_dashboard/post/$postId': typeof DashboardPostPostIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
@@ -361,6 +379,7 @@ export interface FileRouteTypes {
     | '/sanity'
     | '/seed'
     | '/signup'
+    | '/chats'
     | '/community'
     | '/dashboard'
     | '/fund-intelligence'
@@ -382,6 +401,7 @@ export interface FileRouteTypes {
     | '/posts/$slug'
     | '/profiles/$id'
     | '/corporations'
+    | '/chat/$sessionId'
     | '/post/$postId'
     | '/api/auth/$'
     | '/api/profiles/$id'
@@ -399,6 +419,7 @@ export interface FileRouteTypes {
     | '/sanity'
     | '/seed'
     | '/signup'
+    | '/chats'
     | '/community'
     | '/dashboard'
     | '/fund-intelligence'
@@ -420,6 +441,7 @@ export interface FileRouteTypes {
     | '/posts/$slug'
     | '/profiles/$id'
     | '/corporations'
+    | '/chat/$sessionId'
     | '/post/$postId'
     | '/api/auth/$'
     | '/api/profiles/$id'
@@ -438,6 +460,7 @@ export interface FileRouteTypes {
     | '/sanity'
     | '/seed'
     | '/signup'
+    | '/_dashboard/chats'
     | '/_dashboard/community'
     | '/_dashboard/dashboard'
     | '/_dashboard/fund-intelligence'
@@ -459,6 +482,7 @@ export interface FileRouteTypes {
     | '/posts/$slug'
     | '/profiles/$id'
     | '/corporations/'
+    | '/_dashboard/chat/$sessionId'
     | '/_dashboard/post/$postId'
     | '/api/auth/$'
     | '/api/profiles/$id'
@@ -696,6 +720,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCommunityRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/chats': {
+      id: '/_dashboard/chats'
+      path: '/chats'
+      fullPath: '/chats'
+      preLoaderRoute: typeof DashboardChatsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/profiles/$id/trades': {
       id: '/profiles/$id/trades'
       path: '/trades'
@@ -738,6 +769,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardPostPostIdRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/chat/$sessionId': {
+      id: '/_dashboard/chat/$sessionId'
+      path: '/chat/$sessionId'
+      fullPath: '/chat/$sessionId'
+      preLoaderRoute: typeof DashboardChatSessionIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/api/profiles/$id/trade-history': {
       id: '/api/profiles/$id/trade-history'
       path: '/trade-history'
@@ -756,6 +794,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface DashboardRouteChildren {
+  DashboardChatsRoute: typeof DashboardChatsRoute
   DashboardCommunityRoute: typeof DashboardCommunityRoute
   DashboardDashboardRoute: typeof DashboardDashboardRoute
   DashboardFundIntelligenceRoute: typeof DashboardFundIntelligenceRoute
@@ -769,10 +808,12 @@ interface DashboardRouteChildren {
   DashboardTalentRoute: typeof DashboardTalentRoute
   DashboardTournamentsRoute: typeof DashboardTournamentsRoute
   DashboardWriteRoute: typeof DashboardWriteRoute
+  DashboardChatSessionIdRoute: typeof DashboardChatSessionIdRoute
   DashboardPostPostIdRoute: typeof DashboardPostPostIdRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardChatsRoute: DashboardChatsRoute,
   DashboardCommunityRoute: DashboardCommunityRoute,
   DashboardDashboardRoute: DashboardDashboardRoute,
   DashboardFundIntelligenceRoute: DashboardFundIntelligenceRoute,
@@ -786,6 +827,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardTalentRoute: DashboardTalentRoute,
   DashboardTournamentsRoute: DashboardTournamentsRoute,
   DashboardWriteRoute: DashboardWriteRoute,
+  DashboardChatSessionIdRoute: DashboardChatSessionIdRoute,
   DashboardPostPostIdRoute: DashboardPostPostIdRoute,
 }
 

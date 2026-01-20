@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Search, Loader2, BrainCircuit, TrendingUp, AlertTriangle, Scale, Activity, Calendar, Target, Send, MessageSquare, Bot, User, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Search, Loader2, BrainCircuit, TrendingUp, AlertTriangle, Scale, Activity, Calendar, Target } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -9,53 +9,18 @@ import { chatWithStock } from "../server/fn/stock-chat";
 import { getSymbolPosts } from "../server/fn/posts";
 import { Badge } from "./ui/badge";
 import { ResearchChart } from "./ResearchChart";
-import { ScrollArea } from "./ui/scroll-area";
-import { Avatar, AvatarFallback } from "./ui/avatar";
-
-interface ChatMessage {
-    role: "user" | "model";
-    content: string;
-}
+import { getOrCreateChatSession, addChatMessage } from "../server/fn/chat-history";
+import { authClient } from "../lib/auth-client";
+import { CleanChatInterface } from "./CleanChatInterface";
 
 export function StockSearch() {
+    const { data: session } = authClient.useSession();
     const [query, setQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<StockData | null>(null);
     const [posts, setPosts] = useState<any[]>([]);
     const [error, setError] = useState("");
-
-    // Chat state
-    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-    const [chatInput, setChatInput] = useState("");
-    const [isChatLoading, setIsChatLoading] = useState(false);
-    const chatScrollRef = useRef<HTMLDivElement>(null);
-
-    // Cache key for localStorage
-    const getCacheKey = (symbol: string) => `thesivest_chat_stock_${symbol}`;
-
-    // Load cached messages when result changes
-    useEffect(() => {
-        if (result?.symbol) {
-            const cached = localStorage.getItem(getCacheKey(result.symbol));
-            if (cached) {
-                try {
-                    const parsed = JSON.parse(cached);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        setChatMessages(parsed);
-                    }
-                } catch (e) {
-                    console.error("Failed to parse cached chat:", e);
-                }
-            }
-        }
-    }, [result?.symbol]);
-
-    // Save messages to localStorage when they change
-    useEffect(() => {
-        if (result?.symbol && chatMessages.length > 0) {
-            localStorage.setItem(getCacheKey(result.symbol), JSON.stringify(chatMessages));
-        }
-    }, [chatMessages, result?.symbol]);
+    const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,7 +30,7 @@ export function StockSearch() {
         setError("");
         setResult(null);
         setPosts([]);
-        setChatMessages([]); // Reset chat on new search (will load from cache if exists)
+        setCurrentSessionId(null);
 
         try {
             const [stockData, postsData] = await Promise.all([
@@ -75,6 +40,19 @@ export function StockSearch() {
 
             setResult(stockData);
             setPosts(postsData);
+
+            // Initialize chat session if user is logged in
+            if (session?.user?.id) {
+                const sessionData = await getOrCreateChatSession({
+                    data: {
+                        userId: session.user.id,
+                        type: "stock",
+                        contextId: stockData.symbol,
+                        title: `${stockData.symbol} - ${stockData.companyName}`,
+                    },
+                });
+                setCurrentSessionId(sessionData.id);
+            }
         } catch (err) {
             console.error(err);
             setError("Could not fetch stock data. Please try again.");
@@ -100,50 +78,61 @@ Capital Allocation: ${result.capitalAllocation}
         `.trim();
     };
 
-    const handleSendChat = async () => {
-        if (!chatInput.trim() || !result) return;
+    const handleSendMessage = async (message: string): Promise<string> => {
+        if (!result) return "Please search for a stock first.";
 
-        const userMessage: ChatMessage = { role: "user", content: chatInput };
-        setChatMessages(prev => [...prev, userMessage]);
-        setChatInput("");
-        setIsChatLoading(true);
-
-        try {
-            const response = await chatWithStock({
+        // Ensure we have a session
+        let sessionId = currentSessionId;
+        if (!sessionId && session?.user?.id) {
+            const sessionData = await getOrCreateChatSession({
                 data: {
-                    symbol: result.symbol,
-                    context: buildChatContext(),
-                    messages: [...chatMessages, userMessage],
-                }
+                    userId: session.user.id,
+                    type: "stock",
+                    contextId: result.symbol,
+                    title: `${result.symbol} - ${result.companyName}`,
+                },
             });
-
-            setChatMessages(prev => [...prev, { role: "model", content: response }]);
-        } catch (err) {
-            console.error("Chat error:", err);
-            setChatMessages(prev => [...prev, { role: "model", content: "I encountered an error. Please try again." }]);
-        } finally {
-            setIsChatLoading(false);
+            sessionId = sessionData.id;
+            setCurrentSessionId(sessionId);
         }
+
+        // Save user message
+        if (sessionId) {
+            await addChatMessage({
+                data: {
+                    sessionId: sessionId,
+                    role: "user",
+                    content: message,
+                },
+            });
+        }
+
+        // Get AI response
+        const response = await chatWithStock({
+            data: {
+                symbol: result.symbol,
+                context: buildChatContext(),
+                messages: [{ role: "user", content: message }],
+            }
+        });
+
+        // Save AI response
+        if (sessionId) {
+            await addChatMessage({
+                data: {
+                    sessionId: sessionId,
+                    role: "model",
+                    content: response,
+                },
+            });
+        }
+
+        return response;
     };
-
-    // Clear chat history for current stock
-    const handleClearStockChat = () => {
-        if (result?.symbol) {
-            localStorage.removeItem(getCacheKey(result.symbol));
-            setChatMessages([]);
-        }
-    };
-
-    // Auto-scroll chat
-    useEffect(() => {
-        if (chatScrollRef.current) {
-            chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-        }
-    }, [chatMessages]);
 
     return (
         <section className="py-12 container mx-auto px-6">
-            <div className="max-w-4xl mx-auto space-y-12">
+            <div className="max-w-7xl mx-auto space-y-12">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-5xl font-heading text-foreground">
                         Institutional-Grade Stock Analysis
@@ -197,237 +186,130 @@ Capital Allocation: ${result.capitalAllocation}
                                     </div>
                                     <p className="text-muted-foreground mt-2 max-w-2xl">{result.businessSummary}</p>
                                 </div>
-                                <div className="flex items-center gap-2 text-primary bg-primary/10 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
+                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
                                     <BrainCircuit className="w-4 h-4" />
                                     AI Generated Analysis
                                 </div>
                             </div>
 
-                            {/* Research Chart with Stamping */}
+                            {/* Research Chart */}
                             <ResearchChart symbol={result.symbol} posts={posts} />
 
-                            {/* Main Grid */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                {/* Moat Analysis */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-blue-500">
-                                        <Scale className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Economic Moat</h4>
-                                    </div>
-                                    <p className="text-muted-foreground leading-relaxed">{result.moatAnalysis}</p>
-                                </Card>
-
-                                {/* Growth Catalysts */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-green-500">
-                                        <TrendingUp className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Growth Catalysts</h4>
-                                    </div>
-                                    <p className="text-muted-foreground leading-relaxed">{result.growthCatalysts}</p>
-                                </Card>
-
-                                {/* Key Risks */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-red-500">
-                                        <AlertTriangle className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Key Risks</h4>
-                                    </div>
-                                    <ul className="space-y-2">
-                                        {Array.isArray(result.keyRisks) ? result.keyRisks.map((risk, i) => (
-                                            <li key={i} className="flex items-start gap-2 text-muted-foreground leading-relaxed">
-                                                <span className="text-red-500 mt-1">•</span>
-                                                <span>{risk}</span>
-                                            </li>
-                                        )) : <li className="text-muted-foreground">{result.keyRisks}</li>}
-                                    </ul>
-                                </Card>
-
-                                {/* Financials & Valuation */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-purple-500">
-                                        <Activity className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Financials & Valuation</h4>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <span className="text-xs font-semibold text-foreground uppercase block mb-1">Health</span>
-                                            <p className="text-muted-foreground text-sm">{result.financialHealth}</p>
-                                        </div>
-                                        <div className="pt-4 border-t border-border/40">
-                                            <span className="text-xs font-semibold text-foreground uppercase block mb-1">Valuation Context</span>
-                                            <p className="text-muted-foreground text-sm">{result.valuationCommentary}</p>
-                                        </div>
-                                    </div>
-                                </Card>
-
-                                {/* Capital Allocation */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-amber-500">
-                                        <Activity className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Capital Allocation</h4>
-                                    </div>
-                                    <p className="text-muted-foreground leading-relaxed">{result.capitalAllocation}</p>
-                                </Card>
-
-                                {/* Earnings Quality */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-cyan-500">
-                                        <Activity className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Earnings Quality</h4>
-                                    </div>
-                                    <p className="text-muted-foreground leading-relaxed">{result.earningsQuality}</p>
-                                </Card>
-
-                                {/* Upcoming Catalysts */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-orange-500">
-                                        <Calendar className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Upcoming Catalysts</h4>
-                                    </div>
-                                    {Array.isArray(result.upcomingCatalysts) ? (
-                                        <div className="space-y-3">
-                                            {result.upcomingCatalysts.map((catalyst, i) => (
-                                                <div key={i} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <span className="font-semibold text-foreground">{catalyst.event}</span>
-                                                            <Badge variant={catalyst.impact?.toLowerCase().includes('bullish') ? 'default' : catalyst.impact?.toLowerCase().includes('bearish') ? 'destructive' : 'secondary'} className="text-xs">
-                                                                {catalyst.impact?.split(' ')[0] || 'Neutral'}
-                                                            </Badge>
-                                                        </div>
-                                                        <div className="text-xs text-muted-foreground">{catalyst.date}</div>
-                                                        <p className="text-sm text-muted-foreground mt-1">{catalyst.impact}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : <p className="text-muted-foreground">{result.upcomingCatalysts}</p>}
-                                </Card>
-
-                                {/* Short Interest - Only show if notable */}
-                                {result.shortInterest && (
+                            {/* Split View: Analysis + Chat */}
+                            <div className="grid lg:grid-cols-2 gap-6">
+                                {/* Analysis Column */}
+                                <div className="space-y-6">
+                                    {/* Moat Analysis */}
                                     <Card className="p-6 bg-card border-border/60">
-                                        <div className="flex items-center gap-2 mb-4 text-yellow-500">
-                                            <Target className="w-5 h-5" />
-                                            <h4 className="font-bold uppercase tracking-wider text-sm">Short Interest</h4>
-                                            <Badge variant="outline" className="text-xs">Notable</Badge>
+                                        <div className="flex items-center gap-2 mb-4 text-blue-500">
+                                            <Scale className="w-5 h-5" />
+                                            <h4 className="font-bold uppercase tracking-wider text-sm">Economic Moat</h4>
                                         </div>
-                                        <p className="text-muted-foreground leading-relaxed">{result.shortInterest}</p>
+                                        <p className="text-muted-foreground leading-relaxed">{result.moatAnalysis}</p>
                                     </Card>
-                                )}
 
-                                {/* Comparable Multiples Table */}
-                                <Card className="p-6 bg-card border-border/60 md:col-span-2">
-                                    <div className="flex items-center gap-2 mb-4 text-indigo-500">
-                                        <Scale className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Comparable Multiples</h4>
-                                    </div>
-                                    {Array.isArray(result.comparableMultiples) && result.comparableMultiples.length > 0 ? (
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-sm">
-                                                <thead>
-                                                    <tr className="border-b border-border/60">
-                                                        <th className="text-left py-2 px-3 font-semibold text-foreground">Ticker</th>
-                                                        <th className="text-left py-2 px-3 font-semibold text-foreground">Company</th>
-                                                        <th className="text-right py-2 px-3 font-semibold text-foreground">P/E</th>
-                                                        <th className="text-right py-2 px-3 font-semibold text-foreground">EV/EBITDA</th>
-                                                        <th className="text-left py-2 px-3 font-semibold text-foreground">vs {result.symbol}</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {result.comparableMultiples.map((comp, i) => (
-                                                        <tr key={i} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
-                                                            <td className="py-2 px-3 font-mono font-medium text-primary">{comp.ticker}</td>
-                                                            <td className="py-2 px-3 text-muted-foreground">{comp.name}</td>
-                                                            <td className="py-2 px-3 text-right font-mono">{comp.peRatio}</td>
-                                                            <td className="py-2 px-3 text-right font-mono">{comp.evEbitda}</td>
-                                                            <td className="py-2 px-3 text-muted-foreground text-sm">{comp.premium}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
+                                    {/* Growth Catalysts */}
+                                    <Card className="p-6 bg-card border-border/60">
+                                        <div className="flex items-center gap-2 mb-4 text-green-500">
+                                            <TrendingUp className="w-5 h-5" />
+                                            <h4 className="font-bold uppercase tracking-wider text-sm">Growth Catalysts</h4>
                                         </div>
-                                    ) : <p className="text-muted-foreground">{String(result.comparableMultiples)}</p>}
-                                </Card>
-                            </div>
+                                        <p className="text-muted-foreground leading-relaxed">{result.growthCatalysts}</p>
+                                    </Card>
 
-                            {/* Chat Section for Follow-up Questions */}
-                            <Card className="p-6 bg-card border-border/60">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-2 text-primary">
-                                        <MessageSquare className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Ask Follow-up Questions</h4>
-                                    </div>
-                                    {chatMessages.length > 0 && (
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={handleClearStockChat}
-                                            className="text-muted-foreground hover:text-foreground"
-                                        >
-                                            <Trash2 className="w-4 h-4 mr-1" />
-                                            Clear
-                                        </Button>
+                                    {/* Key Risks */}
+                                    <Card className="p-6 bg-card border-border/60">
+                                        <div className="flex items-center gap-2 mb-4 text-red-500">
+                                            <AlertTriangle className="w-5 h-5" />
+                                            <h4 className="font-bold uppercase tracking-wider text-sm">Key Risks</h4>
+                                        </div>
+                                        <ul className="space-y-2">
+                                            {Array.isArray(result.keyRisks) ? result.keyRisks.map((risk, i) => (
+                                                <li key={i} className="flex items-start gap-2 text-muted-foreground leading-relaxed">
+                                                    <span className="text-red-500 mt-1">•</span>
+                                                    <span>{risk}</span>
+                                                </li>
+                                            )) : <li className="text-muted-foreground">{result.keyRisks}</li>}
+                                        </ul>
+                                    </Card>
+
+                                    {/* Financials & Valuation */}
+                                    <Card className="p-6 bg-card border-border/60">
+                                        <div className="flex items-center gap-2 mb-4 text-purple-500">
+                                            <Activity className="w-5 h-5" />
+                                            <h4 className="font-bold uppercase tracking-wider text-sm">Financials & Valuation</h4>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <span className="text-xs font-semibold text-foreground uppercase block mb-1">Health</span>
+                                                <p className="text-muted-foreground text-sm">{result.financialHealth}</p>
+                                            </div>
+                                            <div className="pt-4 border-t border-border/40">
+                                                <span className="text-xs font-semibold text-foreground uppercase block mb-1">Valuation Context</span>
+                                                <p className="text-muted-foreground text-sm">{result.valuationCommentary}</p>
+                                            </div>
+                                        </div>
+                                    </Card>
+
+                                    {/* Capital Allocation */}
+                                    <Card className="p-6 bg-card border-border/60">
+                                        <div className="flex items-center gap-2 mb-4 text-amber-500">
+                                            <Activity className="w-5 h-5" />
+                                            <h4 className="font-bold uppercase tracking-wider text-sm">Capital Allocation</h4>
+                                        </div>
+                                        <p className="text-muted-foreground leading-relaxed">{result.capitalAllocation}</p>
+                                    </Card>
+
+                                    {/* Upcoming Catalysts */}
+                                    {result.upcomingCatalysts && (
+                                        <Card className="p-6 bg-card border-border/60">
+                                            <div className="flex items-center gap-2 mb-4 text-orange-500">
+                                                <Calendar className="w-5 h-5" />
+                                                <h4 className="font-bold uppercase tracking-wider text-sm">Upcoming Catalysts</h4>
+                                            </div>
+                                            {Array.isArray(result.upcomingCatalysts) ? (
+                                                <div className="space-y-3">
+                                                    {result.upcomingCatalysts.map((catalyst, i) => (
+                                                        <div key={i} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <span className="font-semibold text-foreground">{catalyst.event}</span>
+                                                                    <Badge variant="secondary" className="text-xs">
+                                                                        {catalyst.impact?.split(' ')[0] || 'Neutral'}
+                                                                    </Badge>
+                                                                </div>
+                                                                <div className="text-xs text-muted-foreground">{catalyst.date}</div>
+                                                                <p className="text-sm text-muted-foreground mt-1">{catalyst.impact}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : <p className="text-muted-foreground">{result.upcomingCatalysts}</p>}
+                                        </Card>
+                                    )}
+
+                                    {/* Short Interest */}
+                                    {result.shortInterest && (
+                                        <Card className="p-6 bg-card border-border/60">
+                                            <div className="flex items-center gap-2 mb-4 text-yellow-500">
+                                                <Target className="w-5 h-5" />
+                                                <h4 className="font-bold uppercase tracking-wider text-sm">Short Interest</h4>
+                                                <Badge variant="outline" className="text-xs">Notable</Badge>
+                                            </div>
+                                            <p className="text-muted-foreground leading-relaxed">{result.shortInterest}</p>
+                                        </Card>
                                     )}
                                 </div>
 
-                                {/* Chat Messages */}
-                                {chatMessages.length > 0 && (
-                                    <div
-                                        ref={chatScrollRef}
-                                        className="max-h-80 overflow-y-auto space-y-4 mb-4 p-4 bg-muted/20 rounded-lg"
-                                    >
-                                        {chatMessages.map((msg, i) => (
-                                            <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}>
-                                                {msg.role === "model" && (
-                                                    <Avatar className="w-8 h-8 bg-primary/10">
-                                                        <AvatarFallback><Bot className="w-4 h-4 text-primary" /></AvatarFallback>
-                                                    </Avatar>
-                                                )}
-                                                <div className={`max-w-[80%] p-3 rounded-lg ${msg.role === "user"
-                                                    ? "bg-primary text-primary-foreground"
-                                                    : "bg-muted"
-                                                    }`}>
-                                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                                                </div>
-                                                {msg.role === "user" && (
-                                                    <Avatar className="w-8 h-8 bg-muted">
-                                                        <AvatarFallback><User className="w-4 h-4" /></AvatarFallback>
-                                                    </Avatar>
-                                                )}
-                                            </div>
-                                        ))}
-                                        {isChatLoading && (
-                                            <div className="flex gap-3">
-                                                <Avatar className="w-8 h-8 bg-primary/10">
-                                                    <AvatarFallback><Bot className="w-4 h-4 text-primary" /></AvatarFallback>
-                                                </Avatar>
-                                                <div className="bg-muted p-3 rounded-lg">
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Chat Input */}
-                                <div className="flex gap-2">
-                                    <Input
-                                        value={chatInput}
-                                        onChange={(e) => setChatInput(e.target.value)}
-                                        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendChat()}
+                                {/* Chat Column */}
+                                <div className="lg:sticky lg:top-24 h-[800px]">
+                                    <CleanChatInterface
+                                        onSendMessage={handleSendMessage}
+                                        initialMessage={`I've analyzed ${result.companyName} (${result.symbol}). What would you like to know about this stock?`}
                                         placeholder={`Ask anything about ${result.symbol}...`}
-                                        className="flex-1"
-                                        disabled={isChatLoading}
                                     />
-                                    <Button
-                                        onClick={handleSendChat}
-                                        disabled={isChatLoading || !chatInput.trim()}
-                                    >
-                                        <Send className="w-4 h-4" />
-                                    </Button>
                                 </div>
-                            </Card>
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>

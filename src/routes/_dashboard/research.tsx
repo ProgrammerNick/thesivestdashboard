@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { createPost, getUserOpenTrades } from "@/server/fn/posts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,15 +8,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { Loader2, TrendingUp, ArrowUpRight, ArrowDownRight, RefreshCw, CheckCircle2 } from "lucide-react";
 import TiptapEditor from "@/components/Editor/TiptapEditor";
+import { z } from "zod";
+
+const researchSearchSchema = z.object({
+  type: z.enum(["trade", "thesis", "update", "close_trade", "market_outlook"]).optional(),
+});
 
 export const Route = createFileRoute("/_dashboard/research")({
   component: ResearchPage,
+  validateSearch: researchSearchSchema,
 });
 
 function ResearchPage() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/_dashboard/research" });
   const [isLoading, setIsLoading] = useState(false);
-  const [type, setType] = useState<"trade" | "thesis" | "update" | "close_trade" | "market_outlook">("thesis");
+  const [type, setType] = useState<"trade" | "thesis" | "update" | "close_trade" | "market_outlook">(
+    (search.type as any) || "thesis"
+  );
   const [positionType, setPositionType] = useState<"long" | "short">("long");
   const [content, setContent] = useState<any>(null);
   const [openTrades, setOpenTrades] = useState<any[]>([]);

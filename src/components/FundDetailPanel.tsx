@@ -11,10 +11,11 @@ import {
     TableRow,
 } from "./ui/table";
 import { InstitutionalFund } from "@/server/data/fund-data";
+import { Link } from "@tanstack/react-router";
 
 interface FundDetailPanelProps {
     fund: InstitutionalFund;
-    onAskAI: () => void;
+    onAskAI?: () => void; // Made optional - now navigates to chat page
     onClose: () => void;
 }
 
@@ -38,13 +39,16 @@ export function FundDetailPanel({ fund, onAskAI, onClose }: FundDetailPanelProps
                             </CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button
-                                onClick={onAskAI}
-                                className="gap-2"
+                            <Link
+                                to="/chat/$sessionId"
+                                params={{ sessionId: "new" }}
+                                search={{ type: "fund-intelligence", id: fund.id, name: fund.name }}
                             >
-                                <MessageSquareText className="w-4 h-4" />
-                                Ask AI
-                            </Button>
+                                <Button className="gap-2">
+                                    <MessageSquareText className="w-4 h-4" />
+                                    Ask AI
+                                </Button>
+                            </Link>
                             <Button variant="ghost" size="icon" onClick={onClose}>
                                 <X className="w-4 h-4" />
                             </Button>
@@ -107,10 +111,10 @@ export function FundDetailPanel({ fund, onAskAI, onClose }: FundDetailPanelProps
                                                     <Badge
                                                         variant={holding.change === "new" ? "default" : "secondary"}
                                                         className={`text-xs ${holding.change === "add" || holding.change === "new"
-                                                                ? "text-green-600 bg-green-500/10"
-                                                                : holding.change === "trim" || holding.change === "exit"
-                                                                    ? "text-red-600 bg-red-500/10"
-                                                                    : ""
+                                                            ? "text-green-600 bg-green-500/10"
+                                                            : holding.change === "trim" || holding.change === "exit"
+                                                                ? "text-red-600 bg-red-500/10"
+                                                                : ""
                                                             }`}
                                                     >
                                                         {holding.change === "new" && "NEW"}
@@ -142,8 +146,8 @@ export function FundDetailPanel({ fund, onAskAI, onClose }: FundDetailPanelProps
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className={`p-2 rounded-full ${move.action === "Buy"
-                                                    ? "bg-green-500/10 text-green-500"
-                                                    : "bg-red-500/10 text-red-500"
+                                                ? "bg-green-500/10 text-green-500"
+                                                : "bg-red-500/10 text-red-500"
                                                 }`}>
                                                 {move.action === "Buy" ? (
                                                     <ArrowUpRight className="w-4 h-4" />

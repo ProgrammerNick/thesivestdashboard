@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Bot, User, X, Sparkles, History, MessageSquare } from "lucide-react";
+import { Send, Loader2, Bot, User, X, Sparkles, PanelRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { chatWithFund } from "@/server/fn/chat";
-import { getOrCreateChatSession, addChatMessage, getChatSession } from "@/server/fn/chat-history";
-import { ChatHistorySidebar } from "./ChatHistorySidebar";
+import { getOrCreateChatSession, addChatMessage, getChatSession, generateChatSummary } from "@/server/fn/chat-history";
+import { CompactChatHistorySidebar } from "./CompactChatHistorySidebar";
 import { InstitutionalFund } from "@/server/data/fund-data";
 import { authClient } from "@/lib/auth-client";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
     role: "user" | "model";
@@ -27,9 +27,10 @@ export function FundChatSlidePanel({ fund, isOpen, onClose }: FundChatSlidePanel
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState<"chat" | "history">("chat");
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
     const [isInitializing, setIsInitializing] = useState(false);
+    const [hasUserSentMessage, setHasUserSentMessage] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -73,6 +74,9 @@ export function FundChatSlidePanel({ fund, isOpen, onClose }: FundChatSlidePanel
                         content: m.content,
                     }))
                 );
+                // If there are existing messages, user has already sent messages
+                setHasUserSentMessage(true);
+                setIsSidebarOpen(false);
             } else {
                 // New session - add initial greeting
                 const greeting: Message = {
@@ -116,7 +120,8 @@ export function FundChatSlidePanel({ fund, isOpen, onClose }: FundChatSlidePanel
                         content: m.content,
                     }))
                 );
-                setActiveTab("chat");
+                setHasUserSentMessage(true);
+                setIsSidebarOpen(false);
             }
         } catch (error) {
             console.error("Failed to load session:", error);
@@ -125,10 +130,10 @@ export function FundChatSlidePanel({ fund, isOpen, onClose }: FundChatSlidePanel
 
     // Focus input when panel opens
     useEffect(() => {
-        if (isOpen && inputRef.current && activeTab === "chat") {
+        if (isOpen && inputRef.current) {
             setTimeout(() => inputRef.current?.focus(), 300);
         }
-    }, [isOpen, activeTab]);
+    }, [isOpen]);
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -145,6 +150,12 @@ export function FundChatSlidePanel({ fund, isOpen, onClose }: FundChatSlidePanel
         setMessages((prev) => [...prev, userMessage]);
         setInput("");
         setIsLoading(true);
+
+        // Auto-close sidebar on first user message
+        if (!hasUserSentMessage) {
+            setHasUserSentMessage(true);
+            setIsSidebarOpen(false);
+        }
 
         // Save user message
         if (currentSessionId) {
@@ -188,13 +199,27 @@ export function FundChatSlidePanel({ fund, isOpen, onClose }: FundChatSlidePanel
 
             // Save AI response
             if (currentSessionId) {
-                addChatMessage({
+                await addChatMessage({
                     data: {
                         sessionId: currentSessionId,
                         role: "model",
                         content: aiMessage.content,
                     },
-                }).catch(console.error);
+                });
+
+                // Generate summary after first exchange (user + AI response)
+                if (!hasUserSentMessage && messages.length <= 1) {
+                    const allMessages = [...messages, userMessage, aiMessage];
+                    generateChatSummary({
+                        data: {
+                            sessionId: currentSessionId,
+                            messages: allMessages.map(m => ({
+                                role: m.role,
+                                content: m.content
+                            }))
+                        }
+                    }).catch(console.error);
+                }
             }
         } catch (error) {
             console.error("Chat error:", error);
@@ -228,147 +253,149 @@ export function FundChatSlidePanel({ fund, isOpen, onClose }: FundChatSlidePanel
                 onClick={onClose}
             />
 
-            {/* Full-width Chat Panel */}
-            <div className="fixed inset-y-0 right-0 w-full max-w-6xl bg-background border-l border-border shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
-                {/* Header with Tabs */}
-                <div className="border-b border-border bg-card/50">
-                    <div className="flex items-center justify-between p-4 pb-0">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-primary/10">
-                                <Sparkles className="w-5 h-5 text-primary" />
+            {/* Chat Panel with Sidebar */}
+            <div className="fixed inset-y-0 right-0 w-full max-w-7xl bg-background border-l border-border shadow-2xl z-50 flex animate-in slide-in-from-right duration-300">
+                {/* Main Chat Area */}
+                <div className="flex flex-col flex-1 min-w-0">
+                    {/* Header */}
+                    <div className="border-b border-border bg-card/50 px-4 py-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-primary/10">
+                                    <Sparkles className="w-5 h-5 text-primary" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold">AI Fund Analyst</h3>
+                                    <p className="text-xs text-muted-foreground">Analyzing {fund.name}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="font-semibold">AI Fund Analyst</h3>
-                                <p className="text-xs text-muted-foreground">Analyzing {fund.name}</p>
+                            <div className="flex items-center gap-2">
+                                {!isSidebarOpen && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setIsSidebarOpen(true)}
+                                        className="gap-2"
+                                    >
+                                        <PanelRight className="w-4 h-4" />
+                                        History
+                                    </Button>
+                                )}
+                                <Button variant="ghost" size="icon" onClick={onClose}>
+                                    <X className="w-5 h-5" />
+                                </Button>
                             </div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={onClose}>
-                            <X className="w-5 h-5" />
-                        </Button>
                     </div>
 
-                    {/* Tab Navigation */}
-                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "chat" | "history")}>
-                        <TabsList className="w-full justify-start rounded-none border-t border-border/50 bg-transparent h-auto p-0">
-                            <TabsTrigger
-                                value="chat"
-                                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
-                            >
-                                <MessageSquare className="w-4 h-4 mr-2" />
-                                Chat
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="history"
-                                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
-                            >
-                                <History className="w-4 h-4 mr-2" />
-                                History
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                </div>
-
-                {/* Tab Content */}
-                {activeTab === "chat" ? (
-                    <>
-                        {/* Chat Messages */}
-                        <ScrollArea className="flex-1 p-4">
-                            {isInitializing ? (
-                                <div className="flex items-center justify-center h-32">
-                                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {messages.map((m, i) => (
-                                        <div
-                                            key={i}
-                                            className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}
-                                        >
-                                            <Avatar className="w-8 h-8 border border-border shrink-0">
-                                                <AvatarFallback
-                                                    className={m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}
-                                                >
-                                                    {m.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div
-                                                className={`rounded-xl p-3 max-w-[85%] text-sm leading-relaxed ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                                                    }`}
+                    {/* Chat Messages */}
+                    <ScrollArea className="flex-1 p-4">
+                        {isInitializing ? (
+                            <div className="flex items-center justify-center h-32">
+                                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {messages.map((m, i) => (
+                                    <div
+                                        key={i}
+                                        className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+                                    >
+                                        <Avatar className="w-8 h-8 border border-border shrink-0">
+                                            <AvatarFallback
+                                                className={m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}
                                             >
-                                                {m.content}
-                                            </div>
-                                        </div>
-                                    ))}
-
-                                    {/* Loading indicator */}
-                                    {isLoading && (
-                                        <div className="flex gap-3">
-                                            <Avatar className="w-8 h-8 border border-border">
-                                                <AvatarFallback className="bg-muted">
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="bg-muted rounded-xl p-3 text-sm text-muted-foreground">
-                                                <span className="inline-flex gap-1">
-                                                    <span className="animate-bounce [animation-delay:-0.3s]">●</span>
-                                                    <span className="animate-bounce [animation-delay:-0.15s]">●</span>
-                                                    <span className="animate-bounce">●</span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div ref={scrollRef} />
-                                </div>
-                            )}
-                        </ScrollArea>
-
-                        {/* Suggested Questions */}
-                        {messages.length <= 1 && !isInitializing && (
-                            <div className="px-4 pb-3">
-                                <p className="text-xs text-muted-foreground mb-2">Suggested questions:</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {suggestedQuestions.slice(0, 2).map((q, i) => (
-                                        <Button
-                                            key={i}
-                                            variant="outline"
-                                            size="sm"
-                                            className="text-xs h-7"
-                                            onClick={() => {
-                                                setInput(q);
-                                                inputRef.current?.focus();
-                                            }}
+                                                {m.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div
+                                            className={`rounded-xl p-3 max-w-[85%] text-sm leading-relaxed ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                                                }`}
                                         >
-                                            {q}
-                                        </Button>
-                                    ))}
-                                </div>
+                                            {m.role === "model" ? (
+                                                <div className="[&>p]:my-2 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0 [&>strong]:font-semibold [&>strong]:text-foreground [&>em]:italic [&>ul]:my-2 [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:my-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>li]:my-1 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:my-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:my-2 [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:my-2 [&>code]:bg-muted-foreground/20 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-xs [&>pre]:bg-muted-foreground/10 [&>pre]:p-2 [&>pre]:rounded [&>pre]:overflow-x-auto [&>pre>code]:bg-transparent [&>blockquote]:border-l-4 [&>blockquote]:border-muted-foreground/30 [&>blockquote]:pl-4 [&>blockquote]:italic">
+                                                    <ReactMarkdown>{m.content}</ReactMarkdown>
+                                                </div>
+                                            ) : (
+                                                <p className="whitespace-pre-wrap">{m.content}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {/* Loading indicator */}
+                                {isLoading && (
+                                    <div className="flex gap-3">
+                                        <Avatar className="w-8 h-8 border border-border">
+                                            <AvatarFallback className="bg-muted">
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="bg-muted rounded-xl p-3 text-sm text-muted-foreground">
+                                            <span className="inline-flex gap-1">
+                                                <span className="animate-bounce [animation-delay:-0.3s]">●</span>
+                                                <span className="animate-bounce [animation-delay:-0.15s]">●</span>
+                                                <span className="animate-bounce">●</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={scrollRef} />
                             </div>
                         )}
+                    </ScrollArea>
 
-                        {/* Input Area */}
-                        <div className="p-4 border-t border-border bg-card/50">
-                            <form onSubmit={handleSubmit} className="flex gap-2">
-                                <Input
-                                    ref={inputRef}
-                                    placeholder="Ask about their strategy, holdings, or moves..."
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    disabled={isLoading || isInitializing}
-                                    className="flex-1 bg-background"
-                                />
-                                <Button type="submit" size="icon" disabled={isLoading || !input.trim() || isInitializing}>
-                                    <Send className="w-4 h-4" />
-                                </Button>
-                            </form>
+                    {/* Suggested Questions */}
+                    {messages.length <= 1 && !isInitializing && (
+                        <div className="px-4 pb-3">
+                            <p className="text-xs text-muted-foreground mb-2">Suggested questions:</p>
+                            <div className="flex flex-wrap gap-2">
+                                {suggestedQuestions.slice(0, 2).map((q, i) => (
+                                    <Button
+                                        key={i}
+                                        variant="outline"
+                                        size="sm"
+                                        className="text-xs h-7"
+                                        onClick={() => {
+                                            setInput(q);
+                                            inputRef.current?.focus();
+                                        }}
+                                    >
+                                        {q}
+                                    </Button>
+                                ))}
+                            </div>
                         </div>
-                    </>
-                ) : (
-                    /* History Tab */
-                    <ChatHistorySidebar
-                        type="fund-intelligence"
-                        onSelectSession={loadSession}
-                        currentSessionId={currentSessionId || undefined}
-                    />
+                    )}
+
+                    {/* Input Area */}
+                    <div className="p-4 border-t border-border bg-card/50">
+                        <form onSubmit={handleSubmit} className="flex gap-2">
+                            <Input
+                                ref={inputRef}
+                                placeholder="Ask about their strategy, holdings, or moves..."
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                disabled={isLoading || isInitializing}
+                                className="flex-1 bg-background"
+                            />
+                            <Button type="submit" size="icon" disabled={isLoading || !input.trim() || isInitializing}>
+                                <Send className="w-4 h-4" />
+                            </Button>
+                        </form>
+                    </div>
+                </div>
+
+                {/* Collapsible History Sidebar */}
+                {isSidebarOpen && (
+                    <div className="w-80 shrink-0 animate-in slide-in-from-right duration-200">
+                        <CompactChatHistorySidebar
+                            type="fund-intelligence"
+                            onSelectSession={loadSession}
+                            currentSessionId={currentSessionId || undefined}
+                            onClose={() => setIsSidebarOpen(false)}
+                        />
+                    </div>
                 )}
             </div>
         </>

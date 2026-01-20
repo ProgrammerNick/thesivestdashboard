@@ -6,6 +6,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { db } from "@/db/index";
 import { aiAnalysis } from "@/db/schema";
+import { retryGeminiCall } from "../utils/gemini-retry";
 
 export type FundData = {
     fundName: string;
@@ -74,62 +75,65 @@ export async function generateFundAnalysis(query: string): Promise<FundData> {
         - Ensure 'holdings' array is populated with real data found from the search.
         `;
 
-        // @ts-ignore
-        const result = await client.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            config: {
-                tools: [{ googleSearch: {} }],
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "OBJECT",
-                    properties: {
-                        fundName: { type: "STRING" },
-                        strategy: {
-                            type: "STRING",
-                            description: "2-3 sentence summary of investment strategy in plain English",
-                        },
-                        recentActivity: {
-                            type: "STRING",
-                            description: "Commentary on recent purchases/sales and the reasoning behind them.",
-                        },
-                        performanceOutlook: {
-                            type: "STRING",
-                            description: "Analysis of relative out/underperformance and its causes.",
-                        },
-                        convictionThesis: {
-                            type: "STRING",
-                            description: "Why the fund believes in its top holdings - the core investment thesis.",
-                        },
-                        ownershipConcentration: {
-                            type: "STRING",
-                            description: "What percentage of the portfolio is in the top 10 holdings? Is this concentrated or diversified, and what does it mean?",
-                        },
-                        positionSizingLogic: {
-                            type: "STRING",
-                            description: "Why are certain positions larger? Include any manager commentary on position sizing if available.",
-                        },
-                        cashPosition: {
-                            type: "STRING",
-                            description: "Current cash allocation and what it signals about the fund's market outlook.",
-                        },
-                        holdings: {
-                            type: "ARRAY",
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    symbol: { type: "STRING" },
-                                    name: { type: "STRING" },
-                                    percent: { type: "NUMBER" },
+        // Wrap the API call in retry logic
+        const result = await retryGeminiCall(async () => {
+            // @ts-ignore
+            return await client.models.generateContent({
+                model: "gemini-3-flash-preview",
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                config: {
+                    tools: [{ googleSearch: {} }],
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            fundName: { type: "STRING" },
+                            strategy: {
+                                type: "STRING",
+                                description: "2-3 sentence summary of investment strategy in plain English",
+                            },
+                            recentActivity: {
+                                type: "STRING",
+                                description: "Commentary on recent purchases/sales and the reasoning behind them.",
+                            },
+                            performanceOutlook: {
+                                type: "STRING",
+                                description: "Analysis of relative out/underperformance and its causes.",
+                            },
+                            convictionThesis: {
+                                type: "STRING",
+                                description: "Why the fund believes in its top holdings - the core investment thesis.",
+                            },
+                            ownershipConcentration: {
+                                type: "STRING",
+                                description: "What percentage of the portfolio is in the top 10 holdings? Is this concentrated or diversified, and what does it mean?",
+                            },
+                            positionSizingLogic: {
+                                type: "STRING",
+                                description: "Why are certain positions larger? Include any manager commentary on position sizing if available.",
+                            },
+                            cashPosition: {
+                                type: "STRING",
+                                description: "Current cash allocation and what it signals about the fund's market outlook.",
+                            },
+                            holdings: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        symbol: { type: "STRING" },
+                                        name: { type: "STRING" },
+                                        percent: { type: "NUMBER" },
+                                    },
+                                    required: ["symbol", "name", "percent"],
                                 },
-                                required: ["symbol", "name", "percent"],
                             },
                         },
+                        required: ["fundName", "strategy", "holdings", "recentActivity", "performanceOutlook", "convictionThesis", "ownershipConcentration", "positionSizingLogic", "cashPosition"],
                     },
-                    required: ["fundName", "strategy", "holdings", "recentActivity", "performanceOutlook", "convictionThesis", "ownershipConcentration", "positionSizingLogic", "cashPosition"],
                 },
-            },
-        });
+            });
+        }, { maxRetries: 3 });
 
         const responseText = result.text;
 
