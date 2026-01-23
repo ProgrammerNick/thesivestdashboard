@@ -14,25 +14,45 @@ interface CleanChatInterfaceProps {
     onSendMessage: (message: string) => Promise<string>;
     initialMessage?: string;
     placeholder?: string;
+    /** Previous messages to load from a session */
+    previousMessages?: Message[];
+    /** Key to force re-render when session changes */
+    sessionKey?: string;
 }
 
 export function CleanChatInterface({
     onSendMessage,
     initialMessage,
-    placeholder = "Ask anything..."
+    placeholder = "Ask anything...",
+    previousMessages,
+    sessionKey,
 }: CleanChatInterfaceProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const hasInitialized = useRef(false);
 
-    // Add initial message if provided
+    // Initialize messages from previous session or initial message
     useEffect(() => {
-        if (initialMessage) {
+        // Reset when sessionKey changes
+        hasInitialized.current = false;
+    }, [sessionKey]);
+
+    useEffect(() => {
+        if (hasInitialized.current) return;
+
+        if (previousMessages && previousMessages.length > 0) {
+            // Load previous messages from session
+            setMessages(previousMessages);
+            hasInitialized.current = true;
+        } else if (initialMessage) {
+            // Start fresh with initial greeting
             setMessages([{ role: "assistant", content: initialMessage }]);
+            hasInitialized.current = true;
         }
-    }, [initialMessage]);
+    }, [previousMessages, initialMessage, sessionKey]);
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -93,8 +113,8 @@ export function CleanChatInterface({
 
                             <div
                                 className={`max-w-[80%] ${m.role === "user"
-                                        ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-none"
-                                        : "text-gray-900 dark:text-gray-100"
+                                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-none"
+                                    : "text-gray-900 dark:text-gray-100"
                                     } ${m.role === "user" ? "px-4 py-3" : ""}`}
                             >
                                 {m.role === "assistant" ? (

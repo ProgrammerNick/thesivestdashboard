@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { GoogleGenAI } from "@google/genai";
+import { retryGeminiCall } from "../utils/gemini-retry";
 
 export type ChatMessage = {
     role: "user" | "model";
@@ -30,7 +31,7 @@ export const chatWithStock = createServerFn({ method: "POST" })
             throw new Error("Missing Gemini API Key");
         }
 
-        const client = new GoogleGenAI({
+        const ai = new GoogleGenAI({
             apiKey: geminiKey,
         });
 
@@ -58,27 +59,20 @@ If asked about something not in the context, use your knowledge but note that it
             }))
         ];
 
-        // @ts-ignore
-        const result = await client.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: historyContents,
-            config: {
-                tools: [{ googleSearch: {} }]
-            }
-        });
+        // Use retry logic for Gemini API calls
+        const result = await retryGeminiCall(async () => {
+            // @ts-ignore
+            return await ai.models.generateContent({
+                model: "gemini-3-flash-preview",
+                contents: historyContents,
+                config: {
+                    tools: [{ googleSearch: {} }]
+                }
+            });
+        }, { maxRetries: 3 });
 
-        // Handle different response formats from the Gemini SDK
-        let responseText = "";
-
-        if (result?.text) {
-            responseText = typeof result.text === 'function' ? result.text() : result.text;
-        } else if (result?.response?.text) {
-            responseText = typeof result.response.text === 'function' ? result.response.text() : result.response.text;
-        } else if (result?.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-            responseText = result.response.candidates[0].content.parts[0].text;
-        } else if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
-            responseText = result.candidates[0].content.parts[0].text;
-        }
+        // Extract text from response - text is a getter property
+        const responseText = result.text;
 
         if (!responseText) {
             console.error("Could not extract text from Gemini response:", JSON.stringify(result, null, 2));
@@ -87,3 +81,4 @@ If asked about something not in the context, use your knowledge but note that it
 
         return responseText;
     });
+

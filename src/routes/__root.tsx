@@ -69,10 +69,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en" className="bg-background text-foreground">
       <head>
         <HeadContent />
-        <script
-          crossOrigin="anonymous"
-          src="https://tweakcn.com/live-preview.min.js"
-        />
+
       </head>
       <body>
         {children}

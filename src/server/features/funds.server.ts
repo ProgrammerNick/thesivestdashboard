@@ -41,7 +41,7 @@ export async function generateFundAnalysis(query: string): Promise<FundData> {
     }
 
     try {
-        const client = new GoogleGenAI({ apiKey: geminiKey });
+        const ai = new GoogleGenAI({ apiKey: geminiKey });
 
         const prompt = `
         SYSTEM PROMPT: You are a Senior Investment Strategist at a top-tier asset manager. Your goal is to analyze a hedge fund or mutual fund's portfolio and narrative to determine their hidden market conviction and provide actionable insights.
@@ -78,7 +78,7 @@ export async function generateFundAnalysis(query: string): Promise<FundData> {
         // Wrap the API call in retry logic
         const result = await retryGeminiCall(async () => {
             // @ts-ignore
-            return await client.models.generateContent({
+            return await ai.models.generateContent({
                 model: "gemini-3-flash-preview",
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
                 config: {
@@ -135,6 +135,7 @@ export async function generateFundAnalysis(query: string): Promise<FundData> {
             });
         }, { maxRetries: 3 });
 
+        // Extract text from response - text is a getter property
         const responseText = result.text;
 
         if (!responseText) {

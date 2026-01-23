@@ -188,7 +188,7 @@ export const generateChatSummary = createServerFn({ method: "POST" })
         }
 
         try {
-            const client = new GoogleGenAI({
+            const ai = new GoogleGenAI({
                 apiKey: geminiKey,
             });
 
@@ -206,7 +206,7 @@ ${conversationText}
 Title:`;
 
             // @ts-ignore
-            const result = await client.models.generateContent({
+            const result = await ai.models.generateContent({
                 model: "gemini-3-flash-preview",
                 contents: [
                     {
@@ -216,19 +216,7 @@ Title:`;
                 ],
             });
 
-            let summary = "";
-            if (result?.text) {
-                summary = typeof result.text === "function" ? result.text() : result.text;
-            } else if (result?.response?.text) {
-                summary = typeof result.response.text === "function" ? result.response.text() : result.response.text;
-            } else if (result?.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
-                summary = result.response.candidates[0].content.parts[0].text;
-            } else if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
-                summary = result.candidates[0].content.parts[0].text;
-            }
-
-            // Clean up the summary
-            summary = summary.trim().replace(/^["']|["']$/g, "");
+            let summary = result.text?.trim().replace(/^["']|["']$/g, "") || "";
 
             if (summary) {
                 // Update the session title

@@ -15,6 +15,7 @@ import { Route as SanityRouteImport } from './routes/sanity'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DebugSimpleRouteImport } from './routes/debug-simple'
 import { Route as DebugDbRouteImport } from './routes/debug-db'
+import { Route as ResearchRouteImport } from './routes/_research'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CorporationsIndexRouteImport } from './routes/corporations/index'
@@ -44,6 +45,7 @@ import { Route as ProfilesIdPerformanceRouteImport } from './routes/profiles.$id
 import { Route as ApiUsersUpdateNameRouteImport } from './routes/api/users/update-name'
 import { Route as ApiProfilesIdRouteImport } from './routes/api/profiles/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ResearchStockResearchSessionIdRouteImport } from './routes/_research/stock-research.$sessionId'
 import { Route as DashboardPostPostIdRouteImport } from './routes/_dashboard/post.$postId'
 import { Route as DashboardChatSessionIdRouteImport } from './routes/_dashboard/chat.$sessionId'
 import { Route as ApiProfilesIdTradeHistoryRouteImport } from './routes/api/profiles/$id/trade-history'
@@ -77,6 +79,10 @@ const DebugSimpleRoute = DebugSimpleRouteImport.update({
 const DebugDbRoute = DebugDbRouteImport.update({
   id: '/debug-db',
   path: '/debug-db',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchRoute = ResearchRouteImport.update({
+  id: '/_research',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -224,6 +230,12 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResearchStockResearchSessionIdRoute =
+  ResearchStockResearchSessionIdRouteImport.update({
+    id: '/stock-research/$sessionId',
+    path: '/stock-research/$sessionId',
+    getParentRoute: () => ResearchRoute,
+  } as any)
 const DashboardPostPostIdRoute = DashboardPostPostIdRouteImport.update({
   id: '/post/$postId',
   path: '/post/$postId',
@@ -279,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/corporations': typeof CorporationsIndexRoute
   '/chat/$sessionId': typeof DashboardChatSessionIdRoute
   '/post/$postId': typeof DashboardPostPostIdRoute
+  '/stock-research/$sessionId': typeof ResearchStockResearchSessionIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
@@ -319,6 +332,7 @@ export interface FileRoutesByTo {
   '/corporations': typeof CorporationsIndexRoute
   '/chat/$sessionId': typeof DashboardChatSessionIdRoute
   '/post/$postId': typeof DashboardPostPostIdRoute
+  '/stock-research/$sessionId': typeof ResearchStockResearchSessionIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
@@ -331,6 +345,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_dashboard': typeof DashboardRouteWithChildren
+  '/_research': typeof ResearchRouteWithChildren
   '/debug-db': typeof DebugDbRoute
   '/debug-simple': typeof DebugSimpleRoute
   '/login': typeof LoginRoute
@@ -361,6 +376,7 @@ export interface FileRoutesById {
   '/corporations/': typeof CorporationsIndexRoute
   '/_dashboard/chat/$sessionId': typeof DashboardChatSessionIdRoute
   '/_dashboard/post/$postId': typeof DashboardPostPostIdRoute
+  '/_research/stock-research/$sessionId': typeof ResearchStockResearchSessionIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
@@ -403,6 +419,7 @@ export interface FileRouteTypes {
     | '/corporations'
     | '/chat/$sessionId'
     | '/post/$postId'
+    | '/stock-research/$sessionId'
     | '/api/auth/$'
     | '/api/profiles/$id'
     | '/api/users/update-name'
@@ -443,6 +460,7 @@ export interface FileRouteTypes {
     | '/corporations'
     | '/chat/$sessionId'
     | '/post/$postId'
+    | '/stock-research/$sessionId'
     | '/api/auth/$'
     | '/api/profiles/$id'
     | '/api/users/update-name'
@@ -454,6 +472,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_dashboard'
+    | '/_research'
     | '/debug-db'
     | '/debug-simple'
     | '/login'
@@ -484,6 +503,7 @@ export interface FileRouteTypes {
     | '/corporations/'
     | '/_dashboard/chat/$sessionId'
     | '/_dashboard/post/$postId'
+    | '/_research/stock-research/$sessionId'
     | '/api/auth/$'
     | '/api/profiles/$id'
     | '/api/users/update-name'
@@ -496,6 +516,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
+  ResearchRoute: typeof ResearchRouteWithChildren
   DebugDbRoute: typeof DebugDbRoute
   DebugSimpleRoute: typeof DebugSimpleRoute
   LoginRoute: typeof LoginRoute
@@ -557,6 +578,13 @@ declare module '@tanstack/react-router' {
       path: '/debug-db'
       fullPath: '/debug-db'
       preLoaderRoute: typeof DebugDbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_research': {
+      id: '/_research'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof ResearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_dashboard': {
@@ -762,6 +790,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_research/stock-research/$sessionId': {
+      id: '/_research/stock-research/$sessionId'
+      path: '/stock-research/$sessionId'
+      fullPath: '/stock-research/$sessionId'
+      preLoaderRoute: typeof ResearchStockResearchSessionIdRouteImport
+      parentRoute: typeof ResearchRoute
+    }
     '/_dashboard/post/$postId': {
       id: '/_dashboard/post/$postId'
       path: '/post/$postId'
@@ -835,6 +870,18 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface ResearchRouteChildren {
+  ResearchStockResearchSessionIdRoute: typeof ResearchStockResearchSessionIdRoute
+}
+
+const ResearchRouteChildren: ResearchRouteChildren = {
+  ResearchStockResearchSessionIdRoute: ResearchStockResearchSessionIdRoute,
+}
+
+const ResearchRouteWithChildren = ResearchRoute._addFileChildren(
+  ResearchRouteChildren,
+)
+
 interface ProfilesIdRouteChildren {
   ProfilesIdPerformanceRoute: typeof ProfilesIdPerformanceRoute
   ProfilesIdTradesRoute: typeof ProfilesIdTradesRoute
@@ -866,6 +913,7 @@ const ApiProfilesIdRouteWithChildren = ApiProfilesIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
+  ResearchRoute: ResearchRouteWithChildren,
   DebugDbRoute: DebugDbRoute,
   DebugSimpleRoute: DebugSimpleRoute,
   LoginRoute: LoginRoute,

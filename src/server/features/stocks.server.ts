@@ -52,7 +52,7 @@ export async function generateStockAnalysis(query: string): Promise<StockData> {
     }
 
     try {
-        const client = new GoogleGenAI({ apiKey: geminiKey });
+        const ai = new GoogleGenAI({ apiKey: geminiKey });
 
         const prompt = `You are a senior equity research analyst. Analyze the stock "${query}" and provide an institutional-grade investment summary.
 
@@ -87,7 +87,7 @@ export async function generateStockAnalysis(query: string): Promise<StockData> {
         // Wrap the API call in retry logic
         const result = await retryGeminiCall(async () => {
             // @ts-ignore
-            return await client.models.generateContent({
+            return await ai.models.generateContent({
                 model: "gemini-3-flash-preview",
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
                 config: {
@@ -171,6 +171,7 @@ export async function generateStockAnalysis(query: string): Promise<StockData> {
             });
         }, { maxRetries: 3 });
 
+        // Extract text from response - text is a getter property
         const responseText = result.text;
 
         if (!responseText) {
@@ -178,6 +179,7 @@ export async function generateStockAnalysis(query: string): Promise<StockData> {
         }
 
         const cleanJson = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+        console.log("Gemini Stock Analysis Result:", cleanJson.substring(0, 200) + "...");
         return JSON.parse(cleanJson) as StockData;
     } catch (error) {
         console.error("Gemini stock search failed:", error);

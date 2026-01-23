@@ -20,7 +20,7 @@ const postSchema = z.object({
         size: z.number(),
     })).optional(),
     // Fields for research.tsx trades
-    type: z.enum(["trade", "thought", "update", "close_trade", "market_outlook", "quarterly_letter"]).optional(),
+    type: z.enum(["trade", "thought", "thesis", "update", "close_trade", "market_outlook", "quarterly_letter"]).optional(),
     symbol: z.string().optional(),
     buyPrice: z.number().optional(),
     targetPrice: z.number().optional(),
