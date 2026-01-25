@@ -1,16 +1,4 @@
-import {
-    TrendingUp,
-    Users,
-    User,
-    LogOut,
-    LayoutDashboard,
-    PieChart,
-    Briefcase,
-    Trophy,
-    PenTool,
-    UserSearch,
-    Sparkles,
-} from "lucide-react"
+import { TrendingUp } from "lucide-react"
 
 import {
     Sidebar,
@@ -30,7 +18,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 interface NavItem {
     label: string;
     href: string;
-    icon: any;
     employerOnly?: boolean; // Only show to employers/companies
 }
 
@@ -64,31 +51,31 @@ export function AppSidebar() {
         {
             label: "Overview",
             items: [
-                { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+                { label: "Dashboard", href: "/dashboard" },
             ],
         },
         {
             label: "AI Research",
             items: [
-                { label: "Stock Research", href: "/stocks", icon: TrendingUp },
-                { label: "Fund Research", href: "/funds", icon: PieChart },
-                { label: "Fund Intelligence", href: "/fund-intelligence", icon: Sparkles },
+                { label: "Stock Research", href: "/stocks" },
+                { label: "Fund Research", href: "/funds" },
+                { label: "Fund Intelligence", href: "/fund-intelligence" },
             ],
         },
         {
             label: "Community",
             items: [
-                { label: "Feed", href: "/community", icon: Users },
-                { label: "Write", href: "/research", icon: PenTool },
-                { label: "Profile", href: "/profile", icon: User },
+                { label: "Feed", href: "/community" },
+                { label: "Write", href: "/research" },
+                { label: "Profile", href: "/profile" },
             ],
         },
         {
             label: "Career",
             items: [
-                { label: "Talent Search", href: "/talent", icon: UserSearch, employerOnly: true },
-                { label: "Job Board", href: "/jobs", icon: Briefcase },
-                { label: "Tournaments", href: "/tournaments", icon: Trophy },
+                { label: "Talent Search", href: "/talent", employerOnly: true },
+                { label: "Job Board", href: "/jobs" },
+                { label: "Tournaments", href: "/tournaments" },
             ],
         },
     ];
@@ -130,7 +117,6 @@ export function AppSidebar() {
                                                 className="h-10 transition-all font-medium"
                                             >
                                                 <Link to={item.href}>
-                                                    <item.icon className={isActive(item.href) ? "text-primary" : "text-muted-foreground"} />
                                                     <span>{item.label}</span>
                                                 </Link>
                                             </SidebarMenuButton>
@@ -149,7 +135,6 @@ export function AppSidebar() {
                             onClick={handleSignOut}
                             className="h-10 text-muted-foreground hover:text-foreground"
                         >
-                            <LogOut />
                             <span>Sign Out</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

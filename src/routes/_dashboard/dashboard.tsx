@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Search, Clock, ChevronRight, TrendingUp, MessageSquare } from "lucide-react";
+import { Clock, ChevronRight } from "lucide-react";
 import { Link, useLoaderData } from "@tanstack/react-router";
 import { getDashboardData } from "@/server/fn/dashboard";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +48,7 @@ function DashboardHome() {
                 <div className="flex gap-3">
                     <Link to="/research">
                         <Button>
-                            <TrendingUp className="w-4 h-4 mr-2" /> Write Research
+                            Write Research
                         </Button>
                     </Link>
                 </div>
@@ -71,7 +71,6 @@ function DashboardHome() {
                     {posts.length === 0 ? (
                         <Card className="border-dashed">
                             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                                <Search className="w-12 h-12 text-muted-foreground mb-4" />
                                 <h3 className="text-lg font-bold mb-2">No Research Yet</h3>
                                 <p className="text-muted-foreground max-w-sm mb-6">
                                     Be the first to share your investment thesis with the community.
@@ -129,7 +128,6 @@ function DashboardHome() {
                             <div className="divide-y divide-border">
                                 {chatSessions.length === 0 ? (
                                     <div className="p-6 text-center">
-                                        <MessageSquare className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                                         <p className="text-sm text-muted-foreground mb-4">
                                             Start analyzing stocks and funds with AI
                                         </p>
@@ -191,17 +189,17 @@ function DashboardHome() {
                         <CardContent className="space-y-2">
                             <Link to="/stocks" className="block">
                                 <Button variant="ghost" className="w-full justify-start" size="sm">
-                                    <Search className="w-4 h-4 mr-2" /> Research a Stock
+                                    Research a Stock
                                 </Button>
                             </Link>
                             <Link to="/fund-intelligence" className="block">
                                 <Button variant="ghost" className="w-full justify-start" size="sm">
-                                    <TrendingUp className="w-4 h-4 mr-2" /> Analyze a Fund
+                                    Analyze a Fund
                                 </Button>
                             </Link>
                             <Link to="/community" className="block">
                                 <Button variant="ghost" className="w-full justify-start" size="sm">
-                                    <MessageSquare className="w-4 h-4 mr-2" /> Browse Community
+                                    Browse Community
                                 </Button>
                             </Link>
                         </CardContent>

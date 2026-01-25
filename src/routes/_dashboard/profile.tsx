@@ -24,20 +24,14 @@ import {
 } from "@/components/ui/dialog";
 
 import {
-  Plus,
-  TrendingUp,
-  TrendingDown,
-  Wallet,
   ArrowUpRight,
   ArrowDownRight,
   Loader2,
   Trash2,
-  Settings,
-  Home,
-  ExternalLink,
-  Activity
+  TrendingUp,
+  TrendingDown
 } from "lucide-react";
-import { Link } from "@tanstack/react-router"; // Added Link import
+import { Link } from "@tanstack/react-router";
 import { getPortfolios, createPortfolio, getPortfolio, addTransaction, deletePortfolio } from "@/server/fn/portfolio";
 import { getUserTradesFn } from "@/server/fn/profile";
 
@@ -52,7 +46,7 @@ const getProfileData = createServerFn({ method: "GET" }).handler(async () => {
 
   const { getPostsByUserId: getPostsByUserIdDA } = await import("@/server/data-access/posts");
   const posts = await getPostsByUserIdDA(session.user.id);
-  
+
   // Get user trades for trading data
   const trades = await getUserTradesFn({ data: { userId: session.user.id, limit: 100 } });
 
@@ -69,7 +63,7 @@ export const Route = createFileRoute("/_dashboard/profile")({
 function ProfilePage() {
   const { user, posts, trades } = useLoaderData({ from: "/_dashboard/profile" });
   // Removed edit profile state and handlers
-  
+
   // Calculate trading stats from actual trades
   const tradingStats = {
     totalTrades: trades.length,
@@ -101,20 +95,17 @@ function ProfilePage() {
       <div className="flex items-center justify-between">
         <Button variant="ghost" asChild>
           <Link to="/dashboard">
-            <Home className="w-4 h-4 mr-2" />
             Dashboard
           </Link>
         </Button>
         <div className="flex items-center gap-2">
           <Button variant="outline" asChild>
             <Link to={`/profiles/${user.id}`} target="_blank">
-              <ExternalLink className="w-4 h-4 mr-2" />
               View Public Profile
             </Link>
           </Button>
           <Button variant="outline" asChild>
             <Link to="/settings">
-              <Settings className="w-4 h-4 mr-2" />
               Edit Profile
             </Link>
           </Button>
@@ -143,8 +134,7 @@ function ProfilePage() {
             )}
             {posts.length > 0 && <Badge variant="secondary">{posts.length} Posts</Badge>}
             {tradingStats.totalTrades > 0 && (
-              <Badge variant="secondary" className="gap-1">
-                <Activity className="w-3 h-3" />
+              <Badge variant="secondary">
                 {tradingStats.totalTrades} Trades
               </Badge>
             )}
@@ -156,8 +146,7 @@ function ProfilePage() {
       {tradingStats.totalTrades > 0 && (
         <Card className="bg-gradient-to-br from-card to-card/50 border-primary/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-primary" />
+            <CardTitle>
               Trading Performance
             </CardTitle>
             <CardDescription>
@@ -189,7 +178,6 @@ function ProfilePage() {
               <Button variant="outline" asChild>
                 <Link to={`/profiles/${user.id}`}>
                   View Full Trading History
-                  <ExternalLink className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
             </div>
@@ -211,13 +199,11 @@ function ProfilePage() {
             <div className="flex gap-2">
               <Button size="sm" variant="outline" asChild>
                 <Link to="/research?type=trade">
-                  <Activity className="w-4 h-4 mr-2" />
                   Record Trade
                 </Link>
               </Button>
               <Button size="sm" asChild>
                 <Link to="/write">
-                  <Plus className="w-4 h-4 mr-2" />
                   Create New Research
                 </Link>
               </Button>
@@ -229,13 +215,11 @@ function ProfilePage() {
               <div className="flex gap-2 justify-center">
                 <Button variant="outline" asChild>
                   <Link to="/research?type=trade">
-                    <Activity className="w-4 h-4 mr-2" />
                     Record Trade
                   </Link>
                 </Button>
                 <Button asChild>
                   <Link to="/write">
-                    <Plus className="w-4 h-4 mr-2" />
                     Create New Research
                   </Link>
                 </Button>
@@ -374,7 +358,6 @@ function PortfoliosTab() {
         <Dialog>
           <DialogTrigger asChild>
             <Button size="sm">
-              <Plus className="w-4 h-4 mr-2" />
               New Portfolio
             </Button>
           </DialogTrigger>
@@ -415,7 +398,6 @@ function PortfoliosTab() {
       ) : portfolios.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <Wallet className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="font-semibold mb-2">No portfolios yet</h3>
             <p className="text-muted-foreground text-sm text-center mb-4">
               Create a portfolio to start tracking your investments
@@ -520,7 +502,6 @@ function PortfolioDetail({ portfolio, onBack, onRefresh }: { portfolio: any, onB
         <Dialog open={isAddingTransaction} onOpenChange={setIsAddingTransaction}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <Plus className="w-4 h-4 mr-2" />
               Add Transaction
             </Button>
           </DialogTrigger>

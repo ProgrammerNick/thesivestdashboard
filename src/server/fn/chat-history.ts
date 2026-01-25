@@ -115,6 +115,7 @@ export const addChatMessage = createServerFn({ method: "POST" })
         })
     )
     .handler(async ({ data }) => {
+        console.log(`[DEBUG] addChatMessage: sessionId=${data.sessionId}, role=${data.role}, contentLen=${data.content.length}`);
         // Add the message
         const newMessage = await db
             .insert(chatMessage)
@@ -126,7 +127,14 @@ export const addChatMessage = createServerFn({ method: "POST" })
             .returning();
 
         // Update session preview and timestamp
-        const previewText = data.content.slice(0, 100) + (data.content.length > 100 ? "..." : "");
+        // Strip basic markdown for preview
+        const plainText = data.content
+            .replace(/[#*`_]/g, '') // Remove formatting chars
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Replace links with text
+            .replace(/\n+/g, ' ') // Replace newlines with space
+            .trim();
+
+        const previewText = plainText.slice(0, 100) + (plainText.length > 100 ? "..." : "");
         await db
             .update(chatSession)
             .set({
@@ -135,6 +143,7 @@ export const addChatMessage = createServerFn({ method: "POST" })
             })
             .where(eq(chatSession.id, data.sessionId));
 
+        console.log("[DEBUG] addChatMessage: Success");
         return newMessage[0];
     });
 
@@ -256,8 +265,10 @@ export const getOrCreateChatSession = createServerFn({ method: "POST" })
                 .where(eq(userTable.id, data.userId))
                 .limit(1);
 
+            console.log(`[DEBUG] getOrCreateChatSession: userId=${data.userId}, foundUser=${!!userExists.length}`);
+
             if (!userExists || userExists.length === 0) {
-                console.warn(`User ${data.userId} not found in database. This might be a sync issue with Better Auth.`);
+                console.warn(`[DEBUG] User ${data.userId} not found in database. Returning temp session.`);
 
                 // Instead of failing, return a temporary session that doesn't persist
                 // This allows the chat to work even if database sync is delayed
@@ -276,7 +287,7 @@ export const getOrCreateChatSession = createServerFn({ method: "POST" })
                 };
             }
         } catch (error) {
-            console.error("Error validating user:", error);
+            console.error("[DEBUG] Error validating user:", error);
             // Fall back to temporary session on error
             return {
                 id: `temp-${crypto.randomUUID()}`,

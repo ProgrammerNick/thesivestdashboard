@@ -46,6 +46,7 @@ import { Route as ApiUsersUpdateNameRouteImport } from './routes/api/users/updat
 import { Route as ApiProfilesIdRouteImport } from './routes/api/profiles/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ResearchStockResearchSessionIdRouteImport } from './routes/_research/stock-research.$sessionId'
+import { Route as DashboardResearchSessionIdRouteImport } from './routes/_dashboard/research.$sessionId'
 import { Route as DashboardPostPostIdRouteImport } from './routes/_dashboard/post.$postId'
 import { Route as DashboardChatSessionIdRouteImport } from './routes/_dashboard/chat.$sessionId'
 import { Route as ApiProfilesIdTradeHistoryRouteImport } from './routes/api/profiles/$id/trade-history'
@@ -236,6 +237,12 @@ const ResearchStockResearchSessionIdRoute =
     path: '/stock-research/$sessionId',
     getParentRoute: () => ResearchRoute,
   } as any)
+const DashboardResearchSessionIdRoute =
+  DashboardResearchSessionIdRouteImport.update({
+    id: '/$sessionId',
+    path: '/$sessionId',
+    getParentRoute: () => DashboardResearchRoute,
+  } as any)
 const DashboardPostPostIdRoute = DashboardPostPostIdRouteImport.update({
   id: '/post/$postId',
   path: '/post/$postId',
@@ -275,7 +282,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof DashboardHistoryRoute
   '/jobs': typeof DashboardJobsRoute
   '/profile': typeof DashboardProfileRoute
-  '/research': typeof DashboardResearchRoute
+  '/research': typeof DashboardResearchRouteWithChildren
   '/settings': typeof DashboardSettingsRoute
   '/stocks': typeof DashboardStocksRoute
   '/talent': typeof DashboardTalentRoute
@@ -291,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/corporations': typeof CorporationsIndexRoute
   '/chat/$sessionId': typeof DashboardChatSessionIdRoute
   '/post/$postId': typeof DashboardPostPostIdRoute
+  '/research/$sessionId': typeof DashboardResearchSessionIdRoute
   '/stock-research/$sessionId': typeof ResearchStockResearchSessionIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
@@ -316,7 +324,7 @@ export interface FileRoutesByTo {
   '/history': typeof DashboardHistoryRoute
   '/jobs': typeof DashboardJobsRoute
   '/profile': typeof DashboardProfileRoute
-  '/research': typeof DashboardResearchRoute
+  '/research': typeof DashboardResearchRouteWithChildren
   '/settings': typeof DashboardSettingsRoute
   '/stocks': typeof DashboardStocksRoute
   '/talent': typeof DashboardTalentRoute
@@ -332,6 +340,7 @@ export interface FileRoutesByTo {
   '/corporations': typeof CorporationsIndexRoute
   '/chat/$sessionId': typeof DashboardChatSessionIdRoute
   '/post/$postId': typeof DashboardPostPostIdRoute
+  '/research/$sessionId': typeof DashboardResearchSessionIdRoute
   '/stock-research/$sessionId': typeof ResearchStockResearchSessionIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
@@ -360,7 +369,7 @@ export interface FileRoutesById {
   '/_dashboard/history': typeof DashboardHistoryRoute
   '/_dashboard/jobs': typeof DashboardJobsRoute
   '/_dashboard/profile': typeof DashboardProfileRoute
-  '/_dashboard/research': typeof DashboardResearchRoute
+  '/_dashboard/research': typeof DashboardResearchRouteWithChildren
   '/_dashboard/settings': typeof DashboardSettingsRoute
   '/_dashboard/stocks': typeof DashboardStocksRoute
   '/_dashboard/talent': typeof DashboardTalentRoute
@@ -376,6 +385,7 @@ export interface FileRoutesById {
   '/corporations/': typeof CorporationsIndexRoute
   '/_dashboard/chat/$sessionId': typeof DashboardChatSessionIdRoute
   '/_dashboard/post/$postId': typeof DashboardPostPostIdRoute
+  '/_dashboard/research/$sessionId': typeof DashboardResearchSessionIdRoute
   '/_research/stock-research/$sessionId': typeof ResearchStockResearchSessionIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
@@ -419,6 +429,7 @@ export interface FileRouteTypes {
     | '/corporations'
     | '/chat/$sessionId'
     | '/post/$postId'
+    | '/research/$sessionId'
     | '/stock-research/$sessionId'
     | '/api/auth/$'
     | '/api/profiles/$id'
@@ -460,6 +471,7 @@ export interface FileRouteTypes {
     | '/corporations'
     | '/chat/$sessionId'
     | '/post/$postId'
+    | '/research/$sessionId'
     | '/stock-research/$sessionId'
     | '/api/auth/$'
     | '/api/profiles/$id'
@@ -503,6 +515,7 @@ export interface FileRouteTypes {
     | '/corporations/'
     | '/_dashboard/chat/$sessionId'
     | '/_dashboard/post/$postId'
+    | '/_dashboard/research/$sessionId'
     | '/_research/stock-research/$sessionId'
     | '/api/auth/$'
     | '/api/profiles/$id'
@@ -797,6 +810,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchStockResearchSessionIdRouteImport
       parentRoute: typeof ResearchRoute
     }
+    '/_dashboard/research/$sessionId': {
+      id: '/_dashboard/research/$sessionId'
+      path: '/$sessionId'
+      fullPath: '/research/$sessionId'
+      preLoaderRoute: typeof DashboardResearchSessionIdRouteImport
+      parentRoute: typeof DashboardResearchRoute
+    }
     '/_dashboard/post/$postId': {
       id: '/_dashboard/post/$postId'
       path: '/post/$postId'
@@ -828,6 +848,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DashboardResearchRouteChildren {
+  DashboardResearchSessionIdRoute: typeof DashboardResearchSessionIdRoute
+}
+
+const DashboardResearchRouteChildren: DashboardResearchRouteChildren = {
+  DashboardResearchSessionIdRoute: DashboardResearchSessionIdRoute,
+}
+
+const DashboardResearchRouteWithChildren =
+  DashboardResearchRoute._addFileChildren(DashboardResearchRouteChildren)
+
 interface DashboardRouteChildren {
   DashboardChatsRoute: typeof DashboardChatsRoute
   DashboardCommunityRoute: typeof DashboardCommunityRoute
@@ -837,7 +868,7 @@ interface DashboardRouteChildren {
   DashboardHistoryRoute: typeof DashboardHistoryRoute
   DashboardJobsRoute: typeof DashboardJobsRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
-  DashboardResearchRoute: typeof DashboardResearchRoute
+  DashboardResearchRoute: typeof DashboardResearchRouteWithChildren
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardStocksRoute: typeof DashboardStocksRoute
   DashboardTalentRoute: typeof DashboardTalentRoute
@@ -856,7 +887,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHistoryRoute: DashboardHistoryRoute,
   DashboardJobsRoute: DashboardJobsRoute,
   DashboardProfileRoute: DashboardProfileRoute,
-  DashboardResearchRoute: DashboardResearchRoute,
+  DashboardResearchRoute: DashboardResearchRouteWithChildren,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardStocksRoute: DashboardStocksRoute,
   DashboardTalentRoute: DashboardTalentRoute,

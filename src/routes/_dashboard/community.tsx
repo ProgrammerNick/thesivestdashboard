@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, PenTool, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_dashboard/community")({
@@ -186,7 +186,6 @@ function CommunityPage() {
                 </>
               ) : (
                 <>
-                  <PenTool className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="font-semibold text-lg mb-2">No Research Yet</h3>
                   <p className="text-muted-foreground mb-4">
                     Be the first to share your investment thesis with the community.

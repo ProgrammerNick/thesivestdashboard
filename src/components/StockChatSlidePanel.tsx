@@ -20,15 +20,19 @@ interface StockChatSlidePanelProps {
     stock: StockData;
     isOpen: boolean;
     onClose: () => void;
+    sessionId: string | null;
 }
 
-export function StockChatSlidePanel({ stock, isOpen, onClose }: StockChatSlidePanelProps) {
+export function StockChatSlidePanel({ stock, isOpen, onClose, sessionId }: StockChatSlidePanelProps) {
     const { data: session } = authClient.useSession();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+    // Use the passed sessionId or local state if we started one internally (fallback)
+    const [internalSessionId, setInternalSessionId] = useState<string | null>(null);
+    const activeSessionId = sessionId || internalSessionId;
+
     const [isInitializing, setIsInitializing] = useState(false);
     const [hasUserSentMessage, setHasUserSentMessage] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -37,9 +41,15 @@ export function StockChatSlidePanel({ stock, isOpen, onClose }: StockChatSlidePa
     // Initialize or load existing session when stock changes or panel opens
     useEffect(() => {
         if (isOpen && session?.user?.id && stock) {
-            initializeSession();
+            if (sessionId) {
+                // If ID passed from parent, load it
+                loadSession(sessionId);
+            } else {
+                // Fallback if no ID passed (stand alone usage?)
+                initializeSession();
+            }
         }
-    }, [isOpen, stock, session?.user?.id]);
+    }, [isOpen, stock, session?.user?.id, sessionId]);
 
     const buildStarterSummary = (data: StockData) => {
         return `## ${data.companyName} (${data.symbol}) Institutional Analysis
@@ -85,7 +95,7 @@ I'm ready to discuss ${data.companyName} in depth. What specific aspect interest
                 },
             });
 
-            setCurrentSessionId(result.id);
+            setInternalSessionId(result.id);
 
             if (result.messages && result.messages.length > 0) {
                 // Load existing messages
@@ -131,11 +141,11 @@ I'm ready to discuss ${data.companyName} in depth. What specific aspect interest
 
 
     // Load a specific session from history
-    const loadSession = async (sessionId: string) => {
+    const loadSession = async (id: string) => {
         try {
-            const sessionData = await getChatSession({ data: { sessionId } });
+            const sessionData = await getChatSession({ data: { sessionId: id } });
             if (sessionData) {
-                setCurrentSessionId(sessionData.id);
+                if (!sessionId) setInternalSessionId(sessionData.id); // Only set internal if not using prop
                 setMessages(
                     sessionData.messages.map((m: any) => ({
                         role: m.role as "user" | "model",
@@ -199,10 +209,10 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
         }
 
         // Save user message
-        if (currentSessionId) {
+        if (activeSessionId) {
             addChatMessage({
                 data: {
-                    sessionId: currentSessionId,
+                    sessionId: activeSessionId,
                     role: "user",
                     content: userMessage.content,
                 },
@@ -225,10 +235,10 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
             setMessages((prev) => [...prev, aiMessage]);
 
             // Save AI response
-            if (currentSessionId) {
+            if (activeSessionId) {
                 await addChatMessage({
                     data: {
-                        sessionId: currentSessionId,
+                        sessionId: activeSessionId,
                         role: "model",
                         content: aiMessage.content,
                     },
@@ -239,7 +249,7 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
                     const allMessages = [...messages, userMessage, aiMessage];
                     generateChatSummary({
                         data: {
-                            sessionId: currentSessionId,
+                            sessionId: activeSessionId,
                             messages: allMessages.map(m => ({
                                 role: m.role,
                                 content: m.content
@@ -422,7 +432,7 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
                         <CompactChatHistorySidebar
                             type="stock"
                             onSelectSession={loadSession}
-                            currentSessionId={currentSessionId || undefined}
+                            currentSessionId={activeSessionId || undefined}
                             onClose={() => setIsSidebarOpen(false)}
                         />
                     </div>

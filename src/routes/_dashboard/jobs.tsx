@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Briefcase, DollarSign, Building2, ExternalLink } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 
 
@@ -32,8 +32,7 @@ function JobBoardPage() {
     <div className="space-y-8 p-6 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
-            <Briefcase className="w-8 h-8 text-primary" />
+          <h1 className="text-3xl font-heading font-bold">
             Job Board
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -94,10 +93,8 @@ function JobBoardPage() {
                     <div>
                       <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{job.title}</h3>
                       <div className="flex items-center gap-2 text-muted-foreground font-medium text-sm mt-1">
-                        <Building2 className="w-3.5 h-3.5" />
                         {job.company}
                         <span className="text-border mx-1">|</span>
-                        <MapPin className="w-3.5 h-3.5" />
                         {job.location}
                       </div>
                     </div>
@@ -111,7 +108,6 @@ function JobBoardPage() {
 
                   <div className="flex flex-wrap items-center gap-4 pt-2">
                     <div className="flex items-center text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
-                      <DollarSign className="w-3.5 h-3.5 mr-1" />
                       {job.salary}
                     </div>
                     <div className="flex gap-2">
@@ -127,8 +123,8 @@ function JobBoardPage() {
                 {/* Action */}
                 <div className="flex flex-col justify-center min-w-[120px]">
                   <Button asChild>
-                    <a href={job.externalUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                      Apply <ExternalLink className="w-4 h-4" />
+                    <a href={job.externalUrl} target="_blank" rel="noopener noreferrer">
+                      Apply
                     </a>
                   </Button>
                 </div>

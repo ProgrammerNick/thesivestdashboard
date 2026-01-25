@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Briefcase, MapPin } from "lucide-react";
+import { Search } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLoaderData } from "@tanstack/react-router";
@@ -30,8 +30,7 @@ function TalentPage() {
     <div className="space-y-8 p-6 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
-            <Briefcase className="w-8 h-8 text-primary" />
+          <h1 className="text-3xl font-heading font-bold">
             Talent & Jobs
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -92,7 +91,7 @@ function TalentPage() {
                           </div>
                           <p className="text-primary font-medium">{candidate.role}</p>
                           <div className="flex items-center text-sm text-muted-foreground mt-1">
-                            <MapPin className="w-3 h-3 mr-1" /> {candidate.location}
+                            {candidate.location}
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2">

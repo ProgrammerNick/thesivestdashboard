@@ -22,6 +22,7 @@ interface CompactChatHistorySidebarProps {
     currentSessionId?: string;
     onClose?: () => void;
     showAllTypes?: boolean; // Show all chat types regardless of filter
+    hideHeader?: boolean;
 }
 
 export function CompactChatHistorySidebar({
@@ -29,7 +30,8 @@ export function CompactChatHistorySidebar({
     onSelectSession,
     currentSessionId,
     onClose,
-    showAllTypes = false
+    showAllTypes = false,
+    hideHeader = false
 }: CompactChatHistorySidebarProps) {
     const { data: session } = authClient.useSession();
     const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -105,20 +107,22 @@ export function CompactChatHistorySidebar({
     return (
         <div className="h-full flex flex-col border-l border-border">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-card/50">
-                <div className="flex items-center gap-2">
-                    <History className="w-4 h-4 text-primary" />
-                    <h3 className="font-semibold text-sm">History</h3>
-                    <Badge variant="secondary" className="text-xs px-1.5">
-                        {sessions.length}
-                    </Badge>
+            {!hideHeader && (
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-card/50">
+                    <div className="flex items-center gap-2">
+                        <History className="w-4 h-4 text-primary" />
+                        <h3 className="font-semibold text-sm">History</h3>
+                        <Badge variant="secondary" className="text-xs px-1.5">
+                            {sessions.length}
+                        </Badge>
+                    </div>
+                    {onClose && (
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+                            <X className="w-4 h-4" />
+                        </Button>
+                    )}
                 </div>
-                {onClose && (
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
-                        <X className="w-4 h-4" />
-                    </Button>
-                )}
-            </div>
+            )}
 
             {/* Sessions */}
             <ScrollArea className="flex-1">

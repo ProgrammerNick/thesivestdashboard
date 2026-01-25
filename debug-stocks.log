@@ -1,0 +1,72 @@
+[2026-01-25T01:31:24.453Z] Analyzing: AAPL
+[2026-01-25T01:31:24.458Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T01:31:50.729Z] Success. Parsing JSON...
+[2026-01-25T01:44:01.772Z] Analyzing: ASTS
+[2026-01-25T01:44:39.927Z] Success. Parsing JSON...
+[2026-01-25T19:45:08.154Z] Analyzing: ASTS
+[2026-01-25T19:45:08.166Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T19:45:43.348Z] Success. Parsing JSON...
+[2026-01-25T20:43:23.732Z] Analyzing: AAPL
+[2026-01-25T20:43:23.740Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T20:44:07.792Z] Success. Parsing JSON...
+[2026-01-25T21:05:41.494Z] Analyzing: ASTS
+[2026-01-25T21:05:41.507Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:06:25.958Z] Success. Parsing JSON...
+[2026-01-25T21:07:51.605Z] Analyzing: TSLA
+[2026-01-25T21:07:51.608Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:08:17.247Z] Error: {"error":{"code":503,"message":"The model is overloaded. Please try again later.","status":"UNAVAILABLE"}}
+[2026-01-25T21:08:42.373Z] Analyzing: TSLA
+[2026-01-25T21:08:42.375Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:08:56.350Z] Analyzing: TSLA
+[2026-01-25T21:08:56.352Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:09:13.941Z] Success. Parsing JSON...
+[2026-01-25T21:10:06.544Z] Success. Parsing JSON...
+[2026-01-25T21:10:42.916Z] Analyzing: TSLA
+[2026-01-25T21:10:42.918Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:11:09.024Z] Success. Parsing JSON...
+[2026-01-25T21:11:25.269Z] Analyzing: TSLA
+[2026-01-25T21:11:25.271Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:11:42.018Z] Empty response from Gemini
+[2026-01-25T21:11:42.020Z] Error: Empty response from Gemini
+[2026-01-25T21:50:09.226Z] Analyzing: NVDA
+[2026-01-25T21:50:09.242Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:50:31.091Z] Empty response from Gemini
+[2026-01-25T21:50:31.094Z] Error: Empty response from Gemini
+[2026-01-25T21:50:39.812Z] Analyzing: NVDA
+[2026-01-25T21:50:39.814Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:51:04.835Z] Success. Parsing JSON...
+[2026-01-25T21:51:52.213Z] Analyzing: NVDA
+[2026-01-25T21:51:52.216Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:52:09.593Z] Empty response from Gemini
+[2026-01-25T21:52:09.595Z] Error: Empty response from Gemini
+[2026-01-25T21:53:02.771Z] Analyzing: AAPL
+[2026-01-25T21:53:02.774Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:54:10.306Z] Success. Parsing JSON...
+[2026-01-25T21:55:19.795Z] Analyzing: NVDA
+[2026-01-25T21:55:19.796Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T21:56:04.844Z] Empty response from Gemini
+[2026-01-25T21:56:04.845Z] Error: Empty response from Gemini
+[2026-01-25T22:01:41.795Z] Analyzing: MSFT
+[2026-01-25T22:01:41.799Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T22:02:02.656Z] Success. Parsing JSON...
+[2026-01-25T22:03:13.994Z] Analyzing: AMZN
+[2026-01-25T22:03:13.998Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T22:04:05.893Z] Success. Parsing JSON...
+[2026-01-25T22:05:02.668Z] Analyzing: GOOGL
+[2026-01-25T22:05:02.673Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T22:05:23.310Z] Success. Parsing JSON...
+[2026-01-25T22:28:40.499Z] Analyzing: TSLA
+[2026-01-25T22:28:40.508Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T22:29:04.870Z] Success. Parsing JSON...
+[2026-01-25T22:32:30.120Z] Analyzing: ASTS
+[2026-01-25T22:32:30.122Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T22:32:56.222Z] Success. Parsing JSON...
+[2026-01-25T22:34:28.542Z] Analyzing: NFLX
+[2026-01-25T22:34:28.545Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T22:35:14.817Z] Success. Parsing JSON...
+[2026-01-25T22:35:21.495Z] Analyzing: NFLX
+[2026-01-25T22:35:21.499Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T22:35:51.115Z] Success. Parsing JSON...
+[2026-01-25T23:27:36.867Z] Analyzing: NUAI
+[2026-01-25T23:27:36.880Z] Failed to get Resource.GEMINI_API_KEY: Error: It does not look like SST links are active. If this is in local development and you are not starting this process through the multiplexer, wrap your command with `sst dev -- <command>`
+[2026-01-25T23:28:26.852Z] Success. Parsing JSON...

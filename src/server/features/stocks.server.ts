@@ -4,7 +4,10 @@
  */
 
 import { GoogleGenAI } from "@google/genai";
+import { Resource } from "sst";
 import { retryGeminiCall } from "../utils/gemini-retry";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 export type Catalyst = {
     event: string;
@@ -44,7 +47,24 @@ export async function generateStockAnalysis(query: string): Promise<StockData> {
         throw new Error("Query parameter required");
     }
 
-    const geminiKey = process.env.GEMINI_API_KEY;
+    // Debug logging
+    const logPath = path.join(process.cwd(), "debug-stocks.log");
+    await fs.appendFile(logPath, `[${new Date().toISOString()}] Analyzing: ${query}\n`);
+
+    let geminiKey = process.env.GEMINI_API_KEY;
+
+    try {
+        geminiKey = Resource.GEMINI_API_KEY.value;
+    } catch (e) {
+        await fs.appendFile(logPath, `[${new Date().toISOString()}] Failed to get Resource.GEMINI_API_KEY: ${e}\n`);
+    }
+
+    if (!geminiKey) {
+        const error = "Missing Gemini API Key";
+        await fs.appendFile(logPath, `[${new Date().toISOString()}] ${error}\n`);
+        console.error(error);
+        throw new Error("Server configuration error: Gemini Key Missing");
+    }
 
     if (!geminiKey) {
         console.error("Missing Gemini API Key");
@@ -175,13 +195,18 @@ export async function generateStockAnalysis(query: string): Promise<StockData> {
         const responseText = result.text;
 
         if (!responseText) {
+            await fs.appendFile(logPath, `[${new Date().toISOString()}] Empty response from Gemini\n`);
             throw new Error("Empty response from Gemini");
         }
 
         const cleanJson = responseText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
         console.log("Gemini Stock Analysis Result:", cleanJson.substring(0, 200) + "...");
+
+        await fs.appendFile(logPath, `[${new Date().toISOString()}] Success. Parsing JSON...\n`);
+
         return JSON.parse(cleanJson) as StockData;
     } catch (error) {
+        await fs.appendFile(logPath, `[${new Date().toISOString()}] Error: ${error instanceof Error ? error.message : String(error)}\n`);
         console.error("Gemini stock search failed:", error);
         throw new Error(`Gemini Error: ${error instanceof Error ? error.message : String(error)}`);
     }

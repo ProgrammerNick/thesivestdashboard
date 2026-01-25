@@ -17,14 +17,8 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import {
-    PieChart,
     ArrowUpRight,
     ArrowDownRight,
-    Filter,
-    Download,
-    Layers,
-    Activity,
-    AlertCircle,
     ChevronDown,
     ChevronUp
 } from "lucide-react";
@@ -64,10 +58,10 @@ function FundsDashboard() {
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline" size="sm">
-                        <Filter className="w-4 h-4 mr-2" /> Filter
+                        Filter
                     </Button>
                     <Button variant="outline" size="sm">
-                        <Download className="w-4 h-4 mr-2" /> Export CSV
+                        Export CSV
                     </Button>
                 </div>
             </div>
@@ -79,9 +73,8 @@ function FundsDashboard() {
                         <CardTitle className="text-xs font-medium text-muted-foreground uppercase">Smart Money Sentiment</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-green-500 flex items-center gap-2">
+                        <div className="text-2xl font-bold text-green-500">
                             Bullish
-                            <Activity className="w-4 h-4" />
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                             Tech & Industrials leading accumulation.
@@ -172,8 +165,7 @@ function FundsDashboard() {
                 <div className="lg:col-span-2 space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Layers className="w-5 h-5" />
+                            <CardTitle>
                                 Significant Portfolio Changes
                             </CardTitle>
                             <CardDescription>
@@ -226,8 +218,7 @@ function FundsDashboard() {
                     {/* Heatmap */}
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <PieChart className="w-5 h-5" />
+                            <CardTitle>
                                 Sector Heatmap
                             </CardTitle>
                             <CardDescription>
@@ -260,8 +251,7 @@ function FundsDashboard() {
                 <div className="space-y-6">
                     <Card className="border-primary/20 bg-primary/5">
                         <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <AlertCircle className="w-5 h-5 text-primary" />
+                            <CardTitle className="text-lg">
                                 Conviction Index
                             </CardTitle>
                             <CardDescription>
