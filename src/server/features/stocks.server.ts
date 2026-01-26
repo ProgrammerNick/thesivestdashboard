@@ -109,11 +109,11 @@ export async function generateStockAnalysis(query: string): Promise<StockData> {
             // @ts-ignore
             return await ai.models.generateContent({
                 model: "gemini-3-flash-preview",
-                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                contents: prompt,
                 config: {
                     tools: [{ googleSearch: {} }],
                     responseMimeType: "application/json",
-                    responseSchema: {
+                    responseJsonSchema: {
                         type: "OBJECT",
                         properties: {
                             symbol: { type: "STRING" },

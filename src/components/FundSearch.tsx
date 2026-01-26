@@ -8,6 +8,9 @@ import { motion, AnimatePresence } from "motion/react";
 import { searchFund } from "../server/fn/funds";
 import { getAnalysisHistory, deleteAnalysis } from "../server/fn/analysis";
 import { authClient } from "@/lib/auth-client";
+import { CleanChatInterface } from "./CleanChatInterface";
+import { getOrCreateChatSession, addChatMessage } from "@/server/fn/chat-history";
+import { chatWithFund } from "@/server/fn/chat";
 
 interface Holding {
     symbol: string;

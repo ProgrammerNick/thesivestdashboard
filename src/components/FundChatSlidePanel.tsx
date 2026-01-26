@@ -254,7 +254,7 @@ export function FundChatSlidePanel({ fund, isOpen, onClose }: FundChatSlidePanel
             />
 
             {/* Chat Panel with Sidebar */}
-            <div className="fixed inset-y-0 right-0 w-full max-w-7xl bg-background border-l border-border shadow-2xl z-50 flex animate-in slide-in-from-right duration-300">
+            <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-background border-l border-border shadow-2xl z-50 flex animate-in slide-in-from-right duration-300">
                 {/* Main Chat Area */}
                 <div className="flex flex-col flex-1 min-w-0">
                     {/* Header */}
@@ -309,12 +309,24 @@ export function FundChatSlidePanel({ fund, isOpen, onClose }: FundChatSlidePanel
                                             </AvatarFallback>
                                         </Avatar>
                                         <div
-                                            className={`rounded-xl p-3 max-w-[85%] text-sm leading-relaxed ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                                            className={`rounded-xl p-3 max-w-[90%] text-sm leading-relaxed ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
                                                 }`}
                                         >
                                             {m.role === "model" ? (
-                                                <div className="[&>p]:my-2 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0 [&>strong]:font-semibold [&>strong]:text-foreground [&>em]:italic [&>ul]:my-2 [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:my-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>li]:my-1 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:my-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:my-2 [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:my-2 [&>code]:bg-muted-foreground/20 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-xs [&>pre]:bg-muted-foreground/10 [&>pre]:p-2 [&>pre]:rounded [&>pre]:overflow-x-auto [&>pre>code]:bg-transparent [&>blockquote]:border-l-4 [&>blockquote]:border-muted-foreground/30 [&>blockquote]:pl-4 [&>blockquote]:italic">
-                                                    <ReactMarkdown>{m.content}</ReactMarkdown>
+                                                <div className="prose prose-sm dark:prose-invert max-w-none">
+                                                    <ReactMarkdown
+                                                        components={{
+                                                            ul: ({ node, ...props }) => <ul className="list-disc ml-4 my-2 space-y-1" {...props} />,
+                                                            ol: ({ node, ...props }) => <ol className="list-decimal ml-4 my-2 space-y-1" {...props} />,
+                                                            li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                                                            h3: ({ node, ...props }) => <h3 className="font-semibold text-foreground mt-4 mb-2 text-sm" {...props} />,
+                                                            strong: ({ node, ...props }) => <strong className="font-bold text-foreground" {...props} />,
+                                                            p: ({ node, ...props }) => <p className="leading-relaxed my-2 last:mb-0" {...props} />,
+                                                            blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-primary/30 pl-4 italic my-2 bg-muted/30 py-1 rounded-r" {...props} />,
+                                                        }}
+                                                    >
+                                                        {m.content}
+                                                    </ReactMarkdown>
                                                 </div>
                                             ) : (
                                                 <p className="whitespace-pre-wrap">{m.content}</p>

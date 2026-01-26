@@ -1,10 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Bot, User, ArrowLeft, PanelRightClose, PanelRightOpen, Sparkles } from "lucide-react";
+import { Send, Loader2, ArrowLeft, PanelRightClose, PanelRightOpen, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 import { chatWithFund } from "@/server/fn/chat";
 import { getOrCreateChatSession, addChatMessage, getChatSession, generateChatSummary } from "@/server/fn/chat-history";
 import { CompactChatHistorySidebar } from "@/components/CompactChatHistorySidebar";
@@ -217,12 +216,12 @@ function ChatPage() {
     };
 
     return (
-        <div className="flex h-[calc(100vh-4rem)] bg-background">
+        <div className="flex h-screen bg-background">
             {/* Main Chat Area */}
             <div className="flex flex-col flex-1 min-w-0">
                 {/* Header */}
-                <div className="border-b border-border bg-card/50 px-4 py-3">
-                    <div className="flex items-center justify-between max-w-7xl mx-auto">
+                <div className="border-b border-border bg-card/50 px-3 py-2">
+                    <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Button
                                 variant="ghost"
@@ -270,8 +269,8 @@ function ChatPage() {
                 </div>
 
                 {/* Chat Messages */}
-                <ScrollArea className="flex-1 px-4">
-                    <div className="max-w-7xl mx-auto py-4">
+                <div className="flex-1 overflow-y-auto px-3 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    <div className="py-3">
                         {isInitializing ? (
                             <div className="flex items-center justify-center h-32">
                                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -288,31 +287,21 @@ function ChatPage() {
 
                                 {/* Simple Q&A for follow-up messages */}
                                 {messages.length > 0 && (
-                                    <div className="max-w-4xl mx-auto space-y-6">
+                                    <div className="space-y-6">
                                         {messages.slice(messages[0].role === "model" ? 1 : 0).map((m, i) => (
-                                            <div
-                                                key={i}
-                                                className={`flex gap-4 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}
-                                            >
-                                                <Avatar className="w-8 h-8 border border-border shrink-0">
-                                                    <AvatarFallback
-                                                        className={m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}
-                                                    >
-                                                        {m.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div
-                                                    className={`rounded-lg px-4 py-3 max-w-[85%] text-sm leading-relaxed shadow-sm ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-card border border-border"
-                                                        }`}
-                                                >
-                                                    {m.role === "model" ? (
+                                            <div key={i} className="space-y-2">
+                                                {m.role === "user" ? (
+                                                    <div className="flex items-start gap-2 text-muted-foreground">
+                                                        <span className="text-xs font-semibold uppercase tracking-wide text-primary shrink-0 pt-0.5">Q:</span>
+                                                        <p className="text-sm font-medium text-foreground">{m.content}</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="pl-5 border-l-2 border-primary/20">
                                                         <div className="prose prose-sm dark:prose-invert max-w-none">
                                                             <ReactMarkdown>{m.content}</ReactMarkdown>
                                                         </div>
-                                                    ) : (
-                                                        <p className="whitespace-pre-wrap">{m.content}</p>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -322,7 +311,7 @@ function ChatPage() {
                             </div>
                         )}
                     </div>
-                </ScrollArea>
+                </div>
 
                 {/* Input Area */}
                 <div className="border-t border-border bg-card/50 p-4">

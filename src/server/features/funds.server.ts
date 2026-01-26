@@ -6,6 +6,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { db } from "@/db/index";
 import { aiAnalysis } from "@/db/schema";
+import { Resource } from "sst";
 import { retryGeminiCall } from "../utils/gemini-retry";
 
 export type FundData = {
@@ -33,7 +34,13 @@ export async function generateFundAnalysis(query: string): Promise<FundData> {
         throw new Error("Query parameter required");
     }
 
-    const geminiKey = process.env.GEMINI_API_KEY;
+    let geminiKey = process.env.GEMINI_API_KEY;
+
+    try {
+        geminiKey = Resource.GEMINI_API_KEY.value;
+    } catch (e) {
+        console.warn("Failed to get Resource.GEMINI_API_KEY, falling back to process.env");
+    }
 
     if (!geminiKey) {
         console.error("Missing Gemini API Key");
@@ -80,11 +87,11 @@ export async function generateFundAnalysis(query: string): Promise<FundData> {
             // @ts-ignore
             return await ai.models.generateContent({
                 model: "gemini-3-flash-preview",
-                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                contents: prompt,
                 config: {
                     tools: [{ googleSearch: {} }],
                     responseMimeType: "application/json",
-                    responseSchema: {
+                    responseJsonSchema: {
                         type: "OBJECT",
                         properties: {
                             fundName: { type: "STRING" },

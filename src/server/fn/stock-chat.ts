@@ -1,3 +1,4 @@
+import { Resource } from "sst";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { GoogleGenAI } from "@google/genai";
@@ -25,7 +26,13 @@ export const chatWithStock = createServerFn({ method: "POST" })
         })
     )
     .handler(async ({ data }) => {
-        const geminiKey = process.env.GEMINI_API_KEY;
+        let geminiKey = process.env.GEMINI_API_KEY;
+
+        try {
+            geminiKey = Resource.GEMINI_API_KEY.value;
+        } catch (e) {
+            console.warn("Resource.GEMINI_API_KEY not found, falling back to env");
+        }
 
         if (!geminiKey) {
             throw new Error("Missing Gemini API Key");
@@ -42,7 +49,17 @@ ${data.context}
 
 Answer questions specifically about this stock, its business, valuation, risks, and catalysts. 
 Be concise but thorough. Use data when available.
-If asked about something not in the context, use your knowledge but note that it may not be current.`;
+If asked about something not in the context, use your knowledge but note that it may not be current.
+
+IMPORTANT FORMATTING INSTRUCTIONS:
+- Use standard Markdown formatting.
+- **ALWAYS use "###" headers** for distinct sections (e.g., ### Strategy, ### Financial Health, ### Risks).
+- Do NOT run these sections together in one paragraph. Separate them with double newlines.
+- Use bullet points for lists, using a hyphen (-) or asterisk (*).
+- Use **bold** for key terms and emphasis.
+- Keep the response visual, structured, and easy to scan.
+- **Be extremely concise.** Avoid conversational filler (e.g., "Here is the analysis", "Good question").
+- Structure your answer with short paragraphs.`;
 
         const historyContents = [
             {

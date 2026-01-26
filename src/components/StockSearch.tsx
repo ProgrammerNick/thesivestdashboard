@@ -36,7 +36,7 @@ export function StockSearch() {
                             userId: session.user.id,
                             type: "stock",
                             contextId: data.symbol,
-                            title: `${data.symbol} Analysis`,
+                            title: `${data.symbol} AI-Powered Analysis`,
                         }
                     });
 
@@ -51,7 +51,8 @@ export function StockSearch() {
 
                     // If it's a new session or has no messages (failed previous run), save the analysis
                     if (chatSession.isNew || chatSession.messages.length === 0) {
-                        const starterSummary = `## ${data.companyName} (${data.symbol}) Institutional Analysis
+                        const starterSummary = `## ${data.companyName} (${data.symbol}) AI-Powered Analysis
+
 > **Business Summary**
 > ${data.businessSummary}
 
@@ -66,12 +67,15 @@ ${data.valuationCommentary}
 ${data.comparableMultiples?.map(c => `| **${c.ticker}** | ${c.name} | ${c.peRatio} | ${c.evEbitda} | ${c.premium} |`).join('\n')}
 
 ### 🏗️ Capital & Management
-**Strategy**: ${data.capitalAllocation}
-**Financial Health**: ${data.financialHealth}
-**Earnings Quality**: ${data.earningsQuality}
+
+- **Strategy**: ${data.capitalAllocation}
+
+- **Financial Health**: ${data.financialHealth}
+
+- **Earnings Quality**: ${data.earningsQuality}
 
 ### ⚠️ Key Risks
-${Array.isArray(data.keyRisks) ? data.keyRisks.map(r => `> ⚠️ **${r}**`).join('\n') : `> ${data.keyRisks}`}
+${Array.isArray(data.keyRisks) ? data.keyRisks.map(r => `> - ⚠️ **${r}**`).join('\n') : `> ${data.keyRisks}`}
 
 ### 📅 Upcoming Catalysts
 | Date | Event | Impact |
@@ -80,7 +84,7 @@ ${data.upcomingCatalysts?.map(c => `| ${c.date} | ${c.event} | ${c.impact} |`).j
 
 ---
 **Growth Catalysts**: ${data.growthCatalysts}
-${data.shortInterest ? `**Short Interest**: ${data.shortInterest}` : ''}
+${data.shortInterest ? `\n\n**Short Interest**: ${data.shortInterest}` : ''}
 
 I'm ready to discuss ${data.companyName} in depth. What specific aspect interests you?`;
 
@@ -120,7 +124,7 @@ I'm ready to discuss ${data.companyName} in depth. What specific aspect interest
             <div className="max-w-7xl mx-auto space-y-12 transition-all duration-300">
                 <div className="text-center space-y-4">
                     <h2 className="text-3xl md:text-5xl font-heading text-foreground">
-                        Institutional-Grade Stock Analysis
+                        AI-Powered Stock Analysis
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                         Deep dive into any company. Visualize community thesis stamped directly on the chart.
@@ -152,15 +156,16 @@ I'm ready to discuss ${data.companyName} in depth. What specific aspect interest
                     <div className="max-w-4xl mx-auto mt-12 bg-card/50 border border-border/50 rounded-xl overflow-hidden">
                         <div className="p-4 border-b border-border/50 bg-muted/20">
                             <h3 className="font-semibold flex items-center gap-2">
-                                Recent Research
+                                History
                             </h3>
                         </div>
-                        <div className="h-[400px]">
+                        <div className="h-[400px] flex flex-col">
+                            {/* This sidebar component already includes the Search Bar at the top because we refactored it */}
                             <CompactChatHistorySidebar
                                 type="stock"
                                 onSelectSession={handleLoadSession}
                                 showAllTypes={false}
-                                hideHeader={true}
+                                hideHeader={false}
                             // We need to modify CompactChatHistorySidebar to handle "embedded" mode better, 
                             // e.g. hiding the header if we provide one, or just re-using it.
                             // For now let's just let it render.

@@ -3,6 +3,7 @@
  * Contains the AI-powered chat functionality for fund discussions
  */
 
+import { Resource } from "sst";
 import { GoogleGenAI } from "@google/genai";
 
 export type ChatMessage = {
@@ -18,7 +19,13 @@ export async function generateFundChatResponse(
     context: string,
     messages: ChatMessage[]
 ): Promise<string> {
-    const geminiKey = process.env.GEMINI_API_KEY;
+    let geminiKey = process.env.GEMINI_API_KEY;
+
+    try {
+        geminiKey = Resource.GEMINI_API_KEY.value;
+    } catch (e) {
+        console.warn("Resource.GEMINI_API_KEY not found, falling back to env");
+    }
 
     if (!geminiKey) {
         throw new Error("Missing Gemini API Key");
@@ -33,7 +40,15 @@ export async function generateFundChatResponse(
     Here is the context of our analysis so far:
     ${context}
     
-    Answer questions specifically about this fund, its holdings, and its strategy. Use Google Search if you need specific up-to-date news or prices that aren't in the context.`;
+    Answer questions specifically about this fund, its holdings, and its strategy. Use Google Search if you need specific up-to-date news or prices that aren't in the context.
+    
+    IMPORTANT FORMATTING INSTRUCTIONS:
+    - Use standard Markdown formatting.
+    - **ALWAYS use "###" headers** for distinct sections (e.g., ### Strategy, ### Performance, ### Holdings).
+    - Do NOT run these sections together. Separate them with double newlines.
+    - Use bullet points for lists.
+    - Use **bold** for key terms and emphasis.
+    - Keep the response visual and easy to scan.`;
 
     // This SDK usually supports 'systemInstruction' in config, or we prepend a user message.
     // We will prepend a user message for safety.

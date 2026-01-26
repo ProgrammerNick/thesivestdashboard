@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Bot, User, X, Sparkles, PanelRight } from "lucide-react";
+import { Send, Loader2, Bot, User, X, Sparkles, PanelRight, ChevronFirst } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
@@ -52,22 +52,23 @@ export function StockChatSlidePanel({ stock, isOpen, onClose, sessionId }: Stock
     }, [isOpen, stock, session?.user?.id, sessionId]);
 
     const buildStarterSummary = (data: StockData) => {
-        return `## ${data.companyName} (${data.symbol}) Institutional Analysis
+        return `## ${data.companyName} (${data.symbol}) AI-powered Analysis
 
-**Economic Moat**: ${data.moatAnalysis}
+**Economic Moat**:
+${data.moatAnalysis}
 
 **Valuation & Peers**:
-Trading at ${data.valuationCommentary}. 
+Trading at ${data.valuationCommentary}.
 *Peers*: ${data.comparableMultiples?.map(c => `${c.ticker} (${c.peRatio} P/E)`).join(', ')}.
 
 **Management Quality**:
 ${data.capitalAllocation}
 
 **Key Risks**:
-${Array.isArray(data.keyRisks) ? data.keyRisks.map(r => `• ${r}`).join('\n') : data.keyRisks}
+${Array.isArray(data.keyRisks) ? data.keyRisks.map(r => `- ${r}`).join('\n') : data.keyRisks}
 
 **Upcoming Catalysts**:
-${data.upcomingCatalysts?.map(c => `• ${c.event} (${c.date}) - ${c.impact}`).join('\n')}
+${data.upcomingCatalysts?.map(c => `- ${c.event} (${c.date}) - ${c.impact}`).join('\n')}
 
 I'm ready to discuss ${data.companyName} in depth. What specific aspect interests you?`;
     };
@@ -290,7 +291,7 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
             />
 
             {/* Chat Panel with Sidebar */}
-            <div className="fixed inset-y-0 right-0 w-[600px] bg-background border-l border-border shadow-2xl z-50 flex animate-in slide-in-from-right duration-300">
+            <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-background border-l border-border shadow-2xl z-50 flex animate-in slide-in-from-right duration-300">
                 {/* Main Chat Area */}
                 <div className="flex flex-col flex-1 min-w-0">
                     {/* Header */}
@@ -301,7 +302,7 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
                                     <Sparkles className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold">{stock.symbol} Analyst</h3>
+                                    <h3 className="font-semibold">{stock.symbol} AI-Powered Analyst</h3>
                                     <p className="text-xs text-muted-foreground">{stock.companyName}</p>
                                 </div>
                             </div>
@@ -325,7 +326,7 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
                     </div>
 
                     {/* Chat Messages */}
-                    <ScrollArea className="flex-1 p-6">
+                    <ScrollArea className="flex-1 p-4">
                         {isInitializing ? (
                             <div className="flex items-center justify-center h-32">
                                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -338,20 +339,28 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
                                             key={i}
                                             className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}
                                         >
-                                            <Avatar className="w-8 h-8 border border-border shrink-0">
-                                                <AvatarFallback
-                                                    className={m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}
-                                                >
-                                                    {m.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                                                </AvatarFallback>
-                                            </Avatar>
                                             <div
-                                                className={`rounded-xl p-3 max-w-[85%] text-sm leading-relaxed ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                                                className={`rounded-lg px-3 py-2 max-w-[95%] text-sm leading-relaxed ${m.role === "user" ? "bg-primary text-primary-foreground ml-auto" : "bg-muted text-foreground mr-auto"
                                                     }`}
                                             >
                                                 {m.role === "model" ? (
-                                                    <div className="[&>p]:my-2 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0 [&>strong]:font-semibold [&>strong]:text-foreground [&>em]:italic [&>ul]:my-2 [&>ul]:list-disc [&>ul]:ml-4 [&>ol]:my-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>li]:my-1 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:my-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:my-2 [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:my-2 [&>code]:bg-muted-foreground/20 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-xs [&>pre]:bg-muted-foreground/10 [&>pre]:p-2 [&>pre]:rounded [&>pre]:overflow-x-auto [&>pre>code]:bg-transparent [&>blockquote]:border-l-4 [&>blockquote]:border-muted-foreground/30 [&>blockquote]:pl-4 [&>blockquote]:italic">
-                                                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                                                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                                                        <ReactMarkdown
+                                                            components={{
+                                                                ul: ({ node, ...props }) => <ul className="list-disc ml-4 my-1 space-y-0.5" {...props} />,
+                                                                ol: ({ node, ...props }) => <ol className="list-decimal ml-4 my-1 space-y-0.5" {...props} />,
+                                                                li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                                                                h3: ({ node, ...props }) => <h3 className="font-semibold text-foreground mt-3 mb-1 text-sm" {...props} />,
+                                                                strong: ({ node, ...props }) => <strong className="font-bold text-foreground" {...props} />,
+                                                                p: ({ node, ...props }) => <p className="leading-relaxed my-1.5 last:mb-0" {...props} />,
+                                                                table: ({ node, ...props }) => <div className="overflow-x-auto my-2"><table className="w-full text-xs border-collapse" {...props} /></div>,
+                                                                th: ({ node, ...props }) => <th className="border border-border bg-muted/50 px-2 py-1 text-left font-semibold" {...props} />,
+                                                                td: ({ node, ...props }) => <td className="border border-border px-2 py-1" {...props} />,
+                                                                blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-primary/30 pl-4 italic my-2 bg-muted/30 py-1 rounded-r" {...props} />,
+                                                            }}
+                                                        >
+                                                            {m.content}
+                                                        </ReactMarkdown>
                                                     </div>
                                                 ) : (
                                                     <p className="whitespace-pre-wrap">{m.content}</p>
@@ -363,12 +372,7 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
                                     {/* Loading indicator */}
                                     {isLoading && (
                                         <div className="flex gap-3">
-                                            <Avatar className="w-8 h-8 border border-border">
-                                                <AvatarFallback className="bg-muted">
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="bg-muted rounded-xl p-3 text-sm text-muted-foreground">
+                                            <div className="bg-muted rounded-xl p-3 text-sm text-muted-foreground ml-auto mr-auto">
                                                 <span className="inline-flex gap-1">
                                                     <span className="animate-bounce [animation-delay:-0.3s]">●</span>
                                                     <span className="animate-bounce [animation-delay:-0.15s]">●</span>
@@ -437,7 +441,7 @@ Peer Comparison: ${stock.comparableMultiples?.map(c => `${c.ticker}: ${c.peRatio
                         />
                     </div>
                 )}
-            </div>
+            </div >
         </>
     );
 }
