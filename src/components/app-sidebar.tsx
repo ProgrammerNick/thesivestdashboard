@@ -59,6 +59,7 @@ export function AppSidebar() {
             items: [
                 { label: "Stock Research", href: "/stocks" },
                 { label: "Fund Research", href: "/funds" },
+                { label: "Discovery", href: "/discovery" },
                 { label: "Fund Intelligence", href: "/fund-intelligence" },
             ],
         },

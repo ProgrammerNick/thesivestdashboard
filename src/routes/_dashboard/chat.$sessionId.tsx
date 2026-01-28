@@ -276,14 +276,16 @@ function ChatPage() {
                                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
                             </div>
                         ) : (
-                            <div className="space-y-8 pb-12">
+                            <div className="space-y-4 pb-12">
                                 {/* Report View for the first message (Analysis) */}
-                                {messages.length > 0 && messages[0].role === "model" && (
-                                    <div className="animate-in fade-in duration-500">
-                                        <ReportView content={messages[0].content} />
-                                        {messages.length > 1 && <div className="border-t border-border my-8" />}
-                                    </div>
-                                )}
+                                {
+                                    messages.length > 0 && messages[0].role === "model" && (
+                                        <div className="animate-in fade-in duration-500">
+                                            <ReportView content={messages[0].content} />
+                                            {messages.length > 1 && <div className="border-t border-border my-4" />}
+                                        </div>
+                                    )
+                                }
 
                                 {/* Simple Q&A for follow-up messages */}
                                 {messages.length > 0 && (
@@ -334,17 +336,19 @@ function ChatPage() {
             </div>
 
             {/* Chat History Sidebar */}
-            {isHistoryOpen && (
-                <div className="w-80 shrink-0 animate-in slide-in-from-right duration-200 border-l border-border">
-                    <CompactChatHistorySidebar
-                        type={contextType}
-                        onSelectSession={handleLoadSession}
-                        currentSessionId={currentSessionId || undefined}
-                        onClose={() => setIsHistoryOpen(false)}
-                        showAllTypes={true}
-                    />
-                </div>
-            )}
-        </div>
+            {
+                isHistoryOpen && (
+                    <div className="w-64 shrink-0 animate-in slide-in-from-right duration-200 border-l border-border">
+                        <CompactChatHistorySidebar
+                            type={contextType}
+                            onSelectSession={handleLoadSession}
+                            currentSessionId={currentSessionId || undefined}
+                            onClose={() => setIsHistoryOpen(false)}
+                            showAllTypes={true}
+                        />
+                    </div>
+                )
+            }
+        </div >
     );
 }

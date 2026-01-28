@@ -6,7 +6,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { GoogleGenAI } from "@google/genai";
 
 // Types for the chat history
-export type ChatSessionType = "fund" | "stock" | "fund-intelligence";
+export type ChatSessionType = "fund" | "stock" | "fund-intelligence" | "discovery";
 
 export interface ChatSessionWithMessages {
     id: string;
@@ -30,7 +30,7 @@ export const getChatSessions = createServerFn({ method: "GET" })
     .inputValidator(
         z.object({
             userId: z.string(),
-            type: z.enum(["fund", "stock", "fund-intelligence"]).optional(),
+            type: z.enum(["fund", "stock", "fund-intelligence", "discovery"]).optional(),
             limit: z.number().optional().default(20),
         })
     )
@@ -86,7 +86,7 @@ export const createChatSession = createServerFn({ method: "POST" })
     .inputValidator(
         z.object({
             userId: z.string(),
-            type: z.enum(["fund", "stock", "fund-intelligence"]),
+            type: z.enum(["fund", "stock", "fund-intelligence", "discovery"]),
             contextId: z.string(),
             title: z.string(),
         })
@@ -249,7 +249,7 @@ export const getOrCreateChatSession = createServerFn({ method: "POST" })
     .inputValidator(
         z.object({
             userId: z.string(),
-            type: z.enum(["fund", "stock", "fund-intelligence"]),
+            type: z.enum(["fund", "stock", "fund-intelligence", "discovery"]),
             contextId: z.string(),
             title: z.string(),
         })

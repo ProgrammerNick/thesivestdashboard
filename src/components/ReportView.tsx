@@ -108,7 +108,7 @@ export function ReportView({ content, className }: ReportViewProps) {
     const blocks = hasTable ? parseContent(content) : [{ type: "text", content } as ContentBlock];
 
     return (
-        <div className={cn("max-w-4xl mx-auto py-6", className)}>
+        <div className={cn("max-w-4xl mx-auto py-2", className)}>
             <div className="prose prose-lg dark:prose-invert max-w-none 
                 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4
                 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4

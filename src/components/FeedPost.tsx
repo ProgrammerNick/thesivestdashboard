@@ -1,9 +1,11 @@
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader } from "./ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"; // Assuming these exist or I'll use standard img
-import { MessageSquare, Heart, Share2, TrendingUp, TrendingDown, MoreHorizontal } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { MessageSquare, Heart, Share2, TrendingUp, TrendingDown, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { UserPost, CommunityMember } from "../server/fn/contributors";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
+import { authClient } from "@/lib/auth-client";
+// import { deletePost } from "@/server/fn/posts";
 
 interface FeedPostProps {
     post: UserPost;
@@ -20,11 +22,22 @@ export function FeedPost({ post, author }: FeedPostProps) {
         return "text-muted-foreground";
     };
 
+    const { data: session } = authClient.useSession();
+    const router = useRouter();
+    const isOwner = session?.user?.id === author.id;
+
+    // const handleDelete = async () => {
+    //     if (confirm("Are you sure you want to delete this post?")) {
+    //         await deletePost({ data: { id: post.id } });
+    //         router.invalidate();
+    //     }
+    // };
+
     return (
         <Card className="mb-6 border-border/60 hover:border-primary/20 transition-all bg-card/60 backdrop-blur-sm">
             <CardHeader className="flex flex-row items-start justify-between pb-2 space-y-0">
                 <div className="flex gap-3">
-                    <Link to={`/profiles/${author.id}`} className="relative group">
+                    <Link to="/profiles/$id" params={{ id: author.id }} className="relative group">
                         <div className="w-10 h-10 rounded-full bg-muted overflow-hidden border border-border group-hover:border-primary/50 transition-colors">
                             {author.avatar ? (
                                 <img src={author.avatar} alt={author.name} className="w-full h-full object-cover" />
@@ -38,7 +51,7 @@ export function FeedPost({ post, author }: FeedPostProps) {
 
                     <div>
                         <div className="flex items-center gap-2">
-                            <Link to={`/profiles/${author.id}`} className="font-semibold text-foreground hover:underline decoration-primary/50 underline-offset-4">
+                            <Link to="/profiles/$id" params={{ id: author.id }} className="font-semibold text-foreground hover:underline decoration-primary/50 underline-offset-4">
                                 {author.name}
                             </Link>
                             {author.verified && <span className="text-blue-500 text-[10px]">✓</span>}
@@ -50,9 +63,28 @@ export function FeedPost({ post, author }: FeedPostProps) {
                     </div>
                 </div>
 
-                <button className="text-muted-foreground hover:text-foreground">
-                    <MoreHorizontal className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                    {isOwner && (
+                        <>
+                            <Link
+                                to="/research"
+                                search={{ type: post.type as any, editId: post.id }}
+                                className="text-muted-foreground hover:text-primary transition-colors p-1"
+                            >
+                                <Pencil className="w-4 h-4" />
+                            </Link>
+                            <button
+                                onClick={handleDelete}
+                                className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </>
+                    )}
+                    <button className="text-muted-foreground hover:text-foreground">
+                        <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                </div>
             </CardHeader>
 
             <CardContent className="pb-4">

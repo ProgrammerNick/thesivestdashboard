@@ -1,22 +1,23 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { createPost, getUserOpenTrades } from "@/server/fn/posts";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect } from "react";
-import { Loader2, TrendingUp, ArrowUpRight, ArrowDownRight, RefreshCw, CheckCircle2 } from "lucide-react";
+import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, CheckCircle2, RefreshCw, Loader2 } from "lucide-react";
 import TiptapEditor from "@/components/Editor/TiptapEditor";
-import { z } from "zod";
+import { createPost, updatePost, getPost } from "@/server/fn/posts";
 
 const researchSearchSchema = z.object({
   type: z.enum(["trade", "thesis", "update", "close_trade", "market_outlook"]).optional(),
+  editId: z.string().optional(),
 });
 
 export const Route = createFileRoute("/_dashboard/research")({
+  validateSearch: (search) => researchSearchSchema.parse(search),
   component: ResearchPage,
-  validateSearch: researchSearchSchema,
 });
 
 function ResearchPage() {
@@ -30,37 +31,75 @@ function ResearchPage() {
   const [content, setContent] = useState<any>(null);
   const [openTrades, setOpenTrades] = useState<any[]>([]);
   const [selectedTradeId, setSelectedTradeId] = useState<string>("");
+  const [showTradeDetails, setShowTradeDetails] = useState(false);
+  const [editId, setEditId] = useState<string | null>((search.editId as string) || null);
 
   useEffect(() => {
-    if (type === 'update' || type === 'close_trade') {
-      // Fetch open trades
-      getUserOpenTrades().then(setOpenTrades);
+    if (editId) {
+      setIsLoading(true);
+      getPost({ data: { id: editId } }).then((post) => {
+        if (post) {
+          // @ts-ignore
+          if (post.title) (document.getElementById('title') as HTMLInputElement).value = post.title;
+          // @ts-ignore
+          if (post.symbol) (document.getElementById('symbol') as HTMLInputElement).value = post.symbol;
+
+          setContent(typeof post.content === 'string' ? post.content : JSON.parse(post.content as string));
+          setType(post.type as any);
+          if (post.type === 'trade') setShowTradeDetails(true);
+
+          if (post.buyPrice) {
+            // @ts-ignore
+            setTimeout(() => {
+              const el = document.getElementById('buyPrice') as HTMLInputElement;
+              if (el) el.value = post.buyPrice;
+            }, 100);
+          }
+          if (post.targetPrice) {
+            // @ts-ignore
+            setTimeout(() => {
+              const el = document.getElementById('targetPrice') as HTMLInputElement;
+              if (el) el.value = post.targetPrice;
+            }, 100);
+          }
+        }
+        setIsLoading(false);
+      });
     }
-  }, [type]);
+  }, [editId]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     const formData = new FormData(e.currentTarget);
 
+    const postData = {
+      title: formData.get("title") as string,
+      content: content,
+      type: type as any,
+      published: true,
+      symbol: (formData.get("symbol") as string)?.toUpperCase(),
+      buyPrice: formData.get("buyPrice") ? Number(formData.get("buyPrice")) : undefined,
+      targetPrice: formData.get("targetPrice") ? Number(formData.get("targetPrice")) : undefined,
+      stopLoss: formData.get("stopLoss") ? Number(formData.get("stopLoss")) : undefined,
+      referencePostId: selectedTradeId || undefined,
+      closePrice: formData.get("closePrice") ? Number(formData.get("closePrice")) : undefined,
+    };
+
     try {
-      await createPost({
-        data: {
-          title: formData.get("title") as string,
-          content: content,
-          type: type as any,
-          published: true, // Publish immediately so it appears in community feed
-          symbol: (formData.get("symbol") as string)?.toUpperCase(),
-          buyPrice: formData.get("buyPrice") ? Number(formData.get("buyPrice")) : undefined,
-          targetPrice: formData.get("targetPrice") ? Number(formData.get("targetPrice")) : undefined,
-          stopLoss: formData.get("stopLoss") ? Number(formData.get("stopLoss")) : undefined,
-          referencePostId: selectedTradeId || undefined,
-          closePrice: formData.get("closePrice") ? Number(formData.get("closePrice")) : undefined,
-        }
-      });
+      if (editId) {
+        await updatePost({
+          data: {
+            id: editId,
+            data: postData
+          }
+        });
+      } else {
+        await createPost({ data: postData });
+      }
       navigate({ to: "/dashboard" });
     } catch (error) {
-      console.error("Failed to post research:", error);
+      console.error("Failed to save research:", error);
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +126,12 @@ function ResearchPage() {
               type="button"
               variant={type === option.value ? "default" : "outline"}
               size="sm"
-              onClick={() => setType(option.value as any)}
+              onClick={() => {
+                setType(option.value as any);
+                // Reset trade details visibility when switching types
+                if (option.value === "trade") setShowTradeDetails(true);
+                else setShowTradeDetails(false);
+              }}
               className="rounded-full"
             >
               {option.label}
@@ -100,34 +144,59 @@ function ResearchPage() {
           <Input
             id="title"
             name="title"
-            placeholder={type === 'close_trade' ? "Exiting [Symbol]: Thesis Changed" : "Enter your headline..."}
+            placeholder={type === 'close_trade' ? 'Exiting [Symbol]: Thesis Changed' : 'Enter your headline...'}
             required
             className="!text-4xl font-heading font-bold border-none shadow-none p-0 h-auto focus-visible:ring-0 placeholder:text-muted-foreground/40 placeholder:font-normal"
           />
         </div>
 
         {/* Ticker Field - Required for all post types */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-primary" />
-            <Label htmlFor="symbol" className="text-sm font-medium">Ticker</Label>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              <Label htmlFor="symbol" className="text-sm font-medium">Ticker</Label>
+            </div>
+            <Input
+              id="symbol"
+              name="symbol"
+              placeholder="AAPL"
+              required
+              className="w-32 uppercase font-mono text-center"
+            />
           </div>
-          <Input
-            id="symbol"
-            name="symbol"
-            placeholder="AAPL"
-            required
-            className="w-32 uppercase font-mono text-center"
-          />
+
+          {/* Optional Trade Details Toggle for Thesis */}
+          {type === 'thesis' && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowTradeDetails(!showTradeDetails)}
+              className="text-muted-foreground hover:text-primary gap-2"
+            >
+              {showTradeDetails ? (
+                <>
+                  <TrendingDown className="w-4 h-4" />
+                  Remove Trade Details
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="w-4 h-4" />
+                  Add Trade Details (Optional)
+                </>
+              )}
+            </Button>
+          )}
         </div>
 
         {/* Trade Details - Position Type, Entry, Target/Exit */}
-        {(type === 'trade') && (
-          <Card className="bg-muted/30 border-dashed">
+        {(type === 'trade' || (type === 'thesis' && showTradeDetails)) && (
+          <Card className="bg-muted/30 border-dashed animate-in fade-in zoom-in-95 duration-200">
             <CardContent className="pt-4 space-y-4">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Trade Details</span>
+                <span className="text-sm font-medium">Trade Details {type === "thesis" && "(Optional)"}</span>
               </div>
 
               {/* Long/Short Selection */}
@@ -161,7 +230,7 @@ function ResearchPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <Label htmlFor="buyPrice" className="text-xs">Entry Price</Label>
-                  <Input id="buyPrice" name="buyPrice" type="number" step="0.01" placeholder="0.00" required />
+                  <Input id="buyPrice" name="buyPrice" type="number" step="0.01" placeholder="0.00" required={type === "trade"} />
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="targetPrice" className="text-xs">Target Price (optional)</Label>
@@ -176,7 +245,7 @@ function ResearchPage() {
         {(type === 'update' || type === 'close_trade') && (
           <div className="p-4 border rounded-lg bg-muted/20">
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-muted-foreground">
-              {type === 'close_trade' ? <CheckCircle2 className="w-4 h-4" /> : <RefreshCw className="w-4 h-4" />}
+              {type === 'close_trade' ? <CheckCircle2 className='w-4 h-4' /> : <RefreshCw className='w-4 h-4' />}
               {type === 'close_trade' ? 'Close Position' : 'Update Position'}
             </h3>
 

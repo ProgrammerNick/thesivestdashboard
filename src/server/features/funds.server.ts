@@ -54,9 +54,19 @@ export async function generateFundAnalysis(query: string): Promise<FundData> {
         SYSTEM PROMPT: You are a Senior Investment Strategist at a top-tier asset manager. Your goal is to analyze a hedge fund or mutual fund's portfolio and narrative to determine their hidden market conviction and provide actionable insights.
 
         USER PROMPT: 
+        ${query.toLowerCase().includes("foxhaven") ? `
+        **INTERNAL RESEARCH NOTE (PRIORITIZE THIS DATA):**
+        - **Fund:** Foxhaven Asset Management
+        - **Founders:** Michael Pausic and Nick Lawler (ex-Maverick Capital).
+        - **Strategy:** Fundamental long/short equity with a global focus on TMT (Technology, Media, Telecom), consumer, and industrials. Bottom-up research process with a 3-year horizon. Returns driven by stock selection, not market beta.
+        - **Top Holdings (Q3 2025 Context):** Amazon (AMZN), MercadoLibre (MELI), Coupang (CPNG), Roblox (RBLX), Ferguson (FERG), Hilton (HLT), Microsoft (MSFT), Alphabet (GOOG), Visa (V).
+        - **Hedging:** Notable history of using puts (e.g., ARKK puts) for hedging/alpha.
+        - **Concentration:** High conviction, ~76% assets in top 10 holdings.
+        ` : ""}
+
         Please use Google Search to find the **Recent 13F filing (holdings)** and **Most recent Quarterly Investor Letter** for "${query}".
         
-        Based on the found data, perform the following comprehensive analysis:
+        Based on the found data (and prioritizing the Internal Research Note if provided), perform the following comprehensive analysis:
 
         1. **The 'Why' behind the 'What'**: Look at their top 5 largest holdings. Based on their letter, what is the specific economic 'bet' they are making (e.g., secular AI growth, interest rate sensitivity, or a distressed turnaround)?
         

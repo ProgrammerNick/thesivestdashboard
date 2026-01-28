@@ -5,7 +5,12 @@ import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "../db/schema";
 
 const client = await getClient();
-const db = drizzle(client || "", { schema });
+
+if (!client) {
+  throw new Error("Failed to initialize database client in auth.ts. Check VITE_DATABASE_URL_POOLER.");
+}
+
+const db = drizzle(client, { schema });
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -17,6 +22,12 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
+    },
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     },
   },
   user: {

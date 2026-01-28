@@ -227,38 +227,39 @@ function ProfilePage() {
             </div>
           ) : (
             <div className="grid gap-4">
-              {posts.map((post) => {
-                // Helper to parse Tiptap JSON and get text preview
-                const getContentPreview = (content: string) => {
-                  try {
-                    const doc = JSON.parse(content);
-                    if (doc.type === 'doc' && doc.content) {
-                      return doc.content
-                        .filter((node: any) => node.type === 'paragraph' && node.content)
-                        .map((node: any) => node.content.map((c: any) => c.text || '').join(''))
-                        .join(' ')
-                        .slice(0, 150);
-                    }
-                    return content.slice(0, 150);
-                  } catch {
-                    return content.slice(0, 150);
-                  }
-                };
+              import {FeedPost} from "@/components/FeedPost";
 
-                return (
-                  <Card key={post.id} className="hover:border-primary/50 transition-colors">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between">
-                        <CardTitle className="text-lg">{post.title}</CardTitle>
-                        <span className="text-xs text-muted-foreground">{format(new Date(post.publishedAt), 'MMM d, yyyy')}</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{getContentPreview(post.content)}</p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              // ... inside the component ...
+
+              <div className="grid gap-4">
+                {posts.map((post) => {
+                  // Map data-access post shape to FeedPost props
+                  const postForFeed: any = {
+                    ...post,
+                    buyPrice: post.buyPrice || undefined,
+                    targetPrice: post.targetPrice || undefined,
+                    stopLoss: post.stopLoss || undefined,
+                    // Ensure performance object exists if needed by FeedPost, or handle its absence
+                  };
+
+                  const authorForFeed: any = {
+                    id: user.id,
+                    name: user.name,
+                    image: user.image,
+                    bio: (user as any).bio,
+                    verified: (user as any).verified,
+                    clubName: (user as any).clubName,
+                  };
+
+                  return (
+                    <FeedPost
+                      key={post.id}
+                      post={postForFeed}
+                      author={authorForFeed}
+                    />
+                  );
+                })}
+              </div>
             </div>
           )}
         </TabsContent>

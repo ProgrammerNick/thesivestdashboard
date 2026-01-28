@@ -32,11 +32,13 @@ import { Route as DashboardTalentRouteImport } from './routes/_dashboard/talent'
 import { Route as DashboardStocksRouteImport } from './routes/_dashboard/stocks'
 import { Route as DashboardSettingsRouteImport } from './routes/_dashboard/settings'
 import { Route as DashboardResearchRouteImport } from './routes/_dashboard/research'
+import { Route as DashboardRecordTradeRouteImport } from './routes/_dashboard/record-trade'
 import { Route as DashboardProfileRouteImport } from './routes/_dashboard/profile'
 import { Route as DashboardJobsRouteImport } from './routes/_dashboard/jobs'
 import { Route as DashboardHistoryRouteImport } from './routes/_dashboard/history'
 import { Route as DashboardFundsRouteImport } from './routes/_dashboard/funds'
 import { Route as DashboardFundIntelligenceRouteImport } from './routes/_dashboard/fund-intelligence'
+import { Route as DashboardDiscoveryRouteImport } from './routes/_dashboard/discovery'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard/dashboard'
 import { Route as DashboardCommunityRouteImport } from './routes/_dashboard/community'
 import { Route as DashboardChatsRouteImport } from './routes/_dashboard/chats'
@@ -165,6 +167,11 @@ const DashboardResearchRoute = DashboardResearchRouteImport.update({
   path: '/research',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardRecordTradeRoute = DashboardRecordTradeRouteImport.update({
+  id: '/record-trade',
+  path: '/record-trade',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardProfileRoute = DashboardProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -191,6 +198,11 @@ const DashboardFundIntelligenceRoute =
     path: '/fund-intelligence',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardDiscoveryRoute = DashboardDiscoveryRouteImport.update({
+  id: '/discovery',
+  path: '/discovery',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -277,11 +289,13 @@ export interface FileRoutesByFullPath {
   '/chats': typeof DashboardChatsRoute
   '/community': typeof DashboardCommunityRoute
   '/dashboard': typeof DashboardDashboardRoute
+  '/discovery': typeof DashboardDiscoveryRoute
   '/fund-intelligence': typeof DashboardFundIntelligenceRoute
   '/funds': typeof DashboardFundsRoute
   '/history': typeof DashboardHistoryRoute
   '/jobs': typeof DashboardJobsRoute
   '/profile': typeof DashboardProfileRoute
+  '/record-trade': typeof DashboardRecordTradeRoute
   '/research': typeof DashboardResearchRouteWithChildren
   '/settings': typeof DashboardSettingsRoute
   '/stocks': typeof DashboardStocksRoute
@@ -319,11 +333,13 @@ export interface FileRoutesByTo {
   '/chats': typeof DashboardChatsRoute
   '/community': typeof DashboardCommunityRoute
   '/dashboard': typeof DashboardDashboardRoute
+  '/discovery': typeof DashboardDiscoveryRoute
   '/fund-intelligence': typeof DashboardFundIntelligenceRoute
   '/funds': typeof DashboardFundsRoute
   '/history': typeof DashboardHistoryRoute
   '/jobs': typeof DashboardJobsRoute
   '/profile': typeof DashboardProfileRoute
+  '/record-trade': typeof DashboardRecordTradeRoute
   '/research': typeof DashboardResearchRouteWithChildren
   '/settings': typeof DashboardSettingsRoute
   '/stocks': typeof DashboardStocksRoute
@@ -364,11 +380,13 @@ export interface FileRoutesById {
   '/_dashboard/chats': typeof DashboardChatsRoute
   '/_dashboard/community': typeof DashboardCommunityRoute
   '/_dashboard/dashboard': typeof DashboardDashboardRoute
+  '/_dashboard/discovery': typeof DashboardDiscoveryRoute
   '/_dashboard/fund-intelligence': typeof DashboardFundIntelligenceRoute
   '/_dashboard/funds': typeof DashboardFundsRoute
   '/_dashboard/history': typeof DashboardHistoryRoute
   '/_dashboard/jobs': typeof DashboardJobsRoute
   '/_dashboard/profile': typeof DashboardProfileRoute
+  '/_dashboard/record-trade': typeof DashboardRecordTradeRoute
   '/_dashboard/research': typeof DashboardResearchRouteWithChildren
   '/_dashboard/settings': typeof DashboardSettingsRoute
   '/_dashboard/stocks': typeof DashboardStocksRoute
@@ -408,11 +426,13 @@ export interface FileRouteTypes {
     | '/chats'
     | '/community'
     | '/dashboard'
+    | '/discovery'
     | '/fund-intelligence'
     | '/funds'
     | '/history'
     | '/jobs'
     | '/profile'
+    | '/record-trade'
     | '/research'
     | '/settings'
     | '/stocks'
@@ -450,11 +470,13 @@ export interface FileRouteTypes {
     | '/chats'
     | '/community'
     | '/dashboard'
+    | '/discovery'
     | '/fund-intelligence'
     | '/funds'
     | '/history'
     | '/jobs'
     | '/profile'
+    | '/record-trade'
     | '/research'
     | '/settings'
     | '/stocks'
@@ -494,11 +516,13 @@ export interface FileRouteTypes {
     | '/_dashboard/chats'
     | '/_dashboard/community'
     | '/_dashboard/dashboard'
+    | '/_dashboard/discovery'
     | '/_dashboard/fund-intelligence'
     | '/_dashboard/funds'
     | '/_dashboard/history'
     | '/_dashboard/jobs'
     | '/_dashboard/profile'
+    | '/_dashboard/record-trade'
     | '/_dashboard/research'
     | '/_dashboard/settings'
     | '/_dashboard/stocks'
@@ -712,6 +736,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardResearchRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/record-trade': {
+      id: '/_dashboard/record-trade'
+      path: '/record-trade'
+      fullPath: '/record-trade'
+      preLoaderRoute: typeof DashboardRecordTradeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/profile': {
       id: '/_dashboard/profile'
       path: '/profile'
@@ -745,6 +776,13 @@ declare module '@tanstack/react-router' {
       path: '/fund-intelligence'
       fullPath: '/fund-intelligence'
       preLoaderRoute: typeof DashboardFundIntelligenceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/discovery': {
+      id: '/_dashboard/discovery'
+      path: '/discovery'
+      fullPath: '/discovery'
+      preLoaderRoute: typeof DashboardDiscoveryRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/_dashboard/dashboard': {
@@ -863,11 +901,13 @@ interface DashboardRouteChildren {
   DashboardChatsRoute: typeof DashboardChatsRoute
   DashboardCommunityRoute: typeof DashboardCommunityRoute
   DashboardDashboardRoute: typeof DashboardDashboardRoute
+  DashboardDiscoveryRoute: typeof DashboardDiscoveryRoute
   DashboardFundIntelligenceRoute: typeof DashboardFundIntelligenceRoute
   DashboardFundsRoute: typeof DashboardFundsRoute
   DashboardHistoryRoute: typeof DashboardHistoryRoute
   DashboardJobsRoute: typeof DashboardJobsRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardRecordTradeRoute: typeof DashboardRecordTradeRoute
   DashboardResearchRoute: typeof DashboardResearchRouteWithChildren
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardStocksRoute: typeof DashboardStocksRoute
@@ -882,11 +922,13 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardChatsRoute: DashboardChatsRoute,
   DashboardCommunityRoute: DashboardCommunityRoute,
   DashboardDashboardRoute: DashboardDashboardRoute,
+  DashboardDiscoveryRoute: DashboardDiscoveryRoute,
   DashboardFundIntelligenceRoute: DashboardFundIntelligenceRoute,
   DashboardFundsRoute: DashboardFundsRoute,
   DashboardHistoryRoute: DashboardHistoryRoute,
   DashboardJobsRoute: DashboardJobsRoute,
   DashboardProfileRoute: DashboardProfileRoute,
+  DashboardRecordTradeRoute: DashboardRecordTradeRoute,
   DashboardResearchRoute: DashboardResearchRouteWithChildren,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardStocksRoute: DashboardStocksRoute,

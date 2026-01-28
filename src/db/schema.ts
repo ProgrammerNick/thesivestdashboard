@@ -22,7 +22,7 @@ export type TournamentStatus = "Upcoming" | "Active" | "Completed";
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
-  displayName: text("display_name").notNull().unique(),
+  displayName: text("display_name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),

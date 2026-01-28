@@ -6,7 +6,8 @@ import { Button } from "../components/ui/button";
 
 const checkAuth = createServerFn({ method: "GET" }).handler(async () => {
   const request = getRequest();
-  const session = await auth.api.getSession({ headers: request!.headers });
+  if (!request) return null;
+  const session = await auth.api.getSession({ headers: request.headers });
   return session;
 });
 

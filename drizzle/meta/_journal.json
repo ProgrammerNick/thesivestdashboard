@@ -43,6 +43,20 @@
       "when": 1768337542829,
       "tag": "0005_certain_sheva_callister",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1769411931359,
+      "tag": "0006_far_daredevil",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1769576621600,
+      "tag": "0007_robust_rocket_raccoon",
+      "breakpoints": true
     }
   ]
 }

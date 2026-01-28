@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
     role: "user" | "assistant";
@@ -55,11 +56,17 @@ export function CleanChatInterface({
     }, [previousMessages, initialMessage, sessionKey]);
 
     // Auto-scroll to bottom
-    useEffect(() => {
+    const scrollToBottom = () => {
         if (scrollRef.current) {
-            scrollRef.current.scrollIntoView({ behavior: "smooth" });
+            scrollRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
         }
-    }, [messages]);
+    };
+
+    useEffect(() => {
+        // specific timeout to ensure DOM update
+        const timeoutId = setTimeout(scrollToBottom, 50);
+        return () => clearTimeout(timeoutId);
+    }, [messages, isLoading]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -69,6 +76,9 @@ export function CleanChatInterface({
         setMessages((prev) => [...prev, userMessage]);
         setInput("");
         setIsLoading(true);
+
+        // Immediate scroll on user message
+        setTimeout(scrollToBottom, 0);
 
         try {
             const response = await onSendMessage(input);
@@ -119,7 +129,7 @@ export function CleanChatInterface({
                             >
                                 {m.role === "assistant" ? (
                                     <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-semibold prose-p:leading-relaxed prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:text-gray-900 dark:prose-pre:text-gray-100">
-                                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
                                     </div>
                                 ) : (
                                     <p className="text-sm leading-relaxed">{m.content}</p>

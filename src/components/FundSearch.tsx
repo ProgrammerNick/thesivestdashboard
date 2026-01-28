@@ -1,16 +1,13 @@
-import { useState, useEffect } from "react";
-import { Search, Loader2, BrainCircuit, Wallet, ArrowRight, Trash2, History } from "lucide-react";
+import { useState } from "react";
+import { Search, Loader2 } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Link } from "@tanstack/react-router";
 import { Card } from "./ui/card";
-import { motion, AnimatePresence } from "motion/react";
+import { useNavigate } from "@tanstack/react-router";
 import { searchFund } from "../server/fn/funds";
-import { getAnalysisHistory, deleteAnalysis } from "../server/fn/analysis";
-import { authClient } from "@/lib/auth-client";
-import { CleanChatInterface } from "./CleanChatInterface";
 import { getOrCreateChatSession, addChatMessage } from "@/server/fn/chat-history";
-import { chatWithFund } from "@/server/fn/chat";
+import { authClient } from "@/lib/auth-client";
+import { CompactChatHistorySidebar } from "./CompactChatHistorySidebar";
 
 interface Holding {
     symbol: string;
@@ -18,71 +15,14 @@ interface Holding {
     percent: number;
 }
 
-interface SearchResult {
-    fundName: string;
-    holdings: Holding[];
-    strategy: string;
-    recentActivity: string;
-    performanceOutlook: string;
-    convictionThesis: string;
-    ownershipConcentration: string;
-    positionSizingLogic: string;
-    cashPosition: string;
-}
 
-interface SavedAnalysis {
-    id: string;
-    query: string;
-    result: string; // JSON string of SearchResult
-    createdAt: Date;
-}
 
 export function FundSearch() {
     const { data: session } = authClient.useSession();
+    const navigate = useNavigate();
     const [query, setQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<SearchResult | null>(null);
     const [error, setError] = useState("");
-    const [history, setHistory] = useState<SavedAnalysis[]>([]);
-    const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-
-    // Fetch history
-    const loadHistory = async () => {
-        if (session?.user?.id) {
-            try {
-                const data = await getAnalysisHistory({ data: { userId: session.user.id } });
-                const fundHistory = (data as any[]).filter(item => item.type === 'fund');
-                setHistory(fundHistory);
-            } catch (e) {
-                console.error("Failed to load history", e);
-            }
-        }
-    };
-
-    // Load history on mount
-    useEffect(() => {
-        loadHistory();
-    }, []);
-
-    const handleDelete = async (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        try {
-            await deleteAnalysis({ data: { id } });
-            setHistory(prev => prev.filter(item => item.id !== id));
-        } catch (err) {
-            console.error("Failed to delete", err);
-        }
-    };
-
-    const handleHistoryClick = (item: SavedAnalysis) => {
-        try {
-            const parsed = JSON.parse(item.result);
-            setResult(parsed);
-            setQuery(item.query);
-        } catch (e) {
-            console.error("Failed to parse saved result", e);
-        }
-    };
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -90,26 +30,70 @@ export function FundSearch() {
 
         setIsLoading(true);
         setError("");
-        setResult(null);
 
         try {
             const data = await searchFund({
                 data: query
             });
-            setResult(data);
-            loadHistory(); // Reload history after new search (it saves automatically)
 
             // Initialize chat session if user is logged in
             if (session?.user?.id) {
-                const sessionData = await getOrCreateChatSession({
-                    data: {
-                        userId: session.user.id,
-                        type: "fund",
-                        contextId: query,
-                        title: `${data.fundName} Analysis`,
-                    },
-                });
-                setCurrentSessionId(sessionData.id);
+                try {
+                    const chatSession = await getOrCreateChatSession({
+                        data: {
+                            userId: session.user.id,
+                            type: "fund",
+                            contextId: query,
+                            title: `${data.fundName} Analysis`,
+                        },
+                    });
+
+                    // If it's a new session or has no messages, save the analysis
+                    if (chatSession.isNew || chatSession.messages.length === 0) {
+                        const starterSummary = `## ${data.fundName} Investment Strategy Analysis
+
+> **Strategy Overview**
+> ${data.strategy}
+
+### 🎯 Conviction Thesis
+${data.convictionThesis.replace(/^"|"$/g, '')}
+
+### 📊 Portfolio Composition
+
+- **Ownership Concentration**: ${data.ownershipConcentration}
+
+- **Position Sizing**: ${data.positionSizingLogic}
+
+- **Cash Position**: ${data.cashPosition}
+
+### 🏦 Top Holdings
+| Symbol | Name | Weight |
+| :--- | :--- | :--- |
+${data.holdings.map(h => `| ${h.symbol} | ${h.name} | ${h.percent}% |`).join('\n')}
+
+### 📈 Performance & Activity
+- **Recent Activity**: ${data.recentActivity}
+- **Outlook**: ${data.performanceOutlook}
+
+---
+I have analyzed the fund's latest filings and strategy. What specific aspect would you like to discuss?`;
+
+                        await addChatMessage({
+                            data: {
+                                sessionId: chatSession.id,
+                                role: "model",
+                                content: starterSummary
+                            }
+                        });
+                    }
+
+                    navigate({ to: `/chat/${chatSession.id}` });
+                } catch (sessionErr) {
+                    console.error("Failed to initialize session", sessionErr);
+                    setError("Failed to create analysis session.");
+                }
+            } else {
+                setError("Please sign in to access fund research.");
             }
         } catch (err) {
             console.error(err);
@@ -119,85 +103,14 @@ export function FundSearch() {
         }
     };
 
-    const buildFundContext = () => {
-        if (!result) return "";
-        return `
-Fund: ${result.fundName}
-Strategy: ${result.strategy}
-Recent Activity: ${result.recentActivity}
-Performance Outlook: ${result.performanceOutlook}
-Conviction Thesis: ${result.convictionThesis}
-Ownership Concentration: ${result.ownershipConcentration}
-Position Sizing Logic: ${result.positionSizingLogic}
-Cash Position: ${result.cashPosition}
-Top Holdings: ${result.holdings.map(h => `${h.symbol} (${h.percent}%)`).join(", ")}
-        `.trim();
-    };
-
-    const handleSendMessage = async (message: string): Promise<string> => {
-        if (!result) return "Please search for a fund first.";
-
-        // Ensure we have a session
-        let sessionId = currentSessionId;
-        if (!sessionId && session?.user?.id) {
-            const sessionData = await getOrCreateChatSession({
-                data: {
-                    userId: session.user.id,
-                    type: "fund",
-                    contextId: query,
-                    title: `${result.fundName} Analysis`,
-                },
-            });
-            sessionId = sessionData.id;
-            setCurrentSessionId(sessionId);
-        }
-
-        // Save user message
-        if (sessionId) {
-            await addChatMessage({
-                data: {
-                    sessionId: sessionId,
-                    role: "user",
-                    content: message,
-                },
-            });
-        }
-
-        // Get AI response
-        const response = await chatWithFund({
-            data: {
-                fundName: result.fundName,
-                context: buildFundContext(),
-                messages: [{ role: "user", content: message }],
-            }
-        });
-
-        // Save AI response
-        if (sessionId) {
-            await addChatMessage({
-                data: {
-                    sessionId: sessionId,
-                    role: "model",
-                    content: response,
-                },
-            });
-        }
-
-        return response;
+    const handleLoadSession = (id: string) => {
+        navigate({ to: `/chat/${id}` });
     };
 
     return (
         <section className="py-20 container mx-auto px-6">
-            <div className="max-w-4xl mx-auto space-y-12">
-                <div className="text-center space-y-4">
+            <div className="max-w-7xl mx-auto space-y-12">
 
-                    <h2 className="text-3xl md:text-5xl font-heading text-foreground">
-                        Decode Any Fund Strategy
-                    </h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        Search for a fund or manager. Our AI analyzes their latest holdings to reverse-engineer their investment thesis.
-                    </p>
-                </div>
 
                 {/* Search Bar */}
                 <Card className="p-2 flex flex-row items-center gap-2 border-primary/20 bg-background/50 backdrop-blur-sm shadow-xl max-w-2xl mx-auto">
@@ -207,6 +120,7 @@ Top Holdings: ${result.holdings.map(h => `${h.symbol} (${h.percent}%)`).join(", 
                         className="border-none shadow-none focus-visible:ring-0 text-lg py-6 bg-transparent"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
+                        disabled={isLoading}
                     />
                     <Button
                         size="lg"
@@ -220,120 +134,26 @@ Top Holdings: ${result.holdings.map(h => `${h.symbol} (${h.percent}%)`).join(", 
 
                 {/* Error State */}
                 {error && (
-                    <div className="text-center text-red-500 bg-red-500/10 p-4 rounded-lg border border-red-500/20">
+                    <div className="max-w-xl mx-auto text-center text-red-500 bg-red-500/10 p-4 rounded-lg border border-red-500/20">
                         {error}
                     </div>
                 )}
 
-                {/* Results View */}
-                <AnimatePresence mode="wait">
-                    {result && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="grid lg:grid-cols-2 gap-8"
-                        >
-                            {/* Strategy Column - AI Analysis */}
-                            <div className="space-y-6">
-                                <Card className="p-8 border-primary/20 bg-gradient-to-br from-primary/5 via-primary/0 to-transparent relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors" />
-
-                                    <div className="relative z-10 space-y-6">
-                                        <div className="flex items-center gap-3 text-primary mb-2">
-                                            <BrainCircuit className="w-6 h-6" />
-                                            <span className="font-bold tracking-wider text-sm uppercase">Gemini AI Analysis</span>
-                                        </div>
-
-                                        <h3 className="text-2xl font-heading font-bold text-foreground">
-                                            {result.fundName} Strategy
-                                        </h3>
-
-                                        <div className="prose dark:prose-invert">
-                                            <p className="text-lg leading-relaxed text-muted-foreground">
-                                                {result.strategy}
-                                            </p>
-                                        </div>
-
-                                        <div className="pt-2">
-                                            <Link to="/funds/$id" params={{ id: query }}>
-                                                <Button variant="outline" className="gap-2 w-full sm:w-auto">
-                                                    Open Full Research Page <ArrowRight className="w-4 h-4" />
-                                                </Button>
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </Card>
-
-                                <Card className="p-6 bg-card/50 border-border/60">
-                                    <h4 className="text-sm font-bold uppercase tracking-wider text-primary mb-3">Recent Activity</h4>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">{result.recentActivity}</p>
-                                </Card>
-
-                                <Card className="p-6 bg-card/50 border-border/60">
-                                    <h4 className="text-sm font-bold uppercase tracking-wider text-primary mb-3">Performance Context</h4>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">{result.performanceOutlook}</p>
-                                </Card>
-
-                                <Card className="p-6 bg-card/50 border-border/60">
-                                    <h4 className="text-sm font-bold uppercase tracking-wider text-blue-500 mb-3">Ownership Concentration</h4>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">{result.ownershipConcentration}</p>
-                                </Card>
-
-                                <Card className="p-6 bg-card/50 border-border/60">
-                                    <h4 className="text-sm font-bold uppercase tracking-wider text-amber-500 mb-3">Position Sizing Logic</h4>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">{result.positionSizingLogic}</p>
-                                </Card>
-
-                                <Card className="p-6 bg-card/50 border-border/60">
-                                    <h4 className="text-sm font-bold uppercase tracking-wider text-green-500 mb-3">Cash Position</h4>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">{result.cashPosition}</p>
-                                </Card>
-                            </div>
-
-                            {/* Chat Column */}
-                            <div className="lg:sticky lg:top-24 h-[800px]">
-                                <CleanChatInterface
-                                    onSendMessage={handleSendMessage}
-                                    initialMessage={`I've analyzed ${result.fundName}'s investment strategy and holdings. What would you like to know about this fund?`}
-                                    placeholder={`Ask anything about ${result.fundName}...`}
-                                />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
                 {/* History Section */}
-                {history.length > 0 && (
-                    <div className="pt-10 border-t border-border/50">
-                        <h3 className="text-xl font-bold flex items-center gap-2 mb-6 text-muted-foreground">
-                            <History className="w-5 h-5" /> Recent Research
-                        </h3>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {history.map((item) => (
-                                <Card
-                                    key={item.id}
-                                    className="p-4 hover:bg-muted/50 transition-colors cursor-pointer group relative"
-                                    onClick={() => handleHistoryClick(item)}
-                                >
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <div className="font-bold text-lg">{item.query}</div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {new Date(item.createdAt).toLocaleDateString()}
-                                            </div>
-                                        </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-500"
-                                            onClick={(e) => handleDelete(item.id, e)}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </Card>
-                            ))}
+                {session?.user?.id && (
+                    <div className="max-w-4xl mx-auto mt-12 bg-card/50 border border-border/50 rounded-xl overflow-hidden">
+                        <div className="p-4 border-b border-border/50 bg-muted/20">
+                            <h3 className="font-semibold flex items-center gap-2">
+                                History
+                            </h3>
+                        </div>
+                        <div className="h-[400px] flex flex-col">
+                            <CompactChatHistorySidebar
+                                type="fund"
+                                onSelectSession={handleLoadSession}
+                                showAllTypes={false}
+                                hideHeader={false}
+                            />
                         </div>
                     </div>
                 )}

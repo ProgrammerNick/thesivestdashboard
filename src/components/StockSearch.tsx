@@ -4,9 +4,9 @@ import { Search, Loader2 } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { searchStock, StockData } from "@/server/fn/stocks";
+import { searchStock } from "@/server/fn/stocks";
 import { authClient } from "@/lib/auth-client";
-import { getOrCreateChatSession, addChatMessage, getChatSession } from "@/server/fn/chat-history";
+import { getOrCreateChatSession, addChatMessage } from "@/server/fn/chat-history";
 import { CompactChatHistorySidebar } from "./CompactChatHistorySidebar";
 
 export function StockSearch() {
@@ -122,14 +122,7 @@ I'm ready to discuss ${data.companyName} in depth. What specific aspect interest
     return (
         <section className="py-12 container mx-auto px-6 overflow-hidden transition-all duration-300">
             <div className="max-w-7xl mx-auto space-y-12 transition-all duration-300">
-                <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-5xl font-heading text-foreground">
-                        AI-Powered Stock Analysis
-                    </h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        Deep dive into any company. Visualize community thesis stamped directly on the chart.
-                    </p>
-                </div>
+
 
                 {/* Search Bar */}
                 <Card className="p-2 flex flex-row items-center gap-2 border-primary/20 bg-background/50 backdrop-blur-sm shadow-xl max-w-2xl mx-auto">

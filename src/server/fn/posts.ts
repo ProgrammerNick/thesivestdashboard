@@ -262,3 +262,27 @@ export const getUserOpenTrades = createServerFn({ method: "GET" }).handler(async
     // Placeholder - can be extended with actual trade tracking
     return [];
 });
+
+export const deletePost = createServerFn({ method: "POST" })
+    .inputValidator(z.object({ id: z.string() }))
+    .handler(async ({ data }) => {
+        const request = getRequest();
+        const session = await auth.api.getSession({
+            headers: request?.headers,
+        });
+
+        if (!session) {
+            throw new Error("Unauthorized");
+        }
+
+        const existingPost = await db.query.post.findFirst({
+            where: eq(post.id, data.id),
+        });
+
+        if (!existingPost || existingPost.userId !== session.user.id) {
+            throw new Error("Unauthorized");
+        }
+
+        await db.delete(post).where(eq(post.id, data.id));
+        return { success: true };
+    });

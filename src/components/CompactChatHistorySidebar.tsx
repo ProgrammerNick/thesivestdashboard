@@ -18,7 +18,7 @@ interface ChatSession {
 }
 
 interface CompactChatHistorySidebarProps {
-    type?: "fund" | "stock" | "fund-intelligence";
+    type?: "fund" | "stock" | "fund-intelligence" | "discovery";
     onSelectSession: (sessionId: string) => void;
     currentSessionId?: string;
     onClose?: () => void;
@@ -112,7 +112,7 @@ export function CompactChatHistorySidebar({
             )}
 
             {/* Content */}
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 h-full">
                 {sessions.length === 0 && !isLoading ? (
                     <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
                         <Inbox className="w-8 h-8 text-muted-foreground mb-2" />
@@ -217,6 +217,8 @@ function SessionItem({
                     <div className="flex items-center gap-2 mt-1.5">
                         {(session.type === "fund" || session.type === "fund-intelligence") ? (
                             <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-blue-500/10 text-blue-500 border-blue-500/20">Fund Research</Badge>
+                        ) : session.type === "discovery" ? (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-purple-500/10 text-purple-500 border-purple-500/20">Idea Lab</Badge>
                         ) : (
                             <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-green-500/10 text-green-500 border-green-500/20">Stock Research</Badge>
                         )}
