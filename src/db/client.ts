@@ -11,7 +11,7 @@ export async function getClient() {
         // Ignore SST error
     }
     dbUrl = dbUrl || process.env.VITE_DATABASE_URL_POOLER || process.env.DATABASE_URL;
-    // dbUrl = "postgresql://neondb_owner:npg_BPwieQq9GIJ0@ep-noisy-haze-ahn9uwsd-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+
 
     if (!dbUrl) {
         return undefined
